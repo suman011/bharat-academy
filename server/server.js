@@ -1628,25 +1628,26 @@ app.post("/admin/issues/:id/reply", (req, res) => {
 });
 
 // Serve React (Vite build) — MUST be registered after all API routes so /auth/*, /cart, etc. still work.
-// Prefer project root (Render / npm start from repo root); fall back to path next to this file.
-const clientDistFromCwd = path.resolve(process.cwd(), "client/dist");
-const clientDistFromFile = path.resolve(__dirname, "../client/dist");
-const clientDistPath = fs.existsSync(path.join(clientDistFromCwd, "index.html"))
-  ? clientDistFromCwd
-  : clientDistFromFile;
+// Render: cwd is usually repo root → client/dist. If not, fall back to path next to server/server.js.
+const clientDistPathCwd = path.resolve(process.cwd(), "client/dist");
+const clientDistPathFile = path.resolve(__dirname, "../client/dist");
+const clientDistPath = fs.existsSync(path.join(clientDistPathCwd, "index.html"))
+  ? clientDistPathCwd
+  : clientDistPathFile;
 const assetsPath = path.join(clientDistPath, "assets");
 const indexPath = path.join(clientDistPath, "index.html");
 
 console.log("cwd:", process.cwd());
 console.log("clientDistPath:", clientDistPath);
-console.log("assetsPath exists:", fs.existsSync(assetsPath));
-console.log("indexPath exists:", fs.existsSync(indexPath));
+console.log("assetsPath:", assetsPath);
+console.log("indexPath:", indexPath);
+console.log("assets exists:", fs.existsSync(assetsPath));
+console.log("index exists:", fs.existsSync(indexPath));
 
-// Serve built JS/CSS chunks explicitly first (/assets/*)
-app.use("/assets", express.static(assetsPath, { fallthrough: false }));
-
-// Other static files from dist (favicon, index.html, etc.)
-app.use(express.static(clientDistPath, { fallthrough: false }));
+// Default fallthrough (true): missing files call next() without throwing — avoids spurious 500s.
+// `fallthrough: false` forwards lookup failures as errors → often becomes HTTP 500 for /assets/*.js.
+app.use("/assets", express.static(assetsPath));
+app.use(express.static(clientDistPath));
 
 // SPA fallback only for non-file, non-api routes
 app.get("*", (req, res, next) => {
