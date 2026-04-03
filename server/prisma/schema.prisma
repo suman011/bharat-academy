@@ -1,0 +1,190 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String?
+  email        String   @unique
+  mobile       String?
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  resetTokens PasswordResetToken[]
+  cartItems  CartItem[]
+  orders     Order[]
+  issues     IssueReport[]
+  wishlist  WishlistItem[]
+  progress  CourseProgress[]
+  reviews   CourseReview[]
+  notificationState UserNotificationState?
+  callbackRequests CallbackRequest[]
+
+  @@index([email])
+}
+
+model UserNotificationState {
+  id                 String   @id @default(uuid())
+  userId             String   @unique
+  announcementsSeenAt DateTime @default(dbgenerated("NOW()"))
+  updatedAt          DateTime @updatedAt
+  createdAt          DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Announcement {
+  id        String   @id @default(uuid())
+  title     String
+  body      String
+  kind      String   @default("update") // update|batch|offer|maintenance
+  publishAt DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([publishAt])
+  @@index([createdAt])
+}
+
+model CallbackRequest {
+  id        String   @id @default(uuid())
+  userId    String?
+  name      String
+  mobile    String
+  courseKey String?
+  message   String?
+  status    String   @default("new") // new|contacted|closed
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([courseKey])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  userId    String
+  courseKey String
+  course    Json
+  qty       Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseKey])
+  @@index([userId])
+}
+
+model Order {
+  id            String   @id @default(uuid())
+  userId        String
+  orderId       String   @unique
+  paymentMethod String
+  /// paid = access + enrollment email sent; pending_manual = UPI request, awaiting staff verification (never default to paid)
+  paymentStatus String   @default("pending_manual")
+  currency      String   @default("INR")
+  amountPaid    Int
+  discountPct   Int      @default(0)
+  items         Json
+  createdAt     DateTime @default(now())
+  /// Set when admin verifies manual UPI (audit trail; not proof of bank settlement)
+  verifiedAt       DateTime?
+  verifiedByEmail  String?
+  paymentReference String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model IssueReport {
+  id          String   @id @default(uuid())
+  userId      String
+  courseKey   String
+  courseName  String
+  orderId     String?
+  message     String
+  status      String   @default("open")
+  reply       String?
+  repliedAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([courseKey])
+  @@index([createdAt])
+}
+
+model WishlistItem {
+  id        String   @id @default(uuid())
+  userId    String
+  courseKey String
+  course    Json
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseKey])
+  @@index([userId])
+  @@index([courseKey])
+}
+
+model CourseProgress {
+  id                  String   @id @default(uuid())
+  userId              String
+  courseKey           String
+  completedLessonKeys Json     @default("[]")
+  totalLessons        Int      @default(0)
+  updatedAt           DateTime @updatedAt
+  createdAt           DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseKey])
+  @@index([userId])
+  @@index([courseKey])
+}
+
+model CourseReview {
+  id        String   @id @default(uuid())
+  userId    String
+  courseKey String
+  rating    Int
+  title     String?
+  body      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseKey])
+  @@index([courseKey])
+  @@index([createdAt])
+}
+

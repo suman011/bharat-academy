@@ -1,0 +1,20 @@
+{
+  "users": [
+    {
+      "id": "681c18a4-17d2-420e-818b-56701a96e5bc",
+      "name": "Test User",
+      "email": "test@example.com",
+      "mobile": null,
+      "passwordHash": "$2b$10$XrKz3XjoNd8cMfaPri4v/uc55wu7dpQZKfsCWOdJrmV7gtXbGtC7K",
+      "createdAt": "2026-03-30T10:50:26.123Z"
+    },
+    {
+      "id": "4bb4894d-c5b1-4346-9724-7df01ce203ef",
+      "name": "abc",
+      "email": "abc@gmail.com",
+      "mobile": "5467897654",
+      "passwordHash": "$2b$10$Tv7fN9NAWGL5JByUCouD5.3LyKlxvvMAXVzCaP/nmR46g0ezF4NIG",
+      "createdAt": "2026-03-30T10:52:21.137Z"
+    }
+  ]
+}

@@ -1,0 +1,1595 @@
+import React, { useMemo, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { FaArrowLeft, FaClock, FaRupeeSign, FaGraduationCap, FaStar } from "react-icons/fa";
+import { courseCategories } from "../data/courses";
+
+const slugify = (name) =>
+  name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
+const getCurriculumForCourse = (category, level) => {
+  // Simplified curriculum - will be expanded later
+  return [
+    {
+      module: 'Course Introduction',
+      submodules: [
+        { title: 'Welcome & Overview', concepts: 'Course Goals, Structure, Resources' }
+      ]
+    },
+    {
+      module: 'Core Concepts',
+      submodules: [
+        { title: 'Fundamentals', concepts: 'Key Concepts, Industry Standards' }
+      ]
+    },
+    {
+      module: 'Practical Applications',
+      submodules: [
+        { title: 'Real-World Usage', concepts: 'Case Studies, Best Practices' }
+      ]
+    },
+    {
+      module: 'Advanced Topics',
+      submodules: [
+        { title: 'Advanced Concepts', concepts: 'Expert Techniques, Deep Dive' }
+      ]
+    },
+    {
+      module: 'Project Work',
+      submodules: [
+        { title: 'Hands-On Project', concepts: 'Implementation, Problem Solving' }
+      ]
+    },
+    {
+      module: 'Final Assessment',
+      submodules: [
+        { title: 'Evaluation & Certification', concepts: 'Testing, Certification' }
+      ]
+    }
+  ];
+};
+        {
+          module: 'Advanced PowerPoint',
+};
+        {
+          module: 'Operating System Fundamentals',
+          submodules: [
+            { title: 'OS Concepts', concepts: 'Process management, Memory management, File systems' },
+            { title: 'CPU Scheduling', concepts: 'Scheduling algorithms, Process synchronization, Deadlocks' },
+            { title: 'System Calls', concepts: 'Process control, File management, Device management' }
+          ]
+        },
+        {
+          module: 'Computer Networks',
+          submodules: [
+            { title: 'Network Fundamentals', concepts: 'OSI model, TCP/IP, Network devices, IP addressing' },
+            { title: 'Network Protocols', concepts: 'HTTP, FTP, DNS, DHCP, Routing protocols' },
+            { title: 'Network Security', concepts: 'Firewalls, VPN, Encryption, Network attacks' }
+          ]
+        },
+        {
+          module: 'Database Management System',
+          submodules: [
+            { title: 'SQL Fundamentals', concepts: 'DDL, DML, DCL, Joins, Subqueries, Indexes' },
+            { title: 'Database Design', concepts: 'Normalization, ER diagrams, Relational model' },
+            { title: 'NoSQL Databases', concepts: 'MongoDB, Document databases, Key-value stores' }
+          ]
+        }
+      ]
+    },
+    'Advanced / Industry Courses': {
+      'Advanced': [
+        {
+          module: 'Full Stack Development (MERN)',
+          submodules: [
+            { title: 'Frontend Development', concepts: 'React, Redux, Context API, React Router' },
+            { title: 'Backend Development', concepts: 'Node.js, Express.js, REST APIs, Authentication' },
+            { title: 'Database Integration', concepts: 'MongoDB, Mongoose, Data modeling, CRUD operations' },
+            { title: 'Deployment', concepts: 'Heroku, Vercel, Docker, CI/CD pipelines' }
+          ]
+        },
+        {
+          module: 'Backend Development (Node.js + APIs)',
+          submodules: [
+            { title: 'Node.js Fundamentals', concepts: 'Event loop, Modules, File system, HTTP server' },
+            { title: 'Express.js Framework', concepts: 'Routing, Middleware, Error handling, Security' },
+            { title: 'API Development', concepts: 'RESTful APIs, GraphQL, API documentation, Testing' },
+            { title: 'Database Integration', concepts: 'SQL/NoSQL databases, ORM, Query optimization' }
+          ]
+        },
+        {
+          module: 'System Design Basics',
+          submodules: [
+            { title: 'System Design Principles', concepts: 'Scalability, Reliability, Performance, Security' },
+            { title: 'Architecture Patterns', concepts: 'Monolithic, Microservices, Serverless, Event-driven' },
+            { title: 'Database Design', concepts: 'Data modeling, Indexing, Caching, Replication' },
+            { title: 'System Components', concepts: 'Load balancers, CDNs, Message queues, API gateways' }
+          ]
+        },
+        {
+          module: 'Cloud Computing (AWS/Azure)',
+          submodules: [
+            { title: 'Cloud Fundamentals', concepts: 'Cloud models, Service types, Cloud providers' },
+            { title: 'AWS/Azure Services', concepts: 'Compute, Storage, Database, Networking services' },
+            { title: 'Deployment & Management', concepts: 'Infrastructure as Code, Monitoring, Security' },
+            { title: 'Serverless Computing', concepts: 'Lambda functions, API Gateway, Cloud functions' }
+          ]
+        },
+        {
+          module: 'DevOps (Docker, CI/CD)',
+          submodules: [
+            { title: 'Containerization', concepts: 'Docker basics, Dockerfile, Docker Compose, Container orchestration' },
+            { title: 'CI/CD Pipelines', concepts: 'GitHub Actions, Jenkins, Automated testing, Deployment strategies' },
+            { title: 'Infrastructure Automation', concepts: 'Configuration management, Infrastructure as Code' },
+            { title: 'Monitoring & Logging', concepts: 'Application monitoring, Log aggregation, Alerting' }
+          ]
+        },
+        {
+          module: 'Microservices Architecture',
+          submodules: [
+            { title: 'Microservices Principles', concepts: 'Service decomposition, API design, Data management' },
+            { title: 'Communication Patterns', concepts: 'Synchronous/Asynchronous, Event-driven architecture' },
+            { title: 'Service Discovery', concepts: 'Load balancing, Circuit breakers, Service mesh' },
+            { title: 'Deployment Strategies', concepts: 'Blue-green, Canary, Rolling deployments' }
+          ]
+        }
+      ]
+    },
+    'AI & Future Technology Courses': {
+      'Advanced': [
+        {
+          module: 'Machine Learning Basics',
+          submodules: [
+            { title: 'ML Fundamentals', concepts: 'Supervised/Unsupervised learning, Model evaluation, Overfitting' },
+            { title: 'Regression & Classification', concepts: 'Linear/Logistic regression, Decision trees, SVM' },
+            { title: 'Neural Networks', concepts: 'Perceptrons, Backpropagation, Activation functions' },
+            { title: 'Model Deployment', concepts: 'Model serialization, API creation, Monitoring' }
+          ]
+        },
+        {
+          module: 'Artificial Intelligence Fundamentals',
+          submodules: [
+            { title: 'AI Concepts', concepts: 'Search algorithms, Knowledge representation, Expert systems' },
+            { title: 'Machine Learning', concepts: 'Deep learning, Reinforcement learning, Natural language processing' },
+            { title: 'AI Applications', concepts: 'Computer vision, Robotics, Game playing, Recommendation systems' },
+            { title: 'Ethics & Future', concepts: 'AI ethics, Bias in AI, Future of AI, AGI concepts' }
+          ]
+        },
+        {
+          module: 'Computer Vision',
+          submodules: [
+            { title: 'Image Processing', concepts: 'Image representation, Filtering, Edge detection, Feature extraction' },
+            { title: 'OpenCV Library', concepts: 'Image reading/writing, Basic operations, Drawing functions' },
+            { title: 'Object Detection', concepts: 'Template matching, Haar cascades, Deep learning approaches' },
+            { title: 'Projects', concepts: 'Face detection, Object tracking, Image classification projects' }
+          ]
+        },
+        {
+          module: 'Generative AI',
+          submodules: [
+            { title: 'AI Fundamentals', concepts: 'Large language models, Transformers, Attention mechanisms' },
+            { title: 'Prompt Engineering', concepts: 'Effective prompting, Context setting, Output formatting' },
+            { title: 'ChatGPT & Similar Tools', concepts: 'API usage, Integration, Custom applications' },
+            { title: 'Ethical Considerations', concepts: 'Bias, Misinformation, Responsible AI usage' }
+          ]
+        }
+      ]
+    },
+    'Security & Specialized Courses': {
+      'Advanced': [
+        {
+          module: 'Cyber Security Basics',
+          submodules: [
+            { title: 'Security Fundamentals', concepts: 'CIA triad, Security principles, Threat landscape' },
+            { title: 'Network Security', concepts: 'Firewalls, IDS/IPS, VPN, Encryption protocols' },
+            { title: 'Web Security', concepts: 'OWASP Top 10, XSS, CSRF, SQL injection prevention' },
+            { title: 'Incident Response', concepts: 'Detection, Analysis, Containment, Recovery, Lessons learned' }
+          ]
+        },
+        {
+          module: 'API Development & Testing',
+          submodules: [
+            { title: 'API Design', concepts: 'RESTful principles, HTTP methods, Status codes, API documentation' },
+            { title: 'API Development', concepts: 'Authentication, Authorization, Rate limiting, Error handling' },
+            { title: 'API Testing', concepts: 'Postman, Automated testing, Load testing, Security testing' },
+            { title: 'API Management', concepts: 'Versioning, Monitoring, Analytics, API gateways' }
+          ]
+        }
+      ],
+      'Intermediate': [
+        {
+          module: 'API Development & Testing',
+          submodules: [
+            { title: 'API Design', concepts: 'RESTful principles, HTTP methods, Status codes, API documentation' },
+            { title: 'API Development', concepts: 'Authentication, Authorization, Rate limiting, Error handling' },
+            { title: 'API Testing', concepts: 'Postman, Automated testing, Load testing, Security testing' },
+            { title: 'API Management', concepts: 'Versioning, Monitoring, Analytics, API gateways' }
+          ]
+        }
+      ]
+    },
+    'Job Preparation Courses': {
+      'Beginner': [
+        {
+          module: 'Resume Building',
+          submodules: [
+            { title: 'Resume Fundamentals', concepts: 'Resume types, Format selection, Content organization' },
+            { title: 'Content Writing', concepts: 'Professional summary, Experience description, Skills listing' },
+            { title: 'Resume Design', concepts: 'Typography, Layout, Visual elements, ATS optimization' },
+            { title: 'Resume Review', concepts: 'Self-review, Peer review, Professional feedback' }
+          ]
+        },
+        {
+          module: 'LinkedIn Optimization',
+          submodules: [
+            { title: 'Profile Setup', concepts: 'Professional photo, Headline, About section, Experience' },
+            { title: 'Skills & Endorsements', concepts: 'Skills addition, Endorsement requests, Recommendations' },
+            { title: 'Networking', concepts: 'Connection building, Engagement, Content sharing' },
+            { title: 'Job Search', concepts: 'Job applications, Recruiter outreach, Profile visibility' }
+          ]
+        }
+      ],
+      'Advanced': [
+        {
+          module: 'Interview Preparation (DSA + HR)',
+          submodules: [
+            { title: 'Technical Interview', concepts: 'Data structures, Algorithms, System design, Coding problems' },
+            { title: 'HR Interview', concepts: 'Behavioral questions, Company research, Communication skills' },
+            { title: 'Mock Interviews', concepts: 'Practice sessions, Feedback analysis, Improvement areas' },
+            { title: 'Interview Strategies', concepts: 'STAR method, Problem-solving approach, Follow-up' }
+          ]
+        }
+      ],
+      'Intermediate': [
+        {
+          module: 'Aptitude Training',
+          submodules: [
+            { title: 'Quantitative Aptitude', concepts: 'Numbers, Percentages, Ratios, Time & work, Profit & loss' },
+            { title: 'Logical Reasoning', concepts: 'Pattern recognition, Series, Analogies, Blood relations' },
+            { title: 'Verbal Ability', concepts: 'Reading comprehension, Vocabulary, Grammar, Critical reasoning' },
+            { title: 'Practice Tests', concepts: 'Mock tests, Time management, Performance analysis' }
+          ]
+        },
+        {
+          module: 'Real-Time Project Development',
+          submodules: [
+            { title: 'Project Planning', concepts: 'Requirement analysis, Project scoping, Timeline planning' },
+            { title: 'Development Process', concepts: 'Agile methodology, Version control, Code reviews' },
+            { title: 'Testing & Deployment', concepts: 'Unit testing, Integration testing, Production deployment' },
+            { title: 'Project Management', concepts: 'Team collaboration, Client communication, Documentation' }
+          ]
+        }
+      ]
+    },
+    'Kids / Foundation Courses': {
+      'Beginner': [
+        {
+          module: 'Scratch Programming',
+          submodules: [
+            { title: 'Scratch Interface', concepts: 'Stage, Sprites, Blocks, Scripts area, Interface navigation' },
+            { title: 'Basic Programming', concepts: 'Motion blocks, Looks blocks, Sound blocks, Events' },
+            { title: 'Game Development', concepts: 'Character movement, Backgrounds, Simple games, Animation' },
+            { title: 'Creative Projects', concepts: 'Stories, Animations, Interactive projects, Sharing projects' }
+          ]
+        },
+        {
+          module: 'Python for Kids',
+          submodules: [
+            { title: 'Python Basics', concepts: 'Print statements, Variables, Simple calculations, Comments' },
+            { title: 'Programming Logic', concepts: 'If-else statements, Loops, Functions, Basic algorithms' },
+            { title: 'Turtle Graphics', concepts: 'Drawing shapes, Colors, Animation, Creative drawings' },
+            { title: 'Simple Projects', concepts: 'Games, Calculators, Text-based adventures, Data processing' }
+          ]
+        },
+        {
+          module: 'Basic Robotics (Arduino)',
+          submodules: [
+            { title: 'Arduino Basics', concepts: 'Arduino board, Sensors, Actuators, Basic circuits' },
+            { title: 'Programming Arduino', concepts: 'Arduino IDE, Basic syntax, Digital/Analog I/O' },
+            { title: 'Simple Projects', concepts: 'LED blinking, Buzzer sounds, Sensor reading, Motor control' },
+            { title: 'Robotics Concepts', concepts: 'Input/Output, Control systems, Simple automation' }
+          ]
+        }
+      ]
+    }
+  };
+
+  return curriculums[category]?.[level] || [
+        {
+          module: 'CSS Styling Basics',
+          submodules: [
+            { title: 'CSS Fundamentals', concepts: 'Selectors, Properties, Cascading & Specificity' },
+            { title: 'Layout & Positioning', concepts: 'Box Model, Display, Flexbox Basics' },
+            { title: 'Styling & Effects', concepts: 'Colors, Fonts, Backgrounds, Transitions' }
+          ]
+        },
+        {
+          module: 'JavaScript Introduction',
+          submodules: [
+            { title: 'JavaScript Basics', concepts: 'Variables, Data Types, Operators, Control Flow' },
+            { title: 'Functions & Scope', concepts: 'Function Declaration, Arrow Functions, Scope & Closure' },
+            { title: 'DOM Manipulation', concepts: 'Selecting Elements, Event Listeners, DOM Methods' }
+          ]
+        },
+        {
+          module: 'Building Your First Website',
+          submodules: [
+            { title: 'Project Planning', concepts: 'Wireframing, Design Mockups, Project Structure' },
+            { title: 'HTML & CSS Integration', concepts: 'Semantic Markup, CSS Organization, File Structure' },
+            { title: 'Adding Interactivity', concepts: 'Form Validation, User Interactions, Basic Scripts' }
+          ]
+        },
+        {
+          module: 'Responsive Design Principles',
+          submodules: [
+            { title: 'Mobile-First Approach', concepts: 'Viewport Meta Tags, Fluid Layouts, Media Queries' },
+            { title: 'Responsive Typography', concepts: 'Font Scaling, Line Height, Breakpoints' },
+            { title: 'Testing & Debugging', concepts: 'Browser DevTools, Responsive Testing, Performance' }
+          ]
+        },
+        {
+          module: 'Version Control with Git',
+          submodules: [
+            { title: 'Git Fundamentals', concepts: 'Repository Basics, Commits, Branches' },
+            { title: 'Collaboration', concepts: 'Remote Repositories, Pull Requests, Merging' },
+            { title: 'GitHub Integration', concepts: 'GitHub Pages, README Files, Documentation' }
+          ]
+        },
+        {
+          module: 'Deployment and Hosting',
+          submodules: [
+            { title: 'Hosting Basics', concepts: 'Shared Hosting, Cloud Platforms, Domain Names' },
+            { title: 'Deployment Process', concepts: 'FTP/SFTP, Git Deployment, Build Tools' },
+            { title: 'Optimization', concepts: 'Minification, Image Optimization, Caching' }
+          ]
+        }
+      ]
+    },
+    'Intermediate Courses': {
+      'Intermediate': [
+        {
+          module: 'Advanced HTML5 & CSS3',
+          submodules: [
+            { title: 'HTML5 Advanced', concepts: 'Web Components, Template Element, Shadow DOM' },
+            { title: 'CSS3 Advanced', concepts: 'Animations, Transforms, Filters, Grid System' },
+            { title: 'Preprocessors', concepts: 'SASS/SCSS, Variables, Mixins, Nesting' }
+          ]
+        },
+        {
+          module: 'JavaScript ES6+ Features',
+          submodules: [
+            { title: 'Modern Syntax', concepts: 'let/const, Template Literals, Destructuring, Spread Operator' },
+            { title: 'Advanced Functions', concepts: 'Higher-Order Functions, Promises, Async/Await' },
+            { title: 'Object-Oriented JS', concepts: 'Classes, Prototypes, Inheritance, Encapsulation' }
+          ]
+        },
+        {
+          module: 'Frontend Frameworks (React/Vue)',
+          submodules: [
+            { title: 'Framework Basics', concepts: 'Component Architecture, Virtual DOM, State Management' },
+            { title: 'Lifecycle & Hooks', concepts: 'Component Lifecycle, React Hooks, Vue Composition API' },
+            { title: 'Routing & Navigation', concepts: 'URL Routing, Navigation Components, History API' }
+          ]
+        },
+        {
+          module: 'Backend Development with Node.js',
+          submodules: [
+            { title: 'Node.js Fundamentals', concepts: 'Modules, File System, Event Emitter' },
+            { title: 'Express Framework', concepts: 'Routing, Middleware, Request/Response Handling' },
+            { title: 'Server-Side Rendering', concepts: 'Template Engines, Dynamic Content, Sessions' }
+          ]
+        },
+        {
+          module: 'Database Integration',
+          submodules: [
+            { title: 'SQL Basics', concepts: 'Database Design, Queries, Joins, Normalization' },
+            { title: 'NoSQL Databases', concepts: 'MongoDB, Collections, Documents, Queries' },
+            { title: 'ORMs & Query Builders', concepts: 'Sequelize, Mongoose, Query Optimization' }
+          ]
+        },
+        {
+          module: 'API Development',
+          submodules: [
+            { title: 'REST Architecture', concepts: 'HTTP Methods, Status Codes, Resource Design' },
+            { title: 'API Security', concepts: 'Authentication, Authorization, CORS, Rate Limiting' },
+            { title: 'API Testing', concepts: 'Postman, Testing Frameworks, Documentation' }
+          ]
+        },
+        {
+          module: 'Authentication & Security',
+          submodules: [
+            { title: 'User Authentication', concepts: 'Password Hashing, JWT Tokens, Session Management' },
+            { title: 'Security Best Practices', concepts: 'SQL Injection Prevention, XSS Protection, HTTPS' },
+            { title: 'OAuth & SSO', concepts: 'Third-Party Authentication, Social Login' }
+          ]
+        },
+        {
+          module: 'Full-Stack Project',
+          submodules: [
+            { title: 'Project Architecture', concepts: 'MVC Pattern, Folder Structure, Configuration' },
+            { title: 'Integration & Testing', concepts: 'API Testing, Integration Testing, E2E Testing' },
+            { title: 'Deployment & Monitoring', concepts: 'Docker, Kubernetes, Logging, Performance Monitoring' }
+          ]
+        }
+      ],
+      'Advanced': [
+        {
+          module: 'Advanced Frontend Architecture',
+          submodules: [
+            { title: 'State Management', concepts: 'Redux, Vuex, Context API, Store Patterns' },
+            { title: 'Code Splitting', concepts: 'Lazy Loading, Dynamic Imports, Bundle Analysis' },
+            { title: 'Performance Optimization', concepts: 'Memoization, Code Optimization, Profiling' }
+          ]
+        },
+        {
+          module: 'Microservices & API Design',
+          submodules: [
+            { title: 'Microservices Architecture', concepts: 'Service Decomposition, Inter-service Communication' },
+            { title: 'GraphQL', concepts: 'Query Language, Resolvers, Subscriptions' },
+            { title: 'API Gateway Patterns', concepts: 'Load Balancing, Rate Limiting, Request Routing' }
+          ]
+        },
+        {
+          module: 'Performance Optimization',
+          submodules: [
+            { title: 'Frontend Optimization', concepts: 'Image Optimization, CDN, Caching Strategies' },
+            { title: 'Backend Optimization', concepts: 'Database Indexing, Query Optimization, Caching' },
+            { title: 'Monitoring & Analytics', concepts: 'APM Tools, Metrics Collection, Error Tracking' }
+          ]
+        },
+        {
+          module: 'Testing & Quality Assurance',
+          submodules: [
+            { title: 'Unit Testing', concepts: 'Jest, Mocha, Test Coverage, Mocking' },
+            { title: 'Integration Testing', concepts: 'API Testing, Database Testing, Service Testing' },
+            { title: 'E2E Testing', concepts: 'Selenium, Cypress, Automation Frameworks' }
+          ]
+        },
+        {
+          module: 'DevOps & CI/CD',
+          submodules: [
+            { title: 'Continuous Integration', concepts: 'GitHub Actions, Jenkins, Automated Testing' },
+            { title: 'Continuous Deployment', concepts: 'Automated Deployment, Blue-Green Deployment' },
+            { title: 'Infrastructure as Code', concepts: 'Docker, Terraform, AWS CloudFormation' }
+          ]
+        },
+        {
+          module: 'Scalability & Cloud Deployment',
+          submodules: [
+            { title: 'Cloud Platforms', concepts: 'AWS, Azure, Google Cloud, Serverless' },
+            { title: 'Container Orchestration', concepts: 'Kubernetes, Helm, Service Mesh' },
+            { title: 'Database Scaling', concepts: 'Sharding, Replication, Distributed Databases' }
+          ]
+        },
+        {
+          module: 'Advanced Security Practices',
+          submodules: [
+            { title: 'Security Architecture', concepts: 'Zero Trust Model, Defense in Depth' },
+            { title: 'Cryptography', concepts: 'Encryption, Digital Signatures, Key Management' },
+            { title: 'Compliance & Standards', concepts: 'OWASP, GDPR, ISO 27001' }
+          ]
+        },
+        {
+          module: 'Enterprise-Level Projects',
+          submodules: [
+            { title: 'Large-Scale Architecture', concepts: 'Monolithic vs Microservices, System Design' },
+            { title: 'Team Collaboration', concepts: 'Code Review, Documentation, Knowledge Sharing' },
+            { title: 'Legacy System Modernization', concepts: 'Refactoring, Migration Strategies' }
+          ]
+        }
+      ]
+    },
+    'Advanced Programming & Core Subjects': {
+      'Advanced': [
+        {
+          module: 'Introduction to Data Science',
+          submodules: [
+            { title: 'Data Science Fundamentals', concepts: 'Data Collection, Analysis, Visualization' },
+            { title: 'Tools & Environment', concepts: 'Jupyter, Anaconda, Git, Data Formats' },
+            { title: 'Data Literacy', concepts: 'Data Types, Data Quality, Metadata' }
+          ]
+        },
+        {
+          module: 'Python Programming Basics',
+          submodules: [
+            { title: 'Python Syntax', concepts: 'Variables, Data Types, Operators, Control Flow' },
+            { title: 'Functions & Modules', concepts: 'Function Definition, Built-in Functions, Importing' },
+            { title: 'Object-Oriented Python', concepts: 'Classes, Objects, Methods, Inheritance' }
+          ]
+        },
+        {
+          module: 'Data Analysis with Pandas',
+          submodules: [
+            { title: 'DataFrames & Series', concepts: 'Creating, Indexing, Slicing Data Structures' },
+            { title: 'Data Cleaning', concepts: 'Handling Missing Values, Duplicate Removal, Type Conversion' },
+            { title: 'Data Manipulation', concepts: 'Grouping, Merging, Pivot Tables, Aggregation' }
+          ]
+        },
+        {
+          module: 'Data Visualization',
+          submodules: [
+            { title: 'Matplotlib Basics', concepts: 'Plots, Subplots, Labels, Legends' },
+            { title: 'Seaborn Visualization', concepts: 'Statistical Plots, Distribution Analysis' },
+            { title: 'Interactive Visualizations', concepts: 'Plotly, Bokeh, Dash Dashboards' }
+          ]
+        },
+        {
+          module: 'Statistics Fundamentals',
+          submodules: [
+            { title: 'Descriptive Statistics', concepts: 'Mean, Median, Mode, Variance, Standard Deviation' },
+            { title: 'Probability Basics', concepts: 'Probability Distribution, Normal Distribution' },
+            { title: 'Hypothesis Testing', concepts: 'T-tests, Chi-square Tests, P-values' }
+          ]
+        },
+        {
+          module: 'SQL for Data Analysis',
+          submodules: [
+            { title: 'SQL Queries', concepts: 'SELECT, WHERE, JOIN, GROUP BY, ORDER BY' },
+            { title: 'Aggregate Functions', concepts: 'COUNT, SUM, AVG, MAX, MIN' },
+            { title: 'Database Design', concepts: 'Tables, Relationships, Normalization' }
+          ]
+        },
+        {
+          module: 'Basic Machine Learning',
+          submodules: [
+            { title: 'ML Concepts', concepts: 'Supervised Learning, Unsupervised Learning, Overfitting' },
+            { title: 'Regression Models', concepts: 'Linear Regression, Logistic Regression' },
+            { title: 'Classification', concepts: 'Decision Trees, K-Nearest Neighbors' }
+          ]
+        },
+        {
+          module: 'Data Science Project',
+          submodules: [
+            { title: 'Project Planning', concepts: 'Problem Definition, Data Collection Strategy' },
+            { title: 'Analysis Pipeline', concepts: 'Data Loading, Cleaning, Analysis, Visualization' },
+            { title: 'Documentation & Presentation', concepts: 'Jupyter Notebooks, Reports, Presentations' }
+          ]
+        }
+      ],
+      'Intermediate': [
+        {
+          module: 'Advanced Python for Data Science',
+          submodules: [
+            { title: 'NumPy Optimization', concepts: 'Arrays, Broadcasting, Vectorization' },
+            { title: 'Advanced Pandas', concepts: 'MultiIndex, Time Series, Custom Functions' },
+            { title: 'Performance Optimization', concepts: 'Memory Management, Cython, Parallel Processing' }
+          ]
+        },
+        {
+          module: 'Machine Learning Algorithms',
+          submodules: [
+            { title: 'Scikit-learn Library', concepts: 'Preprocessing, Model Selection, Pipelines' },
+            { title: 'Ensemble Methods', concepts: 'Random Forest, Gradient Boosting, Stacking' },
+            { title: 'Model Evaluation', concepts: 'Cross-Validation, Metrics, Hyperparameter Tuning' }
+          ]
+        },
+        {
+          module: 'Deep Learning with TensorFlow',
+          submodules: [
+            { title: 'Neural Networks Basics', concepts: 'Neurons, Layers, Activation Functions' },
+            { title: 'TensorFlow & Keras', concepts: 'Sequential Models, Functional API, Custom Layers' },
+            { title: 'Training & Optimization', concepts: 'Backpropagation, Optimizers, Loss Functions' }
+          ]
+        },
+        {
+          module: 'Big Data Processing',
+          submodules: [
+            { title: 'Distributed Computing', concepts: 'MapReduce, Spark Architecture' },
+            { title: 'PySpark', concepts: 'RDDs, DataFrames, SQL on Spark' },
+            { title: 'Batch Processing', concepts: 'ETL Pipelines, Data Warehousing' }
+          ]
+        },
+        {
+          module: 'Statistical Modeling',
+          submodules: [
+            { title: 'Regression Analysis', concepts: 'Multiple Regression, Regularization' },
+            { title: 'Bayesian Methods', concepts: 'Bayesian Inference, MCMC Sampling' },
+            { title: 'Time Series Analysis', concepts: 'ARIMA, SARIMA, Forecasting' }
+          ]
+        },
+        {
+          module: 'Data Engineering',
+          submodules: [
+            { title: 'Data Pipelines', concepts: 'ETL Workflows, Data Validation, Schema Management' },
+            { title: 'Databases', concepts: 'PostgreSQL, MongoDB, Data Lake Architecture' },
+            { title: 'Data Governance', concepts: 'Data Quality, Metadata Management, Lineage' }
+          ]
+        },
+        {
+          module: 'A/B Testing & Experimentation',
+          submodules: [
+            { title: 'Experimental Design', concepts: 'Control Groups, Randomization, Sample Size' },
+            { title: 'Statistical Testing', concepts: 'Significance Tests, Power Analysis' },
+            { title: 'Analysis & Interpretation', concepts: 'Effect Sizes, Confidence Intervals' }
+          ]
+        },
+        {
+          module: 'Advanced Analytics Project',
+          submodules: [
+            { title: 'Complex Analysis', concepts: 'Multivariate Analysis, Feature Engineering' },
+            { title: 'Model Development', concepts: 'Model Selection, Ensemble Methods' },
+            { title: 'Deployment & Monitoring', concepts: 'Model Deployment, Performance Monitoring' }
+          ]
+        }
+      ],
+      'Advanced': [
+        {
+          module: 'Advanced Machine Learning',
+          submodules: [
+            { title: 'Advanced Algorithms', concepts: 'SVM, Kernel Methods, Gaussian Processes' },
+            { title: 'Unsupervised Learning', concepts: 'Clustering, Dimensionality Reduction, Anomaly Detection' },
+            { title: 'Meta-learning', concepts: 'Transfer Learning, Few-shot Learning' }
+          ]
+        },
+        {
+          module: 'Deep Learning Architectures',
+          submodules: [
+            { title: 'CNN', concepts: 'Convolutional Layers, Pooling, Architectures (ResNet, VGG)' },
+            { title: 'RNN', concepts: 'LSTM, GRU, Sequence Modeling' },
+            { title: 'Transformers', concepts: 'Attention Mechanism, Transformer Architecture' }
+          ]
+        },
+        {
+          module: 'Natural Language Processing',
+          submodules: [
+            { title: 'Text Processing', concepts: 'Tokenization, Stemming, POS Tagging, NER' },
+            { title: 'Word Embeddings', concepts: 'Word2Vec, GloVe, FastText' },
+            { title: 'Language Models', concepts: 'BERT, GPT, Sequence-to-Sequence Models' }
+          ]
+        },
+        {
+          module: 'Computer Vision',
+          submodules: [
+            { title: 'Image Processing', concepts: 'Filters, Edge Detection, Image Segmentation' },
+            { title: 'Object Detection', concepts: 'YOLO, R-CNN, SSD' },
+            { title: 'Advanced Vision', concepts: 'Face Recognition, Image Generation, GANs' }
+          ]
+        },
+        {
+          module: 'Reinforcement Learning',
+          submodules: [
+            { title: 'RL Fundamentals', concepts: 'Markov Decision Process, Q-Learning, Policy Gradient' },
+            { title: 'Deep RL', concepts: 'DQN, A3C, Policy Optimization' },
+            { title: 'Applications', concepts: 'Game Playing, Robotics, Autonomous Systems' }
+          ]
+        },
+        {
+          module: 'MLOps & Model Deployment',
+          submodules: [
+            { title: 'Model Versioning', concepts: 'Git-based Versioning, Model Registry' },
+            { title: 'Deployment Strategies', concepts: 'Docker, Kubernetes, Serverless Deployment' },
+            { title: 'Monitoring & Maintenance', concepts: 'Model Monitoring, Retraining, Performance Tracking' }
+          ]
+        },
+        {
+          module: 'AI Ethics & Responsible AI',
+          submodules: [
+            { title: 'Bias & Fairness', concepts: 'Identifying Bias, Fairness Metrics' },
+            { title: 'Explainability', concepts: 'SHAP, LIME, Feature Importance' },
+            { title: 'Privacy & Security', concepts: 'Differential Privacy, Federated Learning' }
+          ]
+        },
+        {
+          module: 'Capstone Data Science Project',
+          submodules: [
+            { title: 'End-to-End Project', concepts: 'Problem Scoping, Data Pipeline, Model Development' },
+            { title: 'Advanced Analytics', concepts: 'Multimodal Data, Complex Modeling' },
+            { title: 'Production Deployment', concepts: 'Model Serving, Monitoring, Documentation' }
+          ]
+        }
+      ]
+    },
+    'Design': {
+      'Beginner': [
+        {
+          module: 'Design Fundamentals',
+          submodules: [
+            { title: 'Visual Design Principles', concepts: 'Balance, Contrast, Emphasis, Movement, Rhythm, Unity' },
+            { title: 'Color Theory', concepts: 'Color Wheel, Color Harmony, Psychology of Color' },
+            { title: 'Typography Basics', concepts: 'Font Families, Hierarchy, Readability, Kerning' }
+          ]
+        },
+        {
+          module: 'Color Theory & Typography',
+          submodules: [
+            { title: 'Advanced Color Theory', concepts: 'Color Temperature, Saturation, Color Accessibility' },
+            { title: 'Typography Systems', concepts: 'Type Scales, Font Pairing, Web Typography' },
+            { title: 'Layout & Composition', concepts: 'Grid Systems, Rule of Thirds, Golden Ratio' }
+          ]
+        },
+        {
+          module: 'Layout & Composition',
+          submodules: [
+            { title: 'Design Layout', concepts: 'Wireframing, Mockups, Prototyping Basics' },
+            { title: 'Composition Techniques', concepts: 'Visual Hierarchy, White Space, Alignment' },
+            { title: 'Design Systems', concepts: 'Component Libraries, Style Guides, Consistency' }
+          ]
+        },
+        {
+          module: 'Design Tools (Figma/Sketch)',
+          submodules: [
+            { title: 'Interface Basics', concepts: 'Canvas, Frames, Components, Auto Layout' },
+            { title: 'Design Tools', concepts: 'Pen Tool, Boolean Operations, Constraints' },
+            { title: 'Collaboration Features', concepts: 'Comments, Version History, Team Libraries' }
+          ]
+        },
+        {
+          module: 'User Interface Design Basics',
+          submodules: [
+            { title: 'UI Elements', concepts: 'Buttons, Forms, Navigation, Cards, Modals' },
+            { title: 'Design Patterns', concepts: 'Common UI Patterns, Best Practices' },
+            { title: 'Responsive Design', concepts: 'Mobile-First, Breakpoints, Adaptive Layouts' }
+          ]
+        },
+        {
+          module: 'Wireframing & Prototyping',
+          submodules: [
+            { title: 'Wireframing', concepts: 'Low-Fidelity Wireframes, User Flow Diagrams' },
+            { title: 'Prototyping', concepts: 'Interactive Prototypes, Micro-interactions' },
+            { title: 'User Testing', concepts: 'Usability Testing, Feedback Collection' }
+          ]
+        },
+        {
+          module: 'Design Systems',
+          submodules: [
+            { title: 'System Architecture', concepts: 'Design Tokens, Component Variants' },
+            { title: 'Documentation', concepts: 'Style Guides, Component Documentation' },
+            { title: 'Implementation', concepts: 'Handover to Developers, Maintenance' }
+          ]
+        },
+        {
+          module: 'Portfolio Development',
+          submodules: [
+            { title: 'Case Studies', concepts: 'Project Documentation, Process Showcase' },
+            { title: 'Portfolio Design', concepts: 'Website Creation, Presentation Skills' },
+            { title: 'Professional Networking', concepts: 'LinkedIn, Behance, Dribbble' }
+          ]
+        }
+      ],
+      'Intermediate': [
+        {
+          module: 'Advanced UI/UX Design',
+          submodules: [
+            { title: 'Advanced UI Patterns', concepts: 'Complex Interactions, Data Visualization' },
+            { title: 'Design for Performance', concepts: 'Loading States, Progressive Enhancement' },
+            { title: 'Accessibility Design', concepts: 'WCAG Guidelines, Inclusive Design' }
+          ]
+        },
+        {
+          module: 'User Research & Testing',
+          submodules: [
+            { title: 'Research Methods', concepts: 'Interviews, Surveys, Contextual Inquiry' },
+            { title: 'Usability Testing', concepts: 'Moderated Testing, A/B Testing, Heatmaps' },
+            { title: 'Data Analysis', concepts: 'Quantitative Analysis, Qualitative Insights' }
+          ]
+        },
+        {
+          module: 'Interaction Design',
+          submodules: [
+            { title: 'Micro-interactions', concepts: 'Feedback, Animation, State Changes' },
+            { title: 'Gesture Design', concepts: 'Touch Interactions, Motion Design' },
+            { title: 'Transition Design', concepts: 'Page Transitions, Loading Animations' }
+          ]
+        },
+        {
+          module: 'Design Thinking Process',
+          submodules: [
+            { title: 'Empathize', concepts: 'User Empathy, Stakeholder Mapping' },
+            { title: 'Define', concepts: 'Problem Definition, User Journey Mapping' },
+            { title: 'Ideate', concepts: 'Brainstorming, Crazy 8s, Mind Mapping' }
+          ]
+        },
+        {
+          module: 'Mobile & Responsive Design',
+          submodules: [
+            { title: 'Mobile Design', concepts: 'iOS/Android Guidelines, Thumb Zones' },
+            { title: 'Responsive Patterns', concepts: 'Adaptive Layouts, Content Prioritization' },
+            { title: 'Cross-Platform Design', concepts: 'Platform-Specific Patterns' }
+          ]
+        },
+        {
+          module: 'Design for Accessibility',
+          submodules: [
+            { title: 'Inclusive Design', concepts: 'Universal Design Principles, Cognitive Accessibility' },
+            { title: 'Technical Implementation', concepts: 'Screen Readers, Keyboard Navigation' },
+            { title: 'Testing & Validation', concepts: 'Accessibility Audits, User Testing' }
+          ]
+        },
+        {
+          module: 'Client Presentations',
+          submodules: [
+            { title: 'Presentation Skills', concepts: 'Storytelling, Visual Communication' },
+            { title: 'Design Rationale', concepts: 'Explaining Design Decisions, Data-Driven Arguments' },
+            { title: 'Client Management', concepts: 'Feedback Incorporation, Revision Process' }
+          ]
+        },
+        {
+          module: 'Advanced Prototyping',
+          submodules: [
+            { title: 'Advanced Tools', concepts: 'Framer, Principle, After Effects' },
+            { title: 'Complex Interactions', concepts: 'Multi-step Flows, Conditional Logic' },
+            { title: 'Testing & Iteration', concepts: 'Prototype Testing, User Feedback Integration' }
+          ]
+        }
+      ],
+      'Advanced': [
+        {
+          module: 'Design Leadership & Strategy',
+          submodules: [
+            { title: 'Strategic Thinking', concepts: 'Business Strategy, Design Strategy Alignment' },
+            { title: 'Team Leadership', concepts: 'Mentoring, Design Culture, Team Building' },
+            { title: 'Design Operations', concepts: 'Process Optimization, Resource Management' }
+          ]
+        },
+        {
+          module: 'Advanced User Research',
+          submodules: [
+            { title: 'Advanced Methods', concepts: 'Ethnography, Participatory Design, Diary Studies' },
+            { title: 'Data Synthesis', concepts: 'Affinity Mapping, Journey Mapping, Personas' },
+            { title: 'Research Strategy', concepts: 'Longitudinal Studies, Mixed Methods' }
+          ]
+        },
+        {
+          module: 'Service Design',
+          submodules: [
+            { title: 'Service Design Thinking', concepts: 'Service Blueprints, Customer Journey' },
+            { title: 'Touchpoint Design', concepts: 'Multi-channel Experiences, Service Ecosystems' },
+            { title: 'Service Innovation', concepts: 'Service Prototyping, Business Model Innovation' }
+          ]
+        },
+        {
+          module: 'Design Systems Architecture',
+          submodules: [
+            { title: 'System Design', concepts: 'Scalable Architecture, Governance Models' },
+            { title: 'Advanced Components', concepts: 'Complex Components, Pattern Libraries' },
+            { title: 'System Evolution', concepts: 'Versioning, Migration Strategies, Deprecation' }
+          ]
+        },
+        {
+          module: 'Design Operations',
+          submodules: [
+            { title: 'Process Design', concepts: 'Workflow Optimization, Tool Selection' },
+            { title: 'Metrics & KPIs', concepts: 'Design Impact Measurement, ROI Calculation' },
+            { title: 'Resource Management', concepts: 'Budget Planning, Team Scaling' }
+          ]
+        },
+        {
+          module: 'Innovation & Emerging Technologies',
+          submodules: [
+            { title: 'Emerging Tech', concepts: 'AR/VR, Voice Interfaces, AI/ML Integration' },
+            { title: 'Future Design', concepts: 'Speculative Design, Design Fiction' },
+            { title: 'Innovation Methods', concepts: 'Design Sprints, Innovation Labs' }
+          ]
+        },
+        {
+          module: 'Design Consulting',
+          submodules: [
+            { title: 'Consulting Skills', concepts: 'Client Discovery, Proposal Writing' },
+            { title: 'Project Management', concepts: 'Scope Definition, Timeline Management' },
+            { title: 'Business Development', concepts: 'Networking, Marketing, Client Retention' }
+          ]
+        },
+        {
+          module: 'Large-Scale Design Projects',
+          submodules: [
+            { title: 'Enterprise Design', concepts: 'Large Team Coordination, Stakeholder Management' },
+            { title: 'Complex Systems', concepts: 'Platform Design, Ecosystem Design' },
+            { title: 'Design at Scale', concepts: 'Global Design, Cultural Considerations' }
+          ]
+        }
+      ]
+    },
+    'Marketing': {
+      'Beginner': [
+        {
+          module: 'Digital Marketing Fundamentals',
+          submodules: [
+            { title: 'Marketing Basics', concepts: '4Ps, Target Audience, Value Proposition' },
+            { title: 'Digital Landscape', concepts: 'Digital Channels, Consumer Behavior Online' },
+            { title: 'Marketing Strategy', concepts: 'Goal Setting, KPI Definition, Campaign Planning' }
+          ]
+        },
+        {
+          module: 'Content Marketing',
+          submodules: [
+            { title: 'Content Strategy', concepts: 'Content Types, Audience Analysis, Content Calendar' },
+            { title: 'Content Creation', concepts: 'Writing, Visual Content, Multimedia Production' },
+            { title: 'Content Distribution', concepts: 'SEO, Social Media, Email Marketing' }
+          ]
+        },
+        {
+          module: 'Social Media Marketing',
+          submodules: [
+            { title: 'Platform Strategy', concepts: 'Platform Selection, Content Planning, Community Building' },
+            { title: 'Social Advertising', concepts: 'Ad Formats, Targeting, Budget Optimization' },
+            { title: 'Engagement & Analytics', concepts: 'Engagement Metrics, Social Listening, ROI Measurement' }
+          ]
+        },
+        {
+          module: 'SEO Basics',
+          submodules: [
+            { title: 'Search Fundamentals', concepts: 'How Search Works, Keywords, SERP Analysis' },
+            { title: 'On-Page SEO', concepts: 'Title Tags, Meta Descriptions, Content Optimization' },
+            { title: 'Technical SEO', concepts: 'Site Speed, Mobile Optimization, Schema Markup' }
+          ]
+        },
+        {
+          module: 'Email Marketing',
+          submodules: [
+            { title: 'Email Strategy', concepts: 'List Building, Segmentation, Campaign Planning' },
+            { title: 'Email Design', concepts: 'Templates, Personalization, Mobile Optimization' },
+            { title: 'Automation & Analytics', concepts: 'Workflow Automation, A/B Testing, Performance Tracking' }
+          ]
+        },
+        {
+          module: 'Marketing Analytics',
+          submodules: [
+            { title: 'Data Collection', concepts: 'Google Analytics, Tracking Pixels, UTM Parameters' },
+            { title: 'Performance Metrics', concepts: 'Conversion Rates, Customer Acquisition Cost, Lifetime Value' },
+            { title: 'Reporting & Insights', concepts: 'Dashboard Creation, Data Visualization, Actionable Insights' }
+          ]
+        },
+        {
+          module: 'Brand Building',
+          submodules: [
+            { title: 'Brand Strategy', concepts: 'Brand Identity, Positioning, Messaging' },
+            { title: 'Brand Assets', concepts: 'Logo Design, Brand Guidelines, Visual Identity' },
+            { title: 'Brand Storytelling', concepts: 'Narrative Development, Content Marketing, Brand Experience' }
+          ]
+        },
+        {
+          module: 'Marketing Campaign Planning',
+          submodules: [
+            { title: 'Campaign Strategy', concepts: 'Objective Setting, Target Audience, Channel Selection' },
+            { title: 'Campaign Execution', concepts: 'Timeline Planning, Resource Allocation, Risk Assessment' },
+            { title: 'Campaign Optimization', concepts: 'A/B Testing, Performance Monitoring, Iteration' }
+          ]
+        }
+      ],
+      'Intermediate': [
+        {
+          module: 'Advanced SEO & SEM',
+          submodules: [
+            { title: 'Advanced SEO', concepts: 'Link Building, Technical Audits, International SEO' },
+            { title: 'Search Advertising', concepts: 'Google Ads, Bing Ads, Ad Copy Optimization' },
+            { title: 'Local SEO', concepts: 'Google My Business, Local Citations, Review Management' }
+          ]
+        },
+        {
+          module: 'Social Media Advertising',
+          submodules: [
+            { title: 'Advanced Targeting', concepts: 'Lookalike Audiences, Custom Audiences, Interest Targeting' },
+            { title: 'Creative Optimization', concepts: 'Ad Formats, Video Ads, Carousel Ads' },
+            { title: 'Campaign Management', concepts: 'Budget Allocation, Bid Strategies, Performance Optimization' }
+          ]
+        },
+        {
+          module: 'Content Strategy',
+          submodules: [
+            { title: 'Content Marketing Strategy', concepts: 'Content Pillars, Editorial Calendar, Content Clusters' },
+            { title: 'Content Performance', concepts: 'Content Analytics, Engagement Metrics, Content Optimization' },
+            { title: 'Content Distribution', concepts: 'Influencer Partnerships, Syndication, Repurposing' }
+          ]
+        },
+        {
+          module: 'Marketing Automation',
+          submodules: [
+            { title: 'Automation Tools', concepts: 'CRM Integration, Email Automation, Lead Nurturing' },
+            { title: 'Workflow Design', concepts: 'Customer Journey Mapping, Trigger-Based Campaigns' },
+            { title: 'Personalization', concepts: 'Dynamic Content, Behavioral Targeting, Segmentation' }
+          ]
+        },
+        {
+          module: 'Conversion Rate Optimization',
+          submodules: [
+            { title: 'CRO Fundamentals', concepts: 'Conversion Funnels, User Experience Analysis' },
+            { title: 'Testing & Optimization', concepts: 'A/B Testing, Multivariate Testing, Statistical Significance' },
+            { title: 'User Psychology', concepts: 'Persuasion Principles, Cognitive Biases, Decision Making' }
+          ]
+        },
+        {
+          module: 'Influencer Marketing',
+          submodules: [
+            { title: 'Influencer Strategy', concepts: 'Influencer Identification, Campaign Planning, ROI Measurement' },
+            { title: 'Partnership Management', concepts: 'Contract Negotiation, Content Collaboration, Performance Tracking' },
+            { title: 'Legal & Compliance', concepts: 'FTC Guidelines, Disclosure Requirements, Brand Safety' }
+          ]
+        },
+        {
+          module: 'Marketing Funnels',
+          submodules: [
+            { title: 'Funnel Design', concepts: 'Awareness, Interest, Decision, Action, Retention' },
+            { title: 'Funnel Optimization', concepts: 'Conversion Analysis, Bottleneck Identification, A/B Testing' },
+            { title: 'Multi-Channel Funnels', concepts: 'Attribution Modeling, Cross-Device Tracking' }
+          ]
+        },
+        {
+          module: 'Performance Marketing',
+          submodules: [
+            { title: 'Performance Channels', concepts: 'PPC, Affiliate Marketing, Display Advertising' },
+            { title: 'Attribution & Analytics', concepts: 'Multi-Touch Attribution, Incrementality Testing' },
+            { title: 'Budget Optimization', concepts: 'CPA Optimization, ROAS Maximization, Scaling Strategies' }
+          ]
+        }
+      ],
+      'Advanced': [
+        {
+          module: 'Marketing Leadership',
+          submodules: [
+            { title: 'Strategic Leadership', concepts: 'Marketing Strategy Development, Team Leadership' },
+            { title: 'Cross-Functional Collaboration', concepts: 'Sales Alignment, Product Marketing Integration' },
+            { title: 'Marketing Operations', concepts: 'Process Optimization, Technology Stack Management' }
+          ]
+        },
+        {
+          module: 'Growth Hacking',
+          submodules: [
+            { title: 'Growth Mindset', concepts: 'Experimentation, Data-Driven Decisions, Rapid Iteration' },
+            { title: 'Growth Channels', concepts: 'Viral Marketing, Referral Programs, Partnership Growth' },
+            { title: 'Metrics & Scaling', concepts: 'North Star Metrics, Unit Economics, Sustainable Scaling' }
+          ]
+        },
+        {
+          module: 'Marketing Technology Stack',
+          submodules: [
+            { title: 'MarTech Landscape', concepts: 'Technology Categories, Vendor Evaluation, Integration' },
+            { title: 'Data Platforms', concepts: 'CDP, DMP, Data Warehousing, Business Intelligence' },
+            { title: 'Automation & AI', concepts: 'Marketing AI, Predictive Analytics, Personalization Engines' }
+          ]
+        },
+        {
+          module: 'Data-Driven Marketing',
+          submodules: [
+            { title: 'Advanced Analytics', concepts: 'Cohort Analysis, Customer Segmentation, Predictive Modeling' },
+            { title: 'Marketing Mix Modeling', concepts: 'Attribution Analysis, Budget Allocation Optimization' },
+            { title: 'Privacy & Ethics', concepts: 'Data Privacy Regulations, Ethical Data Use, Consent Management' }
+          ]
+        },
+        {
+          module: 'International Marketing',
+          submodules: [
+            { title: 'Global Strategy', concepts: 'Market Research, Cultural Adaptation, Localization' },
+            { title: 'International Channels', concepts: 'Global Platforms, Local Partnerships, Cross-Border E-commerce' },
+            { title: 'Compliance & Operations', concepts: 'International Regulations, Currency Management, Logistics' }
+          ]
+        },
+        {
+          module: 'Marketing ROI Optimization',
+          submodules: [
+            { title: 'ROI Measurement', concepts: 'Attribution Models, Incrementality, Long-term Value' },
+            { title: 'Budget Optimization', concepts: 'Media Mix Optimization, Dynamic Budgeting' },
+            { title: 'Performance Forecasting', concepts: 'Predictive Analytics, Scenario Planning' }
+          ]
+        },
+        {
+          module: 'Strategic Marketing Planning',
+          submodules: [
+            { title: 'Strategic Frameworks', concepts: 'SWOT Analysis, Competitive Analysis, Market Positioning' },
+            { title: 'Long-term Planning', concepts: '5-Year Marketing Plans, Scenario Planning, Risk Assessment' },
+            { title: 'Change Management', concepts: 'Digital Transformation, Organizational Change, Culture Shift' }
+          ]
+        },
+        {
+          module: 'Marketing Innovation',
+          submodules: [
+            { title: 'Emerging Trends', concepts: 'AI Marketing, AR/VR Commerce, Voice Commerce, Blockchain' },
+            { title: 'Innovation Methodology', concepts: 'Design Thinking, Lean Startup, Agile Marketing' },
+            { title: 'Future Marketing', concepts: 'Predictive Marketing, Hyper-Personalization, Metaverse Marketing' }
+          ]
+        }
+      ]
+    },
+    'Business': {
+      'Beginner': [
+        {
+          module: 'Business Fundamentals',
+          submodules: [
+            { title: 'Business Concepts', concepts: 'Business Models, Value Creation, Stakeholder Analysis' },
+            { title: 'Market Understanding', concepts: 'Market Analysis, Competitive Landscape, Customer Segmentation' },
+            { title: 'Business Planning', concepts: 'Business Plan Development, Goal Setting, Strategy Formulation' }
+          ]
+        },
+        {
+          module: 'Financial Management',
+          submodules: [
+            { title: 'Financial Basics', concepts: 'Financial Statements, Cash Flow, Profit & Loss' },
+            { title: 'Budgeting & Forecasting', concepts: 'Budget Creation, Financial Planning, Variance Analysis' },
+            { title: 'Financial Decision Making', concepts: 'Investment Analysis, Cost-Benefit Analysis, ROI Calculation' }
+          ]
+        },
+        {
+          module: 'Marketing for Businesses',
+          submodules: [
+            { title: 'Marketing Strategy', concepts: 'Market Research, Positioning, Branding' },
+            { title: 'Marketing Mix', concepts: 'Product, Price, Place, Promotion Strategies' },
+            { title: 'Customer Acquisition', concepts: 'Lead Generation, Sales Funnels, Customer Retention' }
+          ]
+        },
+        {
+          module: 'Operations Management',
+          submodules: [
+            { title: 'Process Management', concepts: 'Workflow Design, Process Optimization, Quality Control' },
+            { title: 'Resource Management', concepts: 'Inventory Control, Supply Chain Basics, Capacity Planning' },
+            { title: 'Performance Measurement', concepts: 'KPI Development, Performance Dashboards, Continuous Improvement' }
+          ]
+        },
+        {
+          module: 'Strategic Planning',
+          submodules: [
+            { title: 'Strategic Analysis', concepts: 'SWOT Analysis, PESTEL Analysis, Porter\'s Five Forces' },
+            { title: 'Strategy Development', concepts: 'Vision & Mission, Goal Setting, Strategic Objectives' },
+            { title: 'Strategy Implementation', concepts: 'Action Planning, Resource Allocation, Change Management' }
+          ]
+        },
+        {
+          module: 'Leadership Basics',
+          submodules: [
+            { title: 'Leadership Styles', concepts: 'Leadership Theories, Situational Leadership, Emotional Intelligence' },
+            { title: 'Team Management', concepts: 'Team Building, Motivation, Conflict Resolution' },
+            { title: 'Communication Skills', concepts: 'Effective Communication, Presentation Skills, Feedback' }
+          ]
+        },
+        {
+          module: 'Business Communication',
+          submodules: [
+            { title: 'Written Communication', concepts: 'Business Writing, Email Etiquette, Report Writing' },
+            { title: 'Verbal Communication', concepts: 'Public Speaking, Negotiation, Meeting Management' },
+            { title: 'Digital Communication', concepts: 'Social Media, Digital Etiquette, Virtual Collaboration' }
+          ]
+        },
+        {
+          module: 'Entrepreneurship Essentials',
+          submodules: [
+            { title: 'Entrepreneurial Mindset', concepts: 'Opportunity Recognition, Risk Assessment, Innovation' },
+            { title: 'Business Development', concepts: 'Idea Validation, MVP Development, Customer Development' },
+            { title: 'Startup Operations', concepts: 'Lean Startup, Bootstrapping, Funding Strategies' }
+          ]
+        }
+      ],
+      'Intermediate': [
+        {
+          module: 'Advanced Business Strategy',
+          submodules: [
+            { title: 'Strategic Frameworks', concepts: 'Blue Ocean Strategy, Value Innovation, Competitive Advantage' },
+            { title: 'Strategic Planning', concepts: 'Long-term Planning, Scenario Planning, Risk Management' },
+            { title: 'Strategy Execution', concepts: 'Balanced Scorecard, Strategy Maps, Performance Management' }
+          ]
+        },
+        {
+          module: 'Financial Analysis',
+          submodules: [
+            { title: 'Financial Statement Analysis', concepts: 'Ratio Analysis, Trend Analysis, Comparative Analysis' },
+            { title: 'Investment Analysis', concepts: 'NPV, IRR, Payback Period, Risk Assessment' },
+            { title: 'Financial Modeling', concepts: 'Excel Modeling, Scenario Analysis, Sensitivity Analysis' }
+          ]
+        },
+        {
+          module: 'Project Management',
+          submodules: [
+            { title: 'Project Planning', concepts: 'Project Charter, WBS, Gantt Charts, Resource Planning' },
+            { title: 'Project Execution', concepts: 'Team Management, Risk Management, Quality Control' },
+            { title: 'Project Control', concepts: 'Progress Monitoring, Change Management, Closure' }
+          ]
+        },
+        {
+          module: 'Human Resources Management',
+          submodules: [
+            { title: 'Talent Acquisition', concepts: 'Recruitment, Selection, Onboarding, Employee Retention' },
+            { title: 'Performance Management', concepts: 'Performance Appraisal, Development Planning, Compensation' },
+            { title: 'HR Operations', concepts: 'Employee Relations, Compliance, HR Analytics' }
+          ]
+        },
+        {
+          module: 'Supply Chain Management',
+          submodules: [
+            { title: 'Supply Chain Strategy', concepts: 'Supply Chain Design, Network Optimization, Outsourcing' },
+            { title: 'Inventory Management', concepts: 'Inventory Models, ABC Analysis, Just-in-Time' },
+            { title: 'Logistics & Distribution', concepts: 'Transportation, Warehousing, Distribution Channels' }
+          ]
+        },
+        {
+          module: 'Business Development',
+          submodules: [
+            { title: 'Market Development', concepts: 'Market Research, Competitive Analysis, Market Entry Strategies' },
+            { title: 'Partnership Development', concepts: 'Strategic Alliances, Joint Ventures, Channel Development' },
+            { title: 'Sales & Account Management', concepts: 'Sales Strategy, Account Planning, Customer Relationship' }
+          ]
+        },
+        {
+          module: 'Change Management',
+          submodules: [
+            { title: 'Change Process', concepts: 'Change Models, Resistance Management, Communication Planning' },
+            { title: 'Organizational Development', concepts: 'Culture Change, Process Improvement, Technology Adoption' },
+            { title: 'Change Leadership', concepts: 'Leading Change, Stakeholder Management, Sustainability' }
+          ]
+        },
+        {
+          module: 'Business Analytics',
+          submodules: [
+            { title: 'Data Analysis', concepts: 'Data Collection, Data Cleaning, Exploratory Data Analysis' },
+            { title: 'Business Intelligence', concepts: 'Dashboard Design, KPI Development, Reporting' },
+            { title: 'Decision Support', concepts: 'Data-Driven Decisions, Predictive Analytics, Business Cases' }
+          ]
+        }
+      ],
+      'Advanced': [
+        {
+          module: 'Executive Leadership',
+          submodules: [
+            { title: 'Executive Mindset', concepts: 'Strategic Thinking, Systems Thinking, Long-term Vision' },
+            { title: 'Leadership Development', concepts: 'Executive Coaching, Leadership Assessment, Succession Planning' },
+            { title: 'Board Relations', concepts: 'Board Management, Governance, Stakeholder Communication' }
+          ]
+        },
+        {
+          module: 'Corporate Strategy',
+          submodules: [
+            { title: 'Corporate Strategy', concepts: 'Portfolio Analysis, Diversification, Strategic Alliances' },
+            { title: 'Innovation Strategy', concepts: 'Open Innovation, R&D Management, Technology Strategy' },
+            { title: 'Global Strategy', concepts: 'International Expansion, Global Operations, Cultural Intelligence' }
+          ]
+        },
+        {
+          module: 'Mergers & Acquisitions',
+          submodules: [
+            { title: 'M&A Strategy', concepts: 'Strategic Rationale, Target Identification, Due Diligence' },
+            { title: 'M&A Process', concepts: 'Valuation, Negotiation, Integration Planning' },
+            { title: 'Post-Merger Integration', concepts: 'Cultural Integration, Systems Integration, Performance Management' }
+          ]
+        },
+        {
+          module: 'International Business',
+          submodules: [
+            { title: 'Global Business Environment', concepts: 'Global Economics, Political Risk, Cultural Intelligence' },
+            { title: 'International Strategy', concepts: 'Market Entry Modes, Internationalization Theories' },
+            { title: 'Global Operations', concepts: 'International HRM, Global Supply Chains, Cross-cultural Management' }
+          ]
+        },
+        {
+          module: 'Innovation Management',
+          submodules: [
+            { title: 'Innovation Strategy', concepts: 'Innovation Portfolio, Open Innovation, Disruptive Innovation' },
+            { title: 'Innovation Process', concepts: 'Idea Generation, Innovation Funnels, Stage-Gate Process' },
+            { title: 'Innovation Culture', concepts: 'Innovation Metrics, Reward Systems, Failure Management' }
+          ]
+        },
+        {
+          module: 'Crisis Management',
+          submodules: [
+            { title: 'Crisis Planning', concepts: 'Risk Assessment, Crisis Scenarios, Contingency Planning' },
+            { title: 'Crisis Response', concepts: 'Crisis Communication, Decision Making, Resource Allocation' },
+            { title: 'Post-Crisis Management', concepts: 'Recovery Planning, Learning, Reputation Management' }
+          ]
+        },
+        {
+          module: 'Business Transformation',
+          submodules: [
+            { title: 'Transformation Strategy', concepts: 'Digital Transformation, Organizational Change, Culture Change' },
+            { title: 'Change Implementation', concepts: 'Change Management Models, Resistance Management, Communication' },
+            { title: 'Transformation Metrics', concepts: 'Success Measurement, ROI Analysis, Sustainability' }
+          ]
+        },
+        {
+          module: 'Executive Decision Making',
+          submodules: [
+            { title: 'Decision Frameworks', concepts: 'Rational Decision Making, Intuitive Decision Making, Group Decisions' },
+            { title: 'Strategic Analysis', concepts: 'Scenario Planning, Decision Trees, Real Options' },
+            { title: 'Risk Management', concepts: 'Risk Assessment, Risk Mitigation, Decision under Uncertainty' }
+          ]
+        }
+      ]
+    }
+  };
+
+  return curriculums[category]?.[level] || [
+    {
+      module: 'Course Introduction',
+      submodules: [
+        { title: 'Welcome & Overview', concepts: 'Course Goals, Structure, Resources' }
+      ]
+    },
+    {
+      module: 'Core Concepts',
+      submodules: [
+        { title: 'Fundamentals', concepts: 'Key Concepts, Industry Standards' }
+      ]
+    },
+    {
+      module: 'Practical Applications',
+      submodules: [
+        { title: 'Real-World Usage', concepts: 'Case Studies, Best Practices' }
+      ]
+    },
+    {
+      module: 'Advanced Topics',
+      submodules: [
+        { title: 'Advanced Concepts', concepts: 'Expert Techniques, Deep Dive' }
+      ]
+    },
+    {
+      module: 'Project Work',
+      submodules: [
+        { title: 'Hands-On Project', concepts: 'Implementation, Problem Solving' }
+      ]
+    },
+    {
+      module: 'Final Assessment',
+      submodules: [
+        { title: 'Evaluation & Certification', concepts: 'Testing, Certification' }
+      ]
+    }
+  ];
+};
+
+export default function CourseDetail() {
+  const { courseSlug } = useParams();
+  const [activeTab, setActiveTab] = useState("overview");
+
+  const allCourses = useMemo(
+    () =>
+      courseCategories.flatMap((category) =>
+        category.items.map((course) => ({
+          ...course,
+          category: category.title,
+          categoryColor: category.color,
+          slug: slugify(course.name),
+        }))
+      ),
+    []
+  );
+
+  console.log('Course slug from URL:', courseSlug);
+  console.log('All courses:', allCourses.map(c => ({ name: c.name, slug: c.slug })));
+
+  const course = allCourses.find((item) => item.slug === courseSlug);
+
+  console.log('Found course:', course);
+
+  if (!course) {
+    return (
+      <section className="section-page">
+        <div className="container">
+          <h2>Course not found</h2>
+          <p>The course you are looking for does not exist.</p>
+          <p>Debug info:</p>
+          <p>Slug from URL: {courseSlug}</p>
+          <p>Available courses: {allCourses.map(c => c.slug).join(', ')}</p>
+          <Link className="primary-btn" to="/courses">
+            Back to courses
+          </Link>
+        </div>
+      </section>
+    );
+  }
+
+  const descriptionLines = course.description ? course.description.split("\n\n") : [];
+  const curriculumItems = getCurriculumForCourse(course.category, course.level);
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "overview":
+        return (
+          <>
+            <div className="tab-content-card">
+              <h3>Course Overview</h3>
+              <p>
+                {course.description
+                  ? descriptionLines[0] || "We have a detailed curriculum for this course."
+                  : "No additional course overview is available yet."}
+              </p>
+              <div className="overview-grid">
+                <div>
+                  <strong>Duration</strong>
+                  <p>{course.duration}</p>
+                </div>
+                <div>
+                  <strong>Level</strong>
+                  <p>{course.level}</p>
+                </div>
+                <div>
+                  <strong>Price</strong>
+                  <p>₹{course.price.toLocaleString("en-IN")}</p>
+                </div>
+                <div>
+                  <strong>Category</strong>
+                  <p>{course.category}</p>
+                </div>
+              </div>
+            </div>
+            <div className="course-summary">
+              <h4>What You'll Learn</h4>
+              <ul>
+                {curriculumItems.slice(0, 6).map((item, index) => (
+                  <li key={index}>{item}</li>
+                ))}
+              </ul>
+              <div>
+                <h4>Skills You'll Gain</h4>
+                <p>
+                  {course.category === 'Web Development' 
+                    ? 'HTML, CSS, JavaScript, Responsive Design, Frontend Frameworks'
+                    : course.category === 'Data Science' 
+                    ? 'Python, Data Analysis, Machine Learning, Statistics, Data Visualization'
+                    : course.category === 'Design' 
+                    ? 'UI/UX Design, Prototyping, Design Tools, User Research'
+                    : course.category === 'Marketing' 
+                    ? 'Digital Marketing, SEO, Social Media, Content Strategy'
+                    : course.category === 'Business' 
+                    ? 'Business Strategy, Management, Entrepreneurship, Finance'
+                    : 'Industry-relevant skills and practical knowledge'}
+                </p>
+              </div>
+              {descriptionLines.length > 1 && (
+                <div>
+                  <h4>Course Highlights</h4>
+                  <p>{descriptionLines.slice(1).join(' ').substring(0, 300)}{descriptionLines.slice(1).join(' ').length > 300 ? '...' : ''}</p>
+                </div>
+              )}
+              <div>
+                <h4>Prerequisites</h4>
+                <p>
+                  {course.level === 'Beginner' 
+                    ? 'No prior experience required. This course is designed for complete beginners.' 
+                    : course.level === 'Intermediate' 
+                    ? `Basic knowledge of ${course.category} recommended.`
+                    : `Strong foundation in ${course.category} required.`}
+                </p>
+              </div>
+              <div>
+                <h4>Who This Course Is For</h4>
+                <p>
+                  {course.level === 'Beginner' 
+                    ? 'Perfect for students, career changers, and anyone interested in learning ' + course.category.toLowerCase() + '.'
+                    : course.level === 'Intermediate' 
+                    ? 'Ideal for professionals looking to advance their ' + course.category.toLowerCase() + ' skills.'
+                    : 'Designed for experienced practitioners seeking advanced expertise in ' + course.category.toLowerCase() + '.'}
+                </p>
+              </div>
+              <div>
+                <h4>Career Opportunities</h4>
+                <p>
+                  {course.category === 'Web Development' 
+                    ? 'Web Developer, Frontend Developer, Full-Stack Developer, UI Developer'
+                    : course.category === 'Data Science' 
+                    ? 'Data Analyst, Data Scientist, Machine Learning Engineer, BI Analyst'
+                    : course.category === 'Design' 
+                    ? 'UI/UX Designer, Product Designer, Graphic Designer, Design Lead'
+                    : course.category === 'Marketing' 
+                    ? 'Digital Marketing Specialist, SEO Specialist, Content Marketer, Marketing Manager'
+                    : course.category === 'Business' 
+                    ? 'Business Analyst, Project Manager, Entrepreneur, Business Consultant'
+                    : 'Various career paths in ' + course.category}
+                </p>
+              </div>
+              <div>
+                <h4>Course Format</h4>
+                <p>Self-paced online course with lifetime access. Learn at your own schedule with 24/7 support.</p>
+              </div>
+              <div>
+                <h4>Course Materials</h4>
+                <p>Video lectures, downloadable resources, practice exercises, quizzes, and project files included.</p>
+              </div>
+              <div>
+                <h4>Assessment & Certification</h4>
+                <p>Complete quizzes and projects to test your knowledge. Upon successful completion, receive a certificate of completion.</p>
+              </div>
+              <div>
+                <h4>Support & Resources</h4>
+                <p>Access to community forums, instructor Q&A sessions, and additional learning resources throughout your journey.</p>
+              </div>
+              <div>
+                <h4>Course Details</h4>
+                <p>This {course.level.toLowerCase()} course is perfect for learners in {course.category}. Complete your training in {course.duration} with expert guidance.</p>
+              </div>
+            </div>
+          </>
+        );
+      case "curriculum":
+        return (
+          <div className="tab-content-card">
+            <h3>Course Curriculum</h3>
+            <p>This comprehensive curriculum is designed to take you from {course.level.toLowerCase()} to proficient in {course.category}. Each module builds upon the previous one, ensuring a logical learning progression.</p>
+            {curriculumItems.length > 0 ? (
+              <div className="curriculum-detailed">
+                {curriculumItems.map((item, moduleIndex) => (
+                  <div key={moduleIndex} className="curriculum-module">
+                    <div className="module-header">
+                      <h4>Module {moduleIndex + 1}: {item.module}</h4>
+                    </div>
+                    {item.submodules && item.submodules.length > 0 ? (
+                      <ul className="submodules-list">
+                        {item.submodules.map((submodule, subIndex) => (
+                          <li key={subIndex} className="submodule-item">
+                            <strong className="submodule-title">{submodule.title}</strong>
+                            <p className="concepts-text">Topics: {submodule.concepts}</p>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p>Module content details coming soon.</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p>Curriculum details are being prepared. Please check back soon.</p>
+            )}
+          </div>
+        );
+      case "reviews":
+        return (
+          <div className="tab-content-card">
+            <h3>Student Reviews</h3>
+            <div className="review-card">
+              <div className="review-header">
+                <strong>Priya, 27</strong>
+                <FaStar /> <FaStar /> <FaStar /> <FaStar /> <FaStar />
+              </div>
+              <p>Great practical material, strong teacher support, and real project examples helped me
+                land a job in 3 months.</p>
+            </div>
+            <div className="review-card">
+              <div className="review-header">
+                <strong>Rohit, 34</strong>
+                <FaStar /> <FaStar /> <FaStar /> <FaStar /> <FaStar />
+              </div>
+              <p>A good pacing course with solid coverage. I strongly recommend for beginners and
+                intermediate learners.</p>
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <section className="section-page course-detail-page">
+      <div className="container">
+        <Link to="/courses" className="secondary-btn back-link">
+          <FaArrowLeft /> Back to catalog
+        </Link>
+
+        <div className="course-detail-header">
+          <h1>{course.name}</h1>
+          <div className="course-meta-row">
+            <div className="meta-item">
+              <FaRupeeSign /> ₹{course.price.toLocaleString("en-IN")}
+            </div>
+            <div className="meta-item">
+              <FaClock /> {course.duration}
+            </div>
+            <div className="meta-item">
+              <FaGraduationCap /> {course.level}
+            </div>
+          </div>
+        </div>
+
+        <div className="tabs">
+          <button
+            className={activeTab === "overview" ? "tab active" : "tab"}
+            onClick={() => setActiveTab("overview")}
+          >
+            Overview
+          </button>
+          <button
+            className={activeTab === "curriculum" ? "tab active" : "tab"}
+            onClick={() => setActiveTab("curriculum")}
+          >
+            Curriculum
+          </button>
+          <button
+            className={activeTab === "reviews" ? "tab active" : "tab"}
+            onClick={() => setActiveTab("reviews")}
+          >
+            Reviews
+          </button>
+        </div>
+
+        <div className="tab-content">{renderTabContent()}</div>
+      </div>
+    </section>
+  );
+}
