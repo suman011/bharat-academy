@@ -1626,15 +1626,27 @@ app.post("/admin/issues/:id/reply", (req, res) => {
 });
 
 // Serve React (Vite build) — MUST be registered after all API routes so /auth/*, /cart, etc. still work.
-const clientDistPath = path.join(__dirname, "../client/dist");
+const clientDistPath = path.resolve(__dirname, "../client/dist");
+const indexPath = path.join(clientDistPath, "index.html");
+
 app.use(express.static(clientDistPath));
-app.get("*", (req, res) => {
-  if (req.path.startsWith("/api")) {
-    return res.status(404).json({ ok: false, error: "API route not found" });
+
+// SPA fallback: do not return index.html for hashed assets or other file-like paths (avoids wrong MIME / 500).
+app.get("*", (req, res, next) => {
+  if (
+    req.path.startsWith("/api") ||
+    req.path.startsWith("/health") ||
+    req.path.startsWith("/assets") ||
+    req.path.includes(".")
+  ) {
+    return next();
   }
-  return res.sendFile(path.join(clientDistPath, "index.html"));
+  res.sendFile(indexPath, (err) => {
+    if (err) next(err);
+  });
 });
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`Serving frontend from: ${clientDistPath}`);
 });
