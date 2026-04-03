@@ -12,6 +12,7 @@ require("dotenv").config({ path: path.join(__dirname, ".env"), override: true })
 
 const app = express();
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 const prisma = new PrismaClient();
@@ -1627,17 +1628,26 @@ app.post("/admin/issues/:id/reply", (req, res) => {
 
 // Serve React (Vite build) — MUST be registered after all API routes so /auth/*, /cart, etc. still work.
 const clientDistPath = path.resolve(__dirname, "../client/dist");
+const assetsPath = path.join(clientDistPath, "assets");
 const indexPath = path.join(clientDistPath, "index.html");
 
+console.log("clientDistPath:", clientDistPath);
+console.log("assetsPath:", assetsPath);
+console.log("indexPath:", indexPath);
+
+// Serve built JS/CSS chunks explicitly first (/assets/*)
+app.use("/assets", express.static(assetsPath));
+
+// Other static files from dist (favicon, index.html, etc.)
 app.use(express.static(clientDistPath));
 
-// SPA fallback: do not return index.html for hashed assets or other file-like paths (avoids wrong MIME / 500).
+// SPA fallback only for non-file, non-api routes
 app.get("*", (req, res, next) => {
   if (
     req.path.startsWith("/api") ||
     req.path.startsWith("/health") ||
     req.path.startsWith("/assets") ||
-    req.path.includes(".")
+    path.extname(req.path)
   ) {
     return next();
   }
@@ -1646,7 +1656,17 @@ app.get("*", (req, res, next) => {
   });
 });
 
+// 404 for unknown file/api routes
+app.use((req, res) => {
+  res.status(404).json({ message: "Not found" });
+});
+
+// Error handler
+app.use((err, req, res, next) => {
+  console.error("Server error:", err);
+  res.status(500).json({ message: "Internal server error" });
+});
+
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
-  console.log(`Serving frontend from: ${clientDistPath}`);
 });
