@@ -1,5 +1,6 @@
 const express = require("express");
 const path = require("path");
+const fs = require("fs");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const bcrypt = require("bcryptjs");
@@ -1627,19 +1628,25 @@ app.post("/admin/issues/:id/reply", (req, res) => {
 });
 
 // Serve React (Vite build) — MUST be registered after all API routes so /auth/*, /cart, etc. still work.
-const clientDistPath = path.resolve(__dirname, "../client/dist");
+// Prefer project root (Render / npm start from repo root); fall back to path next to this file.
+const clientDistFromCwd = path.resolve(process.cwd(), "client/dist");
+const clientDistFromFile = path.resolve(__dirname, "../client/dist");
+const clientDistPath = fs.existsSync(path.join(clientDistFromCwd, "index.html"))
+  ? clientDistFromCwd
+  : clientDistFromFile;
 const assetsPath = path.join(clientDistPath, "assets");
 const indexPath = path.join(clientDistPath, "index.html");
 
+console.log("cwd:", process.cwd());
 console.log("clientDistPath:", clientDistPath);
-console.log("assetsPath:", assetsPath);
-console.log("indexPath:", indexPath);
+console.log("assetsPath exists:", fs.existsSync(assetsPath));
+console.log("indexPath exists:", fs.existsSync(indexPath));
 
 // Serve built JS/CSS chunks explicitly first (/assets/*)
-app.use("/assets", express.static(assetsPath));
+app.use("/assets", express.static(assetsPath, { fallthrough: false }));
 
 // Other static files from dist (favicon, index.html, etc.)
-app.use(express.static(clientDistPath));
+app.use(express.static(clientDistPath, { fallthrough: false }));
 
 // SPA fallback only for non-file, non-api routes
 app.get("*", (req, res, next) => {
@@ -1664,7 +1671,9 @@ app.use((req, res) => {
 // Error handler
 app.use((err, req, res, next) => {
   console.error("Server error:", err);
-  res.status(500).json({ message: "Internal server error" });
+  res.status(err.status || 500).json({
+    message: err.message || "Internal server error",
+  });
 });
 
 app.listen(PORT, "0.0.0.0", () => {
