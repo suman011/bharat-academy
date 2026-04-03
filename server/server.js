@@ -441,31 +441,12 @@ async function sendEnrollmentEmailForOrder(user, order, opts = {}) {
   return sendEnrollmentEmail({ to: user.email, subject, html });
 }
 
-app.get("/", (req, res) => {
-  // If the frontend build exists, serve it instead of plain text.
-  // (In dev, the Vite dev server serves the frontend separately.)
-  res.redirect("/health");
-});
-
 app.get("/auth/status", (req, res) => {
   res.json({
     ok: true,
     smtpConfigured: Boolean(transporter),
     clientOrigins: CLIENT_ORIGINS,
   });
-});
-
-// ---------------- Serve React (Vite build) ----------------
-const clientDistPath = path.join(__dirname, "../client/dist");
-app.use(express.static(clientDistPath));
-
-// For React Router routes: serve index.html on refresh/deep links.
-// Keep API routes returning JSON 404s.
-app.get("*", (req, res) => {
-  if (req.path.startsWith("/api")) {
-    return res.status(404).json({ ok: false, error: "API route not found" });
-  }
-  return res.sendFile(path.join(clientDistPath, "index.html"));
 });
 
 app.get("/auth/me", (req, res) => {
@@ -1644,6 +1625,16 @@ app.post("/admin/issues/:id/reply", (req, res) => {
   })().catch((err) => res.status(500).json({ ok: false, error: err?.message || "Failed." }));
 });
 
-app.listen(PORT, () => {
+// Serve React (Vite build) — MUST be registered after all API routes so /auth/*, /cart, etc. still work.
+const clientDistPath = path.join(__dirname, "../client/dist");
+app.use(express.static(clientDistPath));
+app.get("*", (req, res) => {
+  if (req.path.startsWith("/api")) {
+    return res.status(404).json({ ok: false, error: "API route not found" });
+  }
+  return res.sendFile(path.join(clientDistPath, "index.html"));
+});
+
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
 });
