@@ -442,7 +442,9 @@ async function sendEnrollmentEmailForOrder(user, order, opts = {}) {
 }
 
 app.get("/", (req, res) => {
-  res.send("Course Academy API is running");
+  // If the frontend build exists, serve it instead of plain text.
+  // (In dev, the Vite dev server serves the frontend separately.)
+  res.redirect("/health");
 });
 
 app.get("/auth/status", (req, res) => {
@@ -451,6 +453,19 @@ app.get("/auth/status", (req, res) => {
     smtpConfigured: Boolean(transporter),
     clientOrigins: CLIENT_ORIGINS,
   });
+});
+
+// ---------------- Serve React (Vite build) ----------------
+const clientDistPath = path.join(__dirname, "../client/dist");
+app.use(express.static(clientDistPath));
+
+// For React Router routes: serve index.html on refresh/deep links.
+// Keep API routes returning JSON 404s.
+app.get("*", (req, res) => {
+  if (req.path.startsWith("/api")) {
+    return res.status(404).json({ ok: false, error: "API route not found" });
+  }
+  return res.sendFile(path.join(clientDistPath, "index.html"));
 });
 
 app.get("/auth/me", (req, res) => {
