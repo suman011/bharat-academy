@@ -19,7 +19,8 @@ app.use(cookieParser());
 const prisma = new PrismaClient();
 
 const CLIENT_ORIGINS = String(
-  process.env.CLIENT_ORIGIN || "http://localhost:5173,http://localhost:3000,http://localhost:3002,http://localhost:8080"
+  process.env.CLIENT_ORIGIN ||
+    "http://localhost:5173,http://localhost:3000,http://localhost:3002,http://localhost:8080,https://bharat-academy.onrender.com"
 )
   .split(",")
   .map((s) => s.trim())
@@ -28,18 +29,25 @@ const CLIENT_ORIGINS = String(
 app.use(
   cors({
     origin(origin, cb) {
+      // No Origin: non-browser, curl, or some same-site requests — allow.
       if (!origin) return cb(null, true);
-      // Allow any local dev origin (localhost / 127.0.0.1) so `dist/` + direct API calls work.
       try {
         const u = new URL(origin);
+        // Local dev (Vite, etc.)
         if (u.protocol === "http:" && (u.hostname === "localhost" || u.hostname === "127.0.0.1")) {
+          return cb(null, true);
+        }
+        // Render (and preview URLs under *.onrender.com)
+        if (u.protocol === "https:" && u.hostname.endsWith(".onrender.com")) {
           return cb(null, true);
         }
       } catch {
         // ignore
       }
       if (CLIENT_ORIGINS.includes(origin)) return cb(null, true);
-      return cb(new Error(`CORS blocked origin: ${origin}`));
+      // Do not pass Error — that becomes a 500. Reflect CORS denial without throwing.
+      console.warn(`[CORS] Blocked origin: ${origin}`);
+      return cb(null, false);
     },
     credentials: true,
   })
