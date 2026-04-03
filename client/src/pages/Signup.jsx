@@ -1,15 +1,25 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import {
+  PHONE_COUNTRIES,
+  DEFAULT_PHONE_COUNTRY_KEY,
+  dialFromPhoneCountryKey,
+  formatPhoneCountryOption,
+  toPhoneCountryKey,
+} from "../data/countryCallingCodes";
 import { signup } from "../utils/authStore";
 
 export default function Signup() {
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phoneCountryKey, setPhoneCountryKey] = useState(DEFAULT_PHONE_COUNTRY_KEY);
   const [mobile, setMobile] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const selectedDial = dialFromPhoneCountryKey(phoneCountryKey);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -17,7 +27,9 @@ export default function Signup() {
     setLoading(true);
 
     try {
-      await signup({ name, email, mobile, password });
+      const digits = String(mobile || "").replace(/\D/g, "");
+      const mobileForApi = digits.length > 0 ? `${selectedDial}${digits}` : "";
+      await signup({ name, email, mobile: mobileForApi, password });
       navigate("/courses");
     } catch (err) {
       setError(err?.message || "Could not create account.");
@@ -57,12 +69,29 @@ export default function Signup() {
               </label>
 
               <label className="auth-field">
-                <span className="auth-label">Mobile (optional)</span>
-                <input
-                  value={mobile}
-                  onChange={(e) => setMobile(e.target.value)}
-                  placeholder="+91 9876543210"
-                />
+                <span className="auth-label">Mobile number</span>
+                <div className="auth-mobile-row">
+                  <select
+                    className="auth-mobile-select"
+                    value={phoneCountryKey}
+                    onChange={(e) => setPhoneCountryKey(e.target.value)}
+                    aria-label="Country calling code"
+                  >
+                    {PHONE_COUNTRIES.map((c) => (
+                      <option key={toPhoneCountryKey(c)} value={toPhoneCountryKey(c)}>
+                        {formatPhoneCountryOption(c)}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    value={mobile}
+                    onChange={(e) => setMobile(e.target.value.replace(/\D/g, "").slice(0, 15))}
+                    placeholder={selectedDial === "+91" ? "10-digit number" : "National number"}
+                    inputMode="numeric"
+                    autoComplete="tel-national"
+                    aria-label="Mobile number without country code"
+                  />
+                </div>
               </label>
 
               <label className="auth-field">
@@ -99,4 +128,3 @@ export default function Signup() {
     </section>
   );
 }
-

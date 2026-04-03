@@ -1,6 +1,13 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaLaptopCode, FaBrain, FaUserGraduate, FaShieldAlt } from "react-icons/fa";
+import {
+  PHONE_COUNTRIES,
+  DEFAULT_PHONE_COUNTRY_KEY,
+  dialFromPhoneCountryKey,
+  formatPhoneCountryOption,
+  toPhoneCountryKey,
+} from "../data/countryCallingCodes";
 import { industry40Categories, INDUSTRY40_CATEGORY_COUNT } from "../data/industry40Catalog";
 import { courseCategories, IT_CORE_CATEGORY_COUNT } from "../data/courses";
 import CourseCategoryCard from "../components/CourseCategoryCard";
@@ -20,7 +27,7 @@ export default function Home() {
     lastName: "",
     companyName: "",
     email: "",
-    phoneCountryCode: "+91",
+    phoneCountryKey: DEFAULT_PHONE_COUNTRY_KEY,
     phone: "",
     notes: "",
   });
@@ -40,7 +47,8 @@ export default function Home() {
   const [demoResult, setDemoResult] = useState(null);
 
   const phoneDigits = String(demoForm.phone || "").replace(/\D/g, "");
-  const fullMobile = `${demoForm.phoneCountryCode}${phoneDigits}`;
+  const selectedDial = dialFromPhoneCountryKey(demoForm.phoneCountryKey);
+  const fullMobile = `${selectedDial}${phoneDigits}`;
 
   return (
     <>
@@ -63,6 +71,29 @@ export default function Home() {
           </div>
 
           <div className="hero-panel theme-chips-reveal">
+            <div className="hero-panel-book-demo">
+              <a href="#book-demo" className="book-demo-pill-btn">
+                <span className="book-demo-pill-btn__orb" aria-hidden="true">
+                  <svg
+                    className="book-demo-pill-btn__arrow"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M5 12h14m-6-6 6 6-6 6"
+                      stroke="currentColor"
+                      strokeWidth="1.75"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </span>
+                <span className="book-demo-pill-btn__text">Book a demo</span>
+              </a>
+            </div>
             <div className="feature-chip"><FaLaptopCode /> Full Stack & Programming</div>
             <div className="feature-chip"><FaBrain /> AI & Future Technology</div>
             <div className="feature-chip"><FaShieldAlt /> Security & API Skills</div>
@@ -188,7 +219,7 @@ export default function Home() {
       </section>
 
       {/* Course demo lead section (Home only) */}
-      <section className="demo-lead-section" aria-label="Course demo request">
+      <section className="demo-lead-section" id="book-demo" aria-label="Course demo request">
         <div className="container">
           <div className="demo-lead-grid">
             <div className="demo-lead-copy">
@@ -272,58 +303,30 @@ export default function Home() {
                   />
                 </label>
                 <label className="demo-field demo-field--full">
-                  <span className="demo-label">Phone number *</span>
-                  <div style={{ display: "flex", gap: 10 }}>
+                  <span className="demo-label">
+                    Mobile number <span className="demo-required-star" aria-hidden="true">*</span>
+                  </span>
+                  <div className="demo-phone-row">
                     <select
-                      value={demoForm.phoneCountryCode}
-                      onChange={(e) => setDemoForm((p) => ({ ...p, phoneCountryCode: e.target.value }))}
-                      style={{
-                        width: 120,
-                        borderRadius: 14,
-                        border: "1px solid rgba(15,23,42,0.12)",
-                        padding: "12px 10px",
-                        background: "#fff",
-                        color: "#0f172a",
-                        fontFamily: "inherit",
-                        outline: "none",
-                      }}
-                      aria-label="Country code"
+                      className="demo-phone-cc"
+                      value={demoForm.phoneCountryKey}
+                      onChange={(e) => setDemoForm((p) => ({ ...p, phoneCountryKey: e.target.value }))}
+                      aria-label="Country calling code"
                     >
-                      <option value="+91">+91 (India)</option>
-                      <option value="+1">+1 (USA/Canada)</option>
-                      <option value="+44">+44 (UK)</option>
-                      <option value="+971">+971 (UAE)</option>
-                      <option value="+966">+966 (Saudi Arabia)</option>
-                      <option value="+65">+65 (Singapore)</option>
-                      <option value="+60">+60 (Malaysia)</option>
-                      <option value="+61">+61 (Australia)</option>
-                      <option value="+64">+64 (New Zealand)</option>
-                      <option value="+81">+81 (Japan)</option>
-                      <option value="+49">+49 (Germany)</option>
-                      <option value="+33">+33 (France)</option>
-                      <option value="+34">+34 (Spain)</option>
-                      <option value="+39">+39 (Italy)</option>
-                      <option value="+31">+31 (Netherlands)</option>
-                      <option value="+46">+46 (Sweden)</option>
-                      <option value="+47">+47 (Norway)</option>
-                      <option value="+420">+420 (Czechia)</option>
-                      <option value="+55">+55 (Brazil)</option>
-                      <option value="+27">+27 (South Africa)</option>
-                      <option value="+234">+234 (Nigeria)</option>
-                      <option value="+254">+254 (Kenya)</option>
-                      <option value="+880">+880 (Bangladesh)</option>
-                      <option value="+92">+92 (Pakistan)</option>
-                      <option value="+93">+93 (Afghanistan)</option>
-                      <option value="+86">+86 (China)</option>
-                      <option value="+82">+82 (South Korea)</option>
+                      {PHONE_COUNTRIES.map((c) => (
+                        <option key={toPhoneCountryKey(c)} value={toPhoneCountryKey(c)}>
+                          {formatPhoneCountryOption(c)}
+                        </option>
+                      ))}
                     </select>
                     <input
+                      className="demo-phone-national"
                       value={demoForm.phone}
                       onChange={(e) => setDemoForm((p) => ({ ...p, phone: e.target.value }))}
-                      placeholder="9XXXXXXXXX"
-                      autoComplete="tel"
+                      placeholder={selectedDial === "+91" ? "10-digit number" : "National number"}
+                      autoComplete="tel-national"
+                      inputMode="tel"
                       required
-                      style={{ flex: 1 }}
                     />
                   </div>
                 </label>
@@ -400,7 +403,7 @@ export default function Home() {
                       lastName: "",
                       companyName: "",
                       email: "",
-                      phoneCountryCode: "+91",
+                      phoneCountryKey: DEFAULT_PHONE_COUNTRY_KEY,
                       phone: "",
                       notes: "",
                     });

@@ -1,5 +1,12 @@
 import React, { useState } from "react";
 import { FaEnvelope, FaGlobe, FaPhoneAlt, FaWhatsapp } from "react-icons/fa";
+import {
+  PHONE_COUNTRIES,
+  DEFAULT_PHONE_COUNTRY_KEY,
+  dialFromPhoneCountryKey,
+  formatPhoneCountryOption,
+  toPhoneCountryKey,
+} from "../data/countryCallingCodes";
 
 const ENQUIRY_PHONE_TEL = "+919309399799";
 const ENQUIRY_PHONE_DISPLAY = "+91 93093 99799";
@@ -14,59 +21,8 @@ const WHATSAPP_URL = `https://wa.me/919309399799?text=${encodeURIComponent(
   "Hi, I would like to enquire about courses at Bharat Skill Development Academy."
 )}`;
 
-/** iso = ISO 3166-1 alpha-2 for display; code = E.164 country calling code */
-const DIAL_OPTIONS = [
-  { iso: "IN", code: "+91", label: "India" },
-  { iso: "PK", code: "+92", label: "Pakistan" },
-  { iso: "BD", code: "+880", label: "Bangladesh" },
-  { iso: "NP", code: "+977", label: "Nepal" },
-  { iso: "LK", code: "+94", label: "Sri Lanka" },
-  { iso: "US", code: "+1", label: "US / CA" },
-  { iso: "GB", code: "+44", label: "UK" },
-  { iso: "AE", code: "+971", label: "UAE" },
-  { iso: "SA", code: "+966", label: "Saudi Arabia" },
-  { iso: "OM", code: "+968", label: "Oman" },
-  { iso: "QA", code: "+974", label: "Qatar" },
-  { iso: "KW", code: "+965", label: "Kuwait" },
-  { iso: "BH", code: "+973", label: "Bahrain" },
-  { iso: "SG", code: "+65", label: "Singapore" },
-  { iso: "MY", code: "+60", label: "Malaysia" },
-  { iso: "ID", code: "+62", label: "Indonesia" },
-  { iso: "PH", code: "+63", label: "Philippines" },
-  { iso: "TH", code: "+66", label: "Thailand" },
-  { iso: "VN", code: "+84", label: "Vietnam" },
-  { iso: "CN", code: "+86", label: "China" },
-  { iso: "JP", code: "+81", label: "Japan" },
-  { iso: "KR", code: "+82", label: "South Korea" },
-  { iso: "AU", code: "+61", label: "Australia" },
-  { iso: "NZ", code: "+64", label: "New Zealand" },
-  { iso: "DE", code: "+49", label: "Germany" },
-  { iso: "FR", code: "+33", label: "France" },
-  { iso: "IT", code: "+39", label: "Italy" },
-  { iso: "ES", code: "+34", label: "Spain" },
-  { iso: "NL", code: "+31", label: "Netherlands" },
-  { iso: "BE", code: "+32", label: "Belgium" },
-  { iso: "CH", code: "+41", label: "Switzerland" },
-  { iso: "AT", code: "+43", label: "Austria" },
-  { iso: "SE", code: "+46", label: "Sweden" },
-  { iso: "PL", code: "+48", label: "Poland" },
-  { iso: "TR", code: "+90", label: "Turkey" },
-  { iso: "RU", code: "+7", label: "Russia" },
-  { iso: "GR", code: "+30", label: "Greece" },
-  { iso: "PT", code: "+351", label: "Portugal" },
-  { iso: "IE", code: "+353", label: "Ireland" },
-  { iso: "IL", code: "+972", label: "Israel" },
-  { iso: "ZA", code: "+27", label: "South Africa" },
-  { iso: "NG", code: "+234", label: "Nigeria" },
-  { iso: "KE", code: "+254", label: "Kenya" },
-  { iso: "EG", code: "+20", label: "Egypt" },
-  { iso: "BR", code: "+55", label: "Brazil" },
-  { iso: "MX", code: "+52", label: "Mexico" },
-  { iso: "AR", code: "+54", label: "Argentina" },
-];
-
 export default function Contact() {
-  const [dialCode, setDialCode] = useState("+91");
+  const [phoneCountryKey, setPhoneCountryKey] = useState(DEFAULT_PHONE_COUNTRY_KEY);
   const [formData, setFormData] = useState({
     name: "",
     mobile: "",
@@ -109,7 +65,7 @@ export default function Contact() {
         },
         body: JSON.stringify({
           name: formData.name,
-          mobile: `${dialCode} ${formData.mobile}`.trim(),
+          mobile: `${dialFromPhoneCountryKey(phoneCountryKey)} ${formData.mobile}`.trim(),
           email: formData.email,
           message: formData.message,
           _subject: `[Website] Course enquiry — ${formData.name}`,
@@ -262,13 +218,13 @@ export default function Contact() {
                 <div className="contact-phone-row">
                   <select
                     className="contact-phone-row__dial"
-                    value={dialCode}
-                    onChange={(e) => setDialCode(e.target.value)}
+                    value={phoneCountryKey}
+                    onChange={(e) => setPhoneCountryKey(e.target.value)}
                     aria-label="Country calling code"
                   >
-                    {DIAL_OPTIONS.map((o) => (
-                      <option key={`${o.iso}-${o.code}`} value={o.code}>
-                        {o.iso} {o.code} · {o.label}
+                    {PHONE_COUNTRIES.map((c) => (
+                      <option key={toPhoneCountryKey(c)} value={toPhoneCountryKey(c)}>
+                        {formatPhoneCountryOption(c)}
                       </option>
                     ))}
                   </select>
@@ -279,7 +235,7 @@ export default function Contact() {
                     className="contact-phone-row__number"
                     value={formData.mobile}
                     onChange={handleMobileDigits}
-                    placeholder={dialCode === "+91" ? "10-digit number" : "Your number"}
+                    placeholder={dialFromPhoneCountryKey(phoneCountryKey) === "+91" ? "10-digit number" : "Your number"}
                     autoComplete="tel-national"
                     required
                     minLength={6}
