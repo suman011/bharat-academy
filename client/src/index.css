@@ -6030,7 +6030,8 @@ a {
 }
 
 .demo-field input,
-.demo-field textarea {
+.demo-field textarea,
+.demo-field select {
   width: 100%;
   border-radius: 14px;
   border: 1px solid rgba(15, 23, 42, 0.12);
@@ -6038,11 +6039,18 @@ a {
   background: #fff;
   color: #0f172a;
   font-family: inherit;
+  font-size: 1rem;
   outline: none;
 }
 
+.demo-field select {
+  cursor: pointer;
+  appearance: auto;
+}
+
 .demo-field input:focus,
-.demo-field textarea:focus {
+.demo-field textarea:focus,
+.demo-field select:focus {
   border-color: rgba(79, 70, 229, 0.75);
   box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
 }

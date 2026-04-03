@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaLaptopCode, FaBrain, FaUserGraduate, FaShieldAlt } from "react-icons/fa";
 import { industry40Categories, INDUSTRY40_CATEGORY_COUNT } from "../data/industry40Catalog";
@@ -7,8 +7,15 @@ import CourseCategoryCard from "../components/CourseCategoryCard";
 import ItCoursesTierGrid from "../components/ItCoursesTierGrid";
 import { apiUrl } from "../utils/apiBase";
 
+const slugify = (name) =>
+  String(name || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
 export default function Home() {
   const [demoForm, setDemoForm] = useState({
+    courseKey: "",
     firstName: "",
     lastName: "",
     companyName: "",
@@ -17,6 +24,18 @@ export default function Home() {
     phone: "",
     notes: "",
   });
+
+  const demoCourseOptions = useMemo(() => {
+    const map = new Map();
+    for (const cat of courseCategories) {
+      for (const item of cat.items || []) {
+        const key = slugify(item.name);
+        if (!key || map.has(key)) continue;
+        map.set(key, { key, label: item.name });
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => a.label.localeCompare(b.label));
+  }, []);
   const [demoSubmitting, setDemoSubmitting] = useState(false);
   const [demoResult, setDemoResult] = useState(null);
 
@@ -190,10 +209,27 @@ export default function Home() {
             <div className="demo-lead-form">
               <div className="demo-lead-form-head">
                 <span className="demo-lead-badge">Course demo</span>
-                <div className="demo-lead-form-course">Choose any course</div>
+                <div className="demo-lead-form-course">Book a live session</div>
               </div>
 
               <div className="demo-form-grid">
+                <label className="demo-field demo-field--full">
+                  <span className="demo-label">Course name *</span>
+                  <select
+                    value={demoForm.courseKey}
+                    onChange={(e) => setDemoForm((p) => ({ ...p, courseKey: e.target.value }))}
+                    required
+                    aria-required="true"
+                  >
+                    <option value="">— Select a course —</option>
+                    {demoCourseOptions.map((o) => (
+                      <option key={o.key} value={o.key}>
+                        {o.label}
+                      </option>
+                    ))}
+                    <option value="__other__">Other / not listed — describe in notes</option>
+                  </select>
+                </label>
                 <label className="demo-field">
                   <span className="demo-label">First name *</span>
                   <input
@@ -322,6 +358,7 @@ export default function Home() {
                 aria-busy={demoSubmitting}
                 disabled={
                   demoSubmitting ||
+                  !demoForm.courseKey ||
                   demoForm.firstName.trim().length < 1 ||
                   demoForm.lastName.trim().length < 1 ||
                   demoForm.companyName.trim().length < 2 ||
@@ -333,7 +370,16 @@ export default function Home() {
                   setDemoResult(null);
                   try {
                     const name = `${demoForm.firstName} ${demoForm.lastName}`.trim();
-                    const message = `Course demo request\n\nCompany: ${demoForm.companyName}\nEmail: ${demoForm.email}\nPhone: ${fullMobile}\n\nNotes:\n${demoForm.notes || ""}`;
+                    const courseLabel =
+                      demoForm.courseKey === "__other__"
+                        ? "Other / not listed (see notes)"
+                        : demoCourseOptions.find((o) => o.key === demoForm.courseKey)?.label ||
+                          demoForm.courseKey;
+                    const apiCourseKey =
+                      demoForm.courseKey && demoForm.courseKey !== "__other__"
+                        ? demoForm.courseKey
+                        : null;
+                    const message = `Course demo request\n\nCourse: ${courseLabel}\nCompany: ${demoForm.companyName}\nEmail: ${demoForm.email}\nPhone: ${fullMobile}\n\nNotes:\n${demoForm.notes || ""}`;
                     const res = await fetch(apiUrl("/leads/callback"), {
                       method: "POST",
                       credentials: "include",
@@ -341,6 +387,7 @@ export default function Home() {
                       body: JSON.stringify({
                         name,
                         mobile: fullMobile,
+                        courseKey: apiCourseKey,
                         message,
                       }),
                     });
@@ -348,6 +395,7 @@ export default function Home() {
                     if (!res.ok || !data.ok) throw new Error(data.error || "Demo request failed.");
                     setDemoResult({ ok: true, message: "Demo request submitted. We will contact you soon." });
                     setDemoForm({
+                      courseKey: "",
                       firstName: "",
                       lastName: "",
                       companyName: "",
