@@ -11,6 +11,17 @@ const { PrismaClient } = require("@prisma/client");
 // Always load server/.env; override so values here win over stale Windows env vars
 require("dotenv").config({ path: path.join(__dirname, ".env"), override: true });
 
+const dbUrl = String(process.env.DATABASE_URL || "").trim();
+if (!dbUrl) {
+  const hint =
+    "Set DATABASE_URL to your PostgreSQL connection string (Render: Web Service → Environment, or link a Render Postgres and use the Internal/External URL).";
+  if (process.env.NODE_ENV === "production") {
+    console.error(`[FATAL] ${hint}`);
+    process.exit(1);
+  }
+  console.warn(`[warn] DATABASE_URL missing — ${hint}`);
+}
+
 const app = express();
 if (process.env.NODE_ENV === "production") {
   app.set("trust proxy", 1);
