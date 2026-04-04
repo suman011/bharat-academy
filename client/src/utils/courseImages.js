@@ -46,7 +46,7 @@ const BY_COURSE_NAME = {
 
   "machine learning basics": `https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?${q}`,
   "full stack developer program (3-6 months)": `https://images.unsplash.com/photo-1627398242454-45a1465c2479?${q}`,
-  "data science master program": `https://images.unsplash.com/photo-1551288049-bebda4e38f71?${q}`,
+  "data science master program": `https://images.unsplash.com/photo-1522071820081-009f0129c71c?${q}`,
   "ai + machine learning with projects": `https://images.unsplash.com/photo-1620712943543-bcc4688e7485?${q}`,
 
   "cyber security fundamentals": `https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?${q}`,
@@ -79,6 +79,47 @@ const BY_COURSE_NAME = {
   "developer package (html + css + js + react)": `https://images.unsplash.com/photo-1461749280684-dccba630e2f6?${q}`,
   "pro package (dsa + full stack + projects)": `https://images.unsplash.com/photo-1515879218367-8466d910aaa4?${q}`,
 };
+
+/** Automation & robotics catalog — one distinct cover per title (URLs verified). */
+const INDUSTRY_COURSE_COVERS = {
+  "introduction to automation and robotics": `https://images.unsplash.com/photo-1581092160562-40aa08e78837?${q}`,
+  "smart manufacturing basics": `https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?${q}`,
+  "basics of automation & control systems": `https://images.unsplash.com/photo-1503387762-592deb58ef4e?${q}`,
+  "sensors & actuators fundamentals": `https://images.unsplash.com/photo-1518709268805-4e9042af2176?${q}`,
+  "industrial safety & standards": `https://images.unsplash.com/photo-1504307651254-35680f356dfd?${q}`,
+  "electrical & electronics basics for automation": `https://images.unsplash.com/photo-1581094794329-c8112a89af12?${q}`,
+  "basics of plc (introduction)": `https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?${q}`,
+  "introduction to robotics & automation": `https://images.unsplash.com/photo-1617791160505-6f00504e3519?${q}`,
+  "basics of iot (internet of things)": `https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?${q}`,
+  "plc programming (siemens / allen bradley basics)": `https://images.unsplash.com/photo-1518770660439-4636190af475?${q}`,
+  "scada systems & hmi development": `https://images.unsplash.com/photo-1661956602116-aa6865609028?${q}`,
+  "industrial instrumentation": `https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?${q}`,
+  "industrial iot (iiot) with arduino / raspberry pi": `https://images.unsplash.com/photo-1581092334651-ddf26d9a09d0?${q}`,
+  "robotics programming (basic level)": `https://images.unsplash.com/photo-1498050108023-c5249f4df085?${q}`,
+  "mechatronics systems": `https://images.unsplash.com/photo-1518770660439-4636190af475?${q}`,
+  "data acquisition & monitoring systems": `https://images.unsplash.com/photo-1551288049-bebda4e38f71?${q}`,
+  "industrial communication protocols (modbus, opc)": `https://images.unsplash.com/photo-1555066931-4365d14bab8c?${q}`,
+  "python for industrial applications": `https://images.unsplash.com/photo-1526379095098-d400fd0bf935?${q}`,
+  "advanced sensors & signal processing": `https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?${q}`,
+  "introduction to machine vision systems": `https://images.unsplash.com/photo-1677442136019-21780ecad995?${q}`,
+  "lean manufacturing & six sigma basics": `https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?${q}`,
+  "production planning & smart factory concepts": `https://images.unsplash.com/photo-1552664730-d307ca884978?${q}`,
+  "ai & machine learning for manufacturing": `https://images.unsplash.com/photo-1620712943543-bcc4688e7485?${q}`,
+  "advanced plc programming (pid, networking)": `https://images.unsplash.com/photo-1605745341112-85968b19335b?${q}`,
+  "advanced scada & industrial automation": `https://images.unsplash.com/photo-1555066931-4365d14bab8c?${q}`,
+  "industrial robotics (fanuc / abb / kuka)": `https://images.unsplash.com/photo-1611532736597-de2d4265fba3?${q}`,
+  "cobot programming & applications": `https://images.unsplash.com/photo-1614624532983-4ce03382d63d?${q}`,
+  "machine vision & vision ai (opencv / ai models)": `https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?${q}`,
+  "predictive maintenance systems (ai-based)": `https://images.unsplash.com/photo-1451187580459-43490279c0fa?${q}`,
+  "digital twin technology": `https://images.unsplash.com/photo-1627398242454-45a1465c2479?${q}`,
+  "industrial iot architecture (mqtt, opc-ua)": `https://images.unsplash.com/photo-1544197150-b99a580bb7a8?${q}`,
+  "edge computing in manufacturing": `https://images.unsplash.com/photo-1544383835-bda2bc66a55d?${q}`,
+  "advanced data analytics for manufacturing": `https://images.unsplash.com/photo-1460925895917-afdab827c52f?${q}`,
+  "amr / agv systems (autonomous robots)": `https://images.unsplash.com/photo-1485827404703-89b55fcc595e?${q}`,
+  "automation and robotics capstone project (real use case)": `https://images.unsplash.com/photo-1517694712202-14dd9538aa97?${q}`,
+};
+
+const BY_COURSE_NAME_MERGED = { ...BY_COURSE_NAME, ...INDUSTRY_COURSE_COVERS };
 
 const DEFAULT = `https://images.unsplash.com/photo-1498050108023-c5249f4df085?${q}`;
 
@@ -149,11 +190,14 @@ const KEYWORD_FALLBACK = [
   },
   {
     test: (n) =>
-      n.includes("automation") ||
-      n.includes("control systems") ||
-      n.includes("control ") ||
-      n.includes("controller"),
-    url: `https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?${q}`,
+      (n.includes("automation") ||
+        n.includes("control systems") ||
+        n.includes("controller") ||
+        (n.includes("control") && n.includes("system"))) &&
+      !n.includes("robot") &&
+      !n.includes("plc") &&
+      !n.includes("scada"),
+    url: `https://images.unsplash.com/photo-1503387762-592deb58ef4e?${q}`,
   },
   {
     test: (n) =>
@@ -163,15 +207,16 @@ const KEYWORD_FALLBACK = [
       n.includes("transmitter") ||
       n.includes("signal processing") ||
       n.includes("vibration"),
-    url: `https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?${q}`,
+    url: `https://images.unsplash.com/photo-1518709268805-4e9042af2176?${q}`,
   },
   {
     test: (n) => n.includes("safety") || n.includes("standards") || n.includes("loto"),
     url: `https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?${q}`,
   },
   {
-    test: (n) => n.includes("electrical") || n.includes("electronics") || n.includes("power"),
-    url: `https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?${q}`,
+    test: (n) =>
+      (n.includes("electrical") || n.includes("electronics")) && n.includes("industrial"),
+    url: `https://images.unsplash.com/photo-1581094794329-c8112a89af12?${q}`,
   },
   {
     test: (n) => n.includes("digital skills") || n.includes("smart industry") || n.includes("smart industries"),
@@ -262,28 +307,7 @@ const KEYWORD_FALLBACK = [
   },
 
   {
-    test: (n) =>
-      n.includes("industry 4.0") ||
-      n.includes("automation and robotics") ||
-      n.includes("plc") ||
-      n.includes("scada") ||
-      n.includes("iiot") ||
-      n.includes("modbus") ||
-      n.includes("opc-ua") ||
-      n.includes("opc ua") ||
-      n.includes("smart factory") ||
-      n.includes("smart manufacturing") ||
-      n.includes("digital twin") ||
-      n.includes("predictive maintenance") ||
-      n.includes("amr") ||
-      n.includes("agv") ||
-      n.includes("cobot") ||
-      n.includes("fanuc") ||
-      n.includes("abb ") ||
-      n.includes("kuka") ||
-      (n.includes("manufacturing") && (n.includes("analytics") || n.includes("machine learning"))) ||
-      (n.includes("industrial") && (n.includes("robot") || n.includes("iot") || n.includes("cybersecurity") || n.includes("protocol"))) ||
-      (n.includes("machine vision") && n.includes("opencv")),
+    test: (n) => n.includes("industry 4.0") || n.includes("automation and robotics"),
     url: `https://images.unsplash.com/photo-1581092160562-40aa08e78837?${q}`,
   },
   { test: (n) => n.includes("digital literacy") || n.includes("cyber safety"), url: `https://images.unsplash.com/photo-1550751827-4bd374c3f58b?${q}` },
@@ -314,7 +338,7 @@ const IMAGE_VARIANT_PARAMS = {
  */
 export function getCourseImage(courseName, variant = "card") {
   const key = (courseName || "").toLowerCase().trim();
-  let url = BY_COURSE_NAME[key] || null;
+  let url = BY_COURSE_NAME_MERGED[key] || null;
   if (!url) {
     for (const { test, url: u } of KEYWORD_FALLBACK) {
       if (test(key)) {
