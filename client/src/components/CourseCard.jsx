@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaCheckCircle, FaHeart, FaRegHeart, FaTag } from "react-icons/fa";
-import { getCourseImage } from "../utils/courseImages";
+import CourseStickyThumbnail from "./CourseStickyThumbnail";
 import { apiUrl } from "../utils/apiBase";
 import { getCourseKeyPoints } from "../utils/courseKeyPoints";
 
 export default function CourseCard({ course, revealIndex = 0, inWishlist = false, ratingSummary }) {
-  const imageUrl = getCourseImage(course.name);
   const keyPoints = getCourseKeyPoints(course);
   const [wish, setWish] = useState(Boolean(inWishlist));
 
@@ -17,7 +16,7 @@ export default function CourseCard({ course, revealIndex = 0, inWishlist = false
         style={{ "--reveal-delay": `${Math.min(revealIndex, 40) * 0.04}s` }}
       >
         <div className="course-card-image">
-          <img src={imageUrl} alt={course.name} loading="lazy" />
+          <CourseStickyThumbnail courseName={course.name} variant="card" />
           <div className="course-card-overlay" />
           <button
             type="button"
