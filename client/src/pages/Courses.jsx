@@ -35,6 +35,8 @@ export default function Courses() {
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [sortBy, setSortBy] = useState("relevance");
+  /** "" = all, "it" = IT & AI path + more programs, "automation" = Automation & Robotics only */
+  const [trackFilter, setTrackFilter] = useState("");
   const [wishlistKeys, setWishlistKeys] = useState(() => new Set());
   const [ratingMap, setRatingMap] = useState({});
   const [filterAnchorEl, setFilterAnchorEl] = useState(null);
@@ -77,6 +79,15 @@ export default function Courses() {
     const maxW = maxWeeks ? Number(maxWeeks) : null;
     return catalogModules
       .filter((module) => !selectedCategory || module.title === selectedCategory)
+      .filter((module) => {
+        if (trackFilter === "it") {
+          return !industry40Categories.some((c) => c.title === module.title);
+        }
+        if (trackFilter === "automation") {
+          return industry40Categories.some((c) => c.title === module.title);
+        }
+        return true;
+      })
       .map((module) => ({
         ...module,
         items: module.items
@@ -104,7 +115,17 @@ export default function Courses() {
           }),
       }))
       .filter((module) => module.items.length > 0);
-  }, [catalogModules, search, selectedCategory, level, maxWeeks, minPrice, maxPrice, sortBy]);
+  }, [
+    catalogModules,
+    search,
+    selectedCategory,
+    level,
+    maxWeeks,
+    minPrice,
+    maxPrice,
+    sortBy,
+    trackFilter,
+  ]);
 
   const allModuleTitles = useMemo(
     () => courseCategories.map((category) => category.title),
@@ -208,6 +229,7 @@ export default function Courses() {
     setMinPrice("");
     setMaxPrice("");
     setSortBy("relevance");
+    setTrackFilter("");
     setSearch("");
     setSearchParams({});
     setFilterAnchorEl(null);
@@ -239,10 +261,30 @@ export default function Courses() {
     if (minPrice) n += 1;
     if (maxPrice) n += 1;
     if (sortBy && sortBy !== "relevance") n += 1;
+    if (trackFilter) n += 1;
     return n;
-  }, [level, maxWeeks, minPrice, maxPrice, sortBy]);
+  }, [level, maxWeeks, minPrice, maxPrice, sortBy, trackFilter]);
 
-  const totalCourses = filteredModules.reduce((sum, m) => sum + m.items.length, 0);
+  const visibleCourseCount = useMemo(() => {
+    if (!showItThreeColumn) {
+      return filteredModules.reduce((sum, m) => sum + m.items.length, 0);
+    }
+    let n = 0;
+    if (trackFilter === "" || trackFilter === "it") {
+      for (let i = 0; i < IT_CORE_CATEGORY_COUNT; i++) {
+        n += (courseCategories[i]?.items || []).length;
+      }
+    }
+    if (trackFilter === "" || trackFilter === "automation") {
+      for (const c of industry40Categories) {
+        n += (c.items || []).length;
+      }
+    }
+    if ((trackFilter === "" || trackFilter === "it") && extensionModules.length > 0) {
+      n += extensionModules.reduce((sum, m) => sum + m.items.length, 0);
+    }
+    return n;
+  }, [showItThreeColumn, trackFilter, filteredModules, extensionModules]);
 
   return (
     <section className="section-page">
@@ -367,6 +409,20 @@ export default function Courses() {
             }}
           >
             <Grid container spacing={2} aria-label="Advanced filters">
+              <Grid size={12}>
+                <TextField
+                  select
+                  fullWidth
+                  label="Program track"
+                  value={trackFilter}
+                  onChange={(e) => setTrackFilter(e.target.value)}
+                  helperText="Limit the catalog to IT & AI or Automation & Robotics"
+                >
+                  <MenuItem value="">All tracks</MenuItem>
+                  <MenuItem value="it">IT & AI (core levels + more programs)</MenuItem>
+                  <MenuItem value="automation">Automation & Robotics</MenuItem>
+                </TextField>
+              </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
                   select
@@ -475,13 +531,13 @@ export default function Courses() {
           ))}
         </Box>
 
-        {filteredModules.length > 0 ? (
+        {visibleCourseCount > 0 ? (
           <div className="catalog-results-summary" role="status" aria-live="polite" style={{ marginBottom: 22 }}>
-            Showing <strong>{totalCourses}</strong> course{totalCourses === 1 ? "" : "s"}
+            Showing <strong>{visibleCourseCount}</strong> course{visibleCourseCount === 1 ? "" : "s"}
           </div>
         ) : null}
 
-        {showItThreeColumn ? (
+        {showItThreeColumn && (trackFilter === "" || trackFilter === "it") ? (
           <ItCoursesTierGrid
             categories={courseCategories.slice(0, IT_CORE_CATEGORY_COUNT)}
             className="it-courses-block--catalog"
@@ -492,7 +548,7 @@ export default function Courses() {
           />
         ) : null}
 
-        {showItThreeColumn ? (
+        {showItThreeColumn && (trackFilter === "" || trackFilter === "automation") ? (
           <ItCoursesTierGrid
             categories={industry40Categories}
             className="it-courses-block--catalog it-courses-block--i4-after-it"
@@ -503,7 +559,7 @@ export default function Courses() {
           />
         ) : null}
 
-        {showItThreeColumn && extensionModules.length > 0 ? (
+        {showItThreeColumn && (trackFilter === "" || trackFilter === "it") && extensionModules.length > 0 ? (
           <>
             <h2 className="catalog-more-heading">More programs</h2>
             {extensionModules.map((module) => renderModuleSection(module))}
@@ -514,7 +570,7 @@ export default function Courses() {
           ? filteredModules.map((module) => renderModuleSection(module))
           : null}
 
-        {filteredModules.length === 0 ? (
+        {visibleCourseCount === 0 ? (
           <div className="empty-state" role="status" aria-live="polite">
             <div className="empty-state__title">
               {search.trim() ? `No courses found for “${search}”` : "No courses match this filter."}
