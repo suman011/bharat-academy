@@ -382,7 +382,6 @@ export default function Home() {
                       demoForm.courseKey && demoForm.courseKey !== "__other__"
                         ? demoForm.courseKey
                         : null;
-                    const message = `Course demo request\n\nCourse: ${courseLabel}\nCompany: ${demoForm.companyName}\nEmail: ${demoForm.email}\nPhone: ${fullMobile}\n\nNotes:\n${demoForm.notes || ""}`;
                     const res = await fetch(apiUrl("/leads/callback"), {
                       method: "POST",
                       credentials: "include",
@@ -391,7 +390,10 @@ export default function Home() {
                         name,
                         mobile: fullMobile,
                         courseKey: apiCourseKey,
-                        message,
+                        courseLabel,
+                        company: demoForm.companyName.trim(),
+                        leadEmail: demoForm.email.trim(),
+                        notes: demoForm.notes.trim(),
                       }),
                     });
                     const data = await res.json().catch(() => ({}));

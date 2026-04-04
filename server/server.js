@@ -96,6 +96,60 @@ function isEmail(v) {
   return s.includes("@") && s.includes(".");
 }
 
+function escapeHtml(s) {
+  return String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+/** Demo form sends structured fields; callback modals send a single optional message. */
+function buildCallbackStoredMessage({ mobile, rawMessage, courseLabel, company, leadEmail, notes }) {
+  const msg = String(rawMessage || "").trim();
+  const cl = String(courseLabel || "").trim();
+  const co = String(company || "").trim();
+  const em = String(leadEmail || "").trim();
+  const nt = String(notes || "").trim();
+  const hasDemoFields = Boolean(cl || co || em || nt);
+  if (!hasDemoFields) return msg || null;
+
+  const lines = ["Course demo request", ""];
+  if (cl) lines.push(`Course: ${cl}`);
+  if (co) lines.push(`Company: ${co}`);
+  if (em) lines.push(`Email: ${em}`);
+  lines.push(`Phone: ${mobile}`);
+  if (nt) lines.push("", "Notes:", nt);
+  const built = lines.join("\n");
+  if (msg && msg !== built) return `${built}\n\n---\n\n${msg}`;
+  return built;
+}
+
+function buildLeadNotificationHtml({ name, mobile, courseKey, courseLabel, company, leadEmail, notes, extraMessage }) {
+  const courseDisplay = String(courseLabel || "").trim() || String(courseKey || "").trim() || "—";
+  let html = `<div style="font-family:system-ui,-apple-system,sans-serif;line-height:1.55;color:#0f172a;">`;
+  html += `<h2 style="margin:0 0 14px;font-size:18px;">New lead submission</h2>`;
+  html += `<div style="background:#f8fafc;padding:16px 18px;border-radius:10px;border:1px solid #e2e8f0;">`;
+  const row = (label, val) => {
+    const t = String(val ?? "").trim();
+    if (!t) return "";
+    return `<p style="margin:0 0 14px;"><strong style="color:#475569;display:block;margin-bottom:4px;">${escapeHtml(label)}</strong><span style="color:#0f172a;white-space:pre-wrap;">${escapeHtml(t)}</span></p>`;
+  };
+  html += row("Full name", name);
+  html += row("Mobile", mobile);
+  html += row("Course", courseDisplay);
+  html += row("Company", company);
+  html += row("Email", leadEmail);
+  html += row("Notes", notes);
+  const ex = String(extraMessage || "").trim();
+  if (ex) {
+    html += `<p style="margin:0 0 4px;"><strong style="color:#475569;">Message</strong></p>`;
+    html += `<p style="margin:0;white-space:pre-wrap;color:#0f172a;">${escapeHtml(ex)}</p>`;
+  }
+  html += `</div></div>`;
+  return html;
+}
+
 function safeUser(u) {
   return {
     id: u.id,
@@ -815,6 +869,14 @@ const ADMIN_EMAILS = String(process.env.ADMIN_EMAILS || process.env.ADMIN_EMAIL 
   .map((s) => s.trim().toLowerCase())
   .filter(Boolean);
 
+if (!ADMIN_EMAILS.length && isProd) {
+  console.warn(
+    "[config] ADMIN_EMAIL / ADMIN_EMAILS is empty — the Admin navbar link and /api/admin/* will treat everyone as non-admin. Set ADMIN_EMAIL on your host (Render/VPS/etc.); local server/.env is not deployed automatically."
+  );
+} else if (ADMIN_EMAILS.length) {
+  console.log(`[config] Admin allowlist: ${ADMIN_EMAILS.length} address(es) configured.`);
+}
+
 async function requireAdmin(req, res) {
   const user = await requireAuth(req, res);
   if (!user) return null;
@@ -1308,9 +1370,25 @@ app.post("/leads/callback", (req, res) => {
     const name = String(req.body?.name || "").trim();
     const mobile = String(req.body?.mobile || "").trim();
     const courseKey = req.body?.courseKey ? String(req.body.courseKey).trim().toLowerCase() : null;
-    const message = req.body?.message ? String(req.body.message).trim() : null;
+    const rawMessage = req.body?.message != null ? String(req.body.message).trim() : "";
+    const courseLabel = String(req.body?.courseLabel || "").trim();
+    const company = String(req.body?.company || "").trim();
+    const leadEmail = String(req.body?.leadEmail || "").trim();
+    const notes = String(req.body?.notes || "").trim();
     if (!name || name.length < 2) return res.status(400).json({ ok: false, error: "name is required." });
     if (!mobile || mobile.length < 8) return res.status(400).json({ ok: false, error: "mobile is required." });
+
+    const message = buildCallbackStoredMessage({
+      mobile,
+      rawMessage,
+      courseLabel,
+      company,
+      leadEmail,
+      notes,
+    });
+
+    const hasDemoFields = Boolean(courseLabel || company || leadEmail || notes);
+    const extraMessageForMail = hasDemoFields ? "" : rawMessage;
 
     const lead = await prisma.callbackRequest.create({
       data: {
@@ -1324,22 +1402,25 @@ app.post("/leads/callback", (req, res) => {
       select: { id: true, status: true, createdAt: true },
     });
 
-    // Best-effort: email support
+    // Best-effort: email support (field-by-field layout matches the forms)
     try {
       if (transporter) {
         const supportTo = String(process.env.SUPPORT_EMAIL || mailFrom || smtpUser || "support@example.com");
-        const subject = `Callback request: ${name} (${maskMobile(mobile)})`;
-        const html = `
-          <div style="font-family: Arial, sans-serif; line-height:1.6; color:#0f172a;">
-            <h3 style="margin:0 0 10px;">Callback request</h3>
-            <p><strong>Name:</strong> ${name}</p>
-            <p><strong>Mobile:</strong> ${mobile}</p>
-            <p><strong>Course:</strong> ${courseKey || "N/A"}</p>
-            <p><strong>User:</strong> ${maybeUser?.email || "Guest"}</p>
-            <hr/>
-            <p style="white-space:pre-wrap; margin:0;">${message || ""}</p>
-          </div>
-        `;
+        const kind = hasDemoFields ? "Course demo" : "Callback";
+        const subject = `${kind}: ${name} (${maskMobile(mobile)})`;
+        let html = buildLeadNotificationHtml({
+          name,
+          mobile,
+          courseKey,
+          courseLabel,
+          company,
+          leadEmail,
+          notes,
+          extraMessage: extraMessageForMail,
+        });
+        html += `<p style="margin:16px 0 0;font-size:14px;color:#64748b;"><strong>Account on site:</strong> ${escapeHtml(
+          maybeUser?.email || "Guest (not logged in)"
+        )}</p>`;
         await transporter.sendMail({ from: mailFrom, to: supportTo, subject, html });
       }
     } catch {
