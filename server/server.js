@@ -12,6 +12,9 @@ const { PrismaClient } = require("@prisma/client");
 require("dotenv").config({ path: path.join(__dirname, ".env"), override: true });
 
 const app = express();
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+}
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -20,7 +23,7 @@ const prisma = new PrismaClient();
 
 const CLIENT_ORIGINS = String(
   process.env.CLIENT_ORIGIN ||
-    "http://localhost:5173,http://localhost:3000,http://localhost:3002,http://localhost:8080,https://bharat-academy.onrender.com"
+    "http://localhost:5173,http://localhost:3000,http://localhost:3002,http://localhost:8080,https://bharat-academy.onrender.com,https://bharatskillacademy.com,https://www.bharatskillacademy.com"
 )
   .split(",")
   .map((s) => s.trim())
@@ -63,10 +66,13 @@ const JWT_SECRET = process.env.JWT_SECRET || "dev-only-secret-change-me";
 const COOKIE_NAME = process.env.AUTH_COOKIE_NAME || "academy_token";
 
 const isProd = process.env.NODE_ENV === "production";
+// When the SPA is on a different host than this API (e.g. custom domain + Render API),
+// browsers require SameSite=None and Secure for auth cookies on fetch(..., { credentials: "include" }).
+const crossSiteAuth = String(process.env.AUTH_CROSS_SITE || "").trim().toLowerCase() === "true";
 const cookieOptions = {
   httpOnly: true,
-  secure: isProd,
-  sameSite: "lax",
+  secure: crossSiteAuth || isProd,
+  sameSite: crossSiteAuth ? "none" : "lax",
   path: "/",
 };
 
