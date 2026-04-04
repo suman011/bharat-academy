@@ -227,6 +227,10 @@ if (smtpUser && smtpPass && smtpHost) {
         );
       }
     });
+} else {
+  console.warn(
+    "[SMTP] Not configured (set SMTP_HOST, SMTP_USER, SMTP_PASS on this host). Lead saves and enrollments still work, but no emails: password reset, order confirmations, demo/callback alerts."
+  );
 }
 
 async function sendResetEmail({ to, resetUrl }) {
@@ -1403,9 +1407,16 @@ app.post("/leads/callback", (req, res) => {
     });
 
     // Best-effort: email support (field-by-field layout matches the forms)
+    let emailSent = false;
     try {
-      if (transporter) {
-        const supportTo = String(process.env.SUPPORT_EMAIL || mailFrom || smtpUser || "support@example.com");
+      if (!transporter) {
+        console.warn(
+          `[LEADS] Lead saved id=${lead.id} — email not sent (SMTP not configured on server). Add SMTP_HOST, SMTP_USER, SMTP_PASS in your host env (same as local .env).`
+        );
+      } else {
+        const supportTo = String(process.env.SUPPORT_EMAIL || mailFrom || smtpUser || "support@example.com")
+          .trim()
+          .replace(/^["']|["']$/g, "");
         const kind = hasDemoFields ? "Course demo" : "Callback";
         const subject = `${kind}: ${name} (${maskMobile(mobile)})`;
         let html = buildLeadNotificationHtml({
@@ -1421,13 +1432,15 @@ app.post("/leads/callback", (req, res) => {
         html += `<p style="margin:16px 0 0;font-size:14px;color:#64748b;"><strong>Account on site:</strong> ${escapeHtml(
           maybeUser?.email || "Guest (not logged in)"
         )}</p>`;
-        await transporter.sendMail({ from: mailFrom, to: supportTo, subject, html });
+        await transporter.sendMail({ from: mailFrom || smtpUser, to: supportTo, subject, html });
+        emailSent = true;
+        console.log(`[LEADS] Notification email sent for lead id=${lead.id} to=${supportTo}`);
       }
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error(`[LEADS] Lead saved id=${lead.id} but email failed:`, err?.message || err);
     }
 
-    return res.json({ ok: true, lead });
+    return res.json({ ok: true, lead, emailSent });
   })().catch((err) => res.status(500).json({ ok: false, error: err?.message || "Failed." }));
 });
 
