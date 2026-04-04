@@ -264,6 +264,7 @@ const KEYWORD_FALLBACK = [
   {
     test: (n) =>
       n.includes("industry 4.0") ||
+      n.includes("automation and robotics") ||
       n.includes("plc") ||
       n.includes("scada") ||
       n.includes("iiot") ||

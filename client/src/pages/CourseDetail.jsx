@@ -127,7 +127,7 @@ const DOMAIN_LIBRARY = {
   },
   industry40: {
     summary:
-      "Design, integrate, and secure smart manufacturing systems spanning PLC/SCADA, IIoT, robotics, analytics, and Industry 4.0 architectures.",
+      "Design, integrate, and secure smart manufacturing systems spanning PLC/SCADA, IIoT, robotics, analytics, and Automation and Robotics architectures.",
     skills: [
       "Automation & controls",
       "Industrial networks & protocols",
@@ -138,7 +138,7 @@ const DOMAIN_LIBRARY = {
     tools: ["PLC/SCADA stacks", "Industrial networks", "Python & analytics", "Simulators & twins", "Documentation & SOPs"],
     careers: "Automation Engineer, IIoT Engineer, Smart Factory Architect, OT Security Specialist",
     modules: [
-      "Industry 4.0 context & architecture",
+      "Automation and Robotics context & architecture",
       "Automation & integration lab",
       "Data, analytics & visualization",
       "OT security & reliability",
@@ -166,7 +166,7 @@ const DOMAIN_LIBRARY = {
 const detectDomain = (course) => {
   const name = (course.name || "").toLowerCase();
   const cat = (course.category || "").toLowerCase();
-  if (cat.includes("industry 4.0")) return "industry40";
+  if (cat.includes("industry 4.0") || cat.includes("automation and robotics")) return "industry40";
   if (name.includes("security") || name.includes("hacking") || name.includes("testing")) return "security";
   if (name.includes("cloud") || name.includes("devops") || name.includes("aws") || name.includes("ci/cd")) return "cloud_devops";
   if (name.includes("data") || name.includes("machine learning") || name.includes("ai")) return "data_ai";

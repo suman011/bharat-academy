@@ -497,7 +497,7 @@ export default function Courses() {
             categories={industry40Categories}
             className="it-courses-block--catalog it-courses-block--i4-after-it"
             eyebrow="Learning tracks"
-            title="Industry 4.0 courses"
+            title="Automation and Robotics courses"
             lede="Three clear levels — start where you fit, then grow into PLC, SCADA, IIoT, robotics, analytics, OT security, and smart factory architecture."
             layout="rows"
           />

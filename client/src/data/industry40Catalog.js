@@ -1,5 +1,5 @@
 /**
- * Industry 4.0 track: Basic → Intermediate → Advanced.
+ * Automation and Robotics track: Basic → Intermediate → Advanced.
  * Each course includes summary, skills, tools, careers, and 6 curriculum sections for the detail page.
  */
 
@@ -37,18 +37,18 @@ const fin = (topic) => `Recap, assessment & certification readiness — ${topic}
 
 export const industry40Categories = [
   {
-    title: "Basic (Foundation Level – Industry 4.0)",
+    title: "Basic (Foundation Level – Automation and Robotics)",
     color: "i4basic",
     items: [
       course({
-        name: "Introduction to Industry 4.0",
+        name: "Introduction to Automation and Robotics",
         price: 3999,
         weeks: 4,
         level: "Beginner",
         summary:
-          "Build a clear mental model of Industry 4.0: smart factories, data-driven operations, and how digital systems connect people, machines, and supply chains.",
+          "Build a clear mental model of Automation and Robotics: smart factories, data-driven operations, and how digital systems connect people, machines, and supply chains.",
         skills: [
-          "Industry 4.0 pillars & maturity models",
+          "Automation and Robotics pillars & maturity models",
           "Smart factory vocabulary & use cases",
           "OT vs IT awareness",
           "Basic data flow in production",
@@ -62,7 +62,7 @@ export const industry40Categories = [
           "Cyber-physical systems, MES, ERP at a glance",
           "Data, connectivity & KPI thinking on the shop floor",
           "Case studies: global vs Indian manufacturing context",
-          fin("Industry 4.0 foundations"),
+          fin("Automation and Robotics foundations"),
         ],
       }),
       course({
@@ -293,7 +293,7 @@ export const industry40Categories = [
     ],
   },
   {
-    title: "Intermediate (Skill Development – Industry 4.0)",
+    title: "Intermediate (Skill Development – Automation and Robotics)",
     color: "i4intermediate",
     items: [
       course({
@@ -627,7 +627,7 @@ export const industry40Categories = [
     ],
   },
   {
-    title: "Advanced (Professional Level – Industry 4.0)",
+    title: "Advanced (Professional Level – Automation and Robotics)",
     color: "i4advanced",
     items: [
       course({
@@ -1008,7 +1008,7 @@ export const industry40Categories = [
         ],
       }),
       course({
-        name: "Industry 4.0 Capstone Project (Real Use Case)",
+        name: "Automation and Robotics Capstone Project (Real Use Case)",
         price: 27999,
         weeks: 20,
         level: "Expert",
@@ -1022,9 +1022,9 @@ export const industry40Categories = [
           "Executive presentation & roadmap",
         ],
         tools: ["Full stack of prior courses (selectable)", "Project templates", "Demo hardware optional", "Documentation suite"],
-        careers: "Industry 4.0 Consultant, Digital Transformation Lead, Smart Factory Program Manager",
+        careers: "Automation and Robotics Consultant, Digital Transformation Lead, Smart Factory Program Manager",
         prerequisites:
-          "Completion of multiple advanced Industry 4.0 courses or equivalent professional experience; mentor review before enrollment.",
+          "Completion of multiple advanced Automation and Robotics courses or equivalent professional experience; mentor review before enrollment.",
         modules: [
           "Charter, stakeholders & success metrics",
           "Solution architecture & PoC plan",

@@ -112,7 +112,7 @@ export default function Contact() {
             <span className="mini-label">Contact Us</span>
             <h2>Start your admission enquiry</h2>
             <p className="contact-info-panel__lede">
-              Tell us which track you&apos;re interested in — IT, Industry 4.0, job-oriented programs,
+              Tell us which track you&apos;re interested in — IT, Automation and Robotics, job-oriented programs,
               or packages — and we&apos;ll guide you on the next steps.
             </p>
 

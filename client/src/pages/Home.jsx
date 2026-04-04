@@ -59,7 +59,7 @@ export default function Home() {
             <h1>Build your career with modern tech, engineering, and industry-ready skills</h1>
             <p>
               Learn from basics to advanced level with structured courses in computer fundamentals,
-              programming, MERN stack, AI, cyber security, interview preparation, and Industry 4.0.
+              programming, MERN stack, AI, cyber security, interview preparation, and Automation and Robotics.
             </p>
             <div className="hero-actions">
               <Link to="/courses" className="primary-btn">Explore Courses</Link>
@@ -164,7 +164,7 @@ export default function Home() {
             categories={industry40Categories}
             className="it-courses-block--home"
             eyebrow="Learning tracks"
-            title="Industry 4.0 courses"
+            title="Automation and Robotics courses"
             lede="Three clear levels — start where you fit, then grow into PLC, SCADA, IIoT, robotics, analytics, OT security, and smart factory architecture."
             showCourseImages={false}
             layout="rows"
@@ -178,7 +178,7 @@ export default function Home() {
             <span>More programs</span>
             <h2>Specialized tracks, job prep, and packages</h2>
             <p>
-              Premium programs, short-term courses, job-oriented paths, and value bundles — beyond core IT and Industry 4.0 paths.
+              Premium programs, short-term courses, job-oriented paths, and value bundles — beyond core IT and Automation and Robotics paths.
             </p>
           </div>
 
@@ -205,7 +205,7 @@ export default function Home() {
               <li>Industry-oriented technology curriculum</li>
               <li>Practical learning with projects</li>
               <li>Job preparation and interview guidance</li>
-              <li>Future skills in AI, automation, and Industry 4.0</li>
+              <li>Future skills in AI and Automation and Robotics</li>
             </ul>
           </div>
           <div className="why-card accent">
