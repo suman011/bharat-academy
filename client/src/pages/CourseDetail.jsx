@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback, useRef } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   FaArrowLeft,
   FaArrowRight,
@@ -25,6 +25,7 @@ import {
 import { courseCategories } from "../data/courses";
 import CourseStickyThumbnail from "../components/CourseStickyThumbnail";
 import { apiUrl } from "../utils/apiBase";
+import { getCurrentUser, onAuthChanged } from "../utils/authStore";
 import { useCart } from "../context/CartContext";
 import { createPortal } from "react-dom";
 
@@ -282,9 +283,30 @@ export default function CourseDetail() {
   const [callbackSubmitting, setCallbackSubmitting] = useState(false);
   const [callbackResult, setCallbackResult] = useState(null);
   const [alsoBought, setAlsoBought] = useState([]);
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const { add } = useCart();
+  const loginRedirect = `/login?redirect=${encodeURIComponent(location.pathname)}`;
   const tabsSectionRef = useRef(null);
+
+  useEffect(() => {
+    let alive = true;
+    async function refreshUser() {
+      try {
+        const u = await getCurrentUser();
+        if (alive) setUser(u);
+      } catch {
+        if (alive) setUser(null);
+      }
+    }
+    refreshUser();
+    const off = onAuthChanged(() => refreshUser());
+    return () => {
+      alive = false;
+      off();
+    };
+  }, []);
 
   useEffect(() => {
     if (!addedOpen && !issueOpen) return;
@@ -671,13 +693,17 @@ export default function CourseDetail() {
               <button
                 type="button"
                 className="primary-btn cd-overview-buy-now"
-                aria-label="Buy now and go to checkout"
+                aria-label={user ? "Buy now and go to checkout" : "Log in to purchase"}
                 onClick={() => {
+                  if (!user) {
+                    navigate(loginRedirect);
+                    return;
+                  }
                   add(course);
                   navigate("/checkout");
                 }}
               >
-                Buy Now
+                {user ? "Buy Now" : "Log in to buy"}
               </button>
             </div>
           </div>
@@ -1032,40 +1058,52 @@ export default function CourseDetail() {
                   <FaRegHeart aria-hidden className="course-detail-action-icon" />
                 )}
               </button>
-              <button
-                type="button"
-                className="secondary-btn course-buy-now-btn course-buy-now-btn--icon"
-                onClick={() => {
-                  if (hasPendingApplication) {
-                    navigate("/orders");
-                    return;
-                  }
-                  add(course);
-                  setAddedOpen(true);
-                }}
-                title="Add to cart"
-                aria-label="Add course to cart"
-                disabled={hasPendingApplication}
-              >
-                <FaShoppingCart aria-hidden className="course-detail-action-icon" />
-              </button>
-              <button
-                type="button"
-                className="primary-btn course-buy-now-btn course-buy-now-btn--icon"
-                onClick={() => {
-                  if (hasPendingApplication) {
-                    navigate("/orders");
-                    return;
-                  }
-                  add(course);
-                  navigate("/checkout");
-                }}
-                title="Proceed to checkout"
-                aria-label="Proceed to checkout"
-                disabled={hasPendingApplication}
-              >
-                <FaArrowRight aria-hidden className="course-detail-action-icon" />
-              </button>
+              {user ? (
+                <>
+                  <button
+                    type="button"
+                    className="secondary-btn course-buy-now-btn course-buy-now-btn--icon"
+                    onClick={() => {
+                      if (hasPendingApplication) {
+                        navigate("/orders");
+                        return;
+                      }
+                      add(course);
+                      setAddedOpen(true);
+                    }}
+                    title="Add to cart"
+                    aria-label="Add course to cart"
+                    disabled={hasPendingApplication}
+                  >
+                    <FaShoppingCart aria-hidden className="course-detail-action-icon" />
+                  </button>
+                  <button
+                    type="button"
+                    className="primary-btn course-buy-now-btn course-buy-now-btn--icon"
+                    onClick={() => {
+                      if (hasPendingApplication) {
+                        navigate("/orders");
+                        return;
+                      }
+                      add(course);
+                      navigate("/checkout");
+                    }}
+                    title="Proceed to checkout"
+                    aria-label="Proceed to checkout"
+                    disabled={hasPendingApplication}
+                  >
+                    <FaArrowRight aria-hidden className="course-detail-action-icon" />
+                  </button>
+                </>
+              ) : (
+                <Link
+                  to={loginRedirect}
+                  className="primary-btn course-buy-now-btn course-buy-now-btn--login-cta"
+                  title="Log in to add courses to cart and checkout"
+                >
+                  Log in to buy
+                </Link>
+              )}
               <button
                 type="button"
                 className="secondary-btn course-buy-now-btn course-buy-now-btn--icon"

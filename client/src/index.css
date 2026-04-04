@@ -4814,6 +4814,13 @@ a {
   gap: 0;
 }
 
+a.course-buy-now-btn--login-cta.primary-btn {
+  text-decoration: none;
+  min-height: 46px;
+  padding: 0 16px;
+  font-size: 0.88rem;
+}
+
 .course-detail-action-icon {
   flex-shrink: 0;
   width: 1.35rem;

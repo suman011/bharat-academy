@@ -149,27 +149,29 @@ export default function Navbar() {
             Contact
           </NavLink>
           {user ? (
-            <NavLink
-              to="/wishlist"
-              onClick={closeMenu}
-              className="nav-cart-link nav-icon-only"
-              title="Wishlist"
-              aria-label={`Wishlist, ${wishlistCount} saved`}
-            >
-              <FaHeart aria-hidden />
-              <span className="nav-cart-badge">{wishlistCount}</span>
-            </NavLink>
+            <>
+              <NavLink
+                to="/wishlist"
+                onClick={closeMenu}
+                className="nav-cart-link nav-icon-only"
+                title="Wishlist"
+                aria-label={`Wishlist, ${wishlistCount} saved`}
+              >
+                <FaHeart aria-hidden />
+                <span className="nav-cart-badge">{wishlistCount}</span>
+              </NavLink>
+              <NavLink
+                to="/cart"
+                onClick={closeMenu}
+                className="nav-cart-link nav-icon-only"
+                title="Cart"
+                aria-label={`Shopping cart, ${items.length} items`}
+              >
+                <FaShoppingCart aria-hidden />
+                <span className="nav-cart-badge">{items.length}</span>
+              </NavLink>
+            </>
           ) : null}
-          <NavLink
-            to="/cart"
-            onClick={closeMenu}
-            className="nav-cart-link nav-icon-only"
-            title="Cart"
-            aria-label={`Shopping cart, ${items.length} items`}
-          >
-            <FaShoppingCart aria-hidden />
-            <span className="nav-cart-badge">{items.length}</span>
-          </NavLink>
           {user ? (
             <>
               {hasEnrollments ? (
