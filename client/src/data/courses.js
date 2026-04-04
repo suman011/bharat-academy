@@ -10,12 +10,7 @@ export const courseCategories = [
     items: [
       { name: "Computer Fundamentals", price: 1999, duration: "4 weeks", level: "Beginner" },
       { name: "MS Office (Word, Excel, PowerPoint)", price: 3999, duration: "6 weeks", level: "Beginner" },
-      { name: "Internet & Email Essentials", price: 1999, duration: "2 weeks", level: "Beginner" },
       { name: "Digital Literacy & Cyber Safety", price: 2499, duration: "3 weeks", level: "Beginner" },
-      { name: "Typing Skills (English & Marathi/Hindi)", price: 1799, duration: "3 weeks", level: "Beginner" },
-      { name: "Computer Hardware Basics", price: 2999, duration: "4 weeks", level: "Beginner" },
-      { name: "Introduction to Operating Systems (Windows)", price: 2499, duration: "3 weeks", level: "Beginner" },
-      { name: "Paint & Basic Design Tools", price: 1999, duration: "2 weeks", level: "Beginner" }
     ]
   },
   {
@@ -24,7 +19,6 @@ export const courseCategories = [
     items: [
       { name: "Advance Excel (Dashboard, Pivot, Macros)", price: 6999, duration: "8 weeks", level: "Intermediate" },
       { name: "Advance PowerPoint (Presentation Design)", price: 5499, duration: "6 weeks", level: "Intermediate" },
-      { name: "Google Workspace (Docs, Sheets, Slides)", price: 4499, duration: "5 weeks", level: "Intermediate" },
       { name: "HTML, CSS, Bootstrap", price: 6999, duration: "8 weeks", level: "Intermediate" },
       { name: "JavaScript (ES6+)", price: 8999, duration: "10 weeks", level: "Intermediate" },
       { name: "Git & GitHub", price: 3499, duration: "4 weeks", level: "Intermediate" },
@@ -32,9 +26,6 @@ export const courseCategories = [
       { name: "C++ Programming", price: 8999, duration: "12 weeks", level: "Intermediate" },
       { name: "Java Programming", price: 10999, duration: "14 weeks", level: "Intermediate" },
       { name: "Python Programming (Basic + Intermediate)", price: 9999, duration: "12 weeks", level: "Intermediate" },
-      { name: "UI/UX Basics", price: 7999, duration: "8 weeks", level: "Intermediate" },
-      { name: "Canva & Graphic Design", price: 5999, duration: "6 weeks", level: "Intermediate" },
-      { name: "Figma Basics", price: 5499, duration: "6 weeks", level: "Intermediate" }
     ]
   },
   {
@@ -76,8 +67,6 @@ export const courseCategories = [
       { name: "Basic Computer Crash Course", price: 1999, duration: "4 weeks", level: "Beginner" },
       { name: "Excel in 30 Days", price: 2499, duration: "4 weeks", level: "Beginner" },
       { name: "Web Design Basics", price: 2999, duration: "4 weeks", level: "Beginner" },
-      { name: "Canva & Graphic Design", price: 2999, duration: "4 weeks", level: "Beginner" },
-      { name: "Spoken English", price: 2499, duration: "4 weeks", level: "Beginner" },
       { name: "Coding for Beginners", price: 3499, duration: "4 weeks", level: "Beginner" }
     ]
   },
@@ -96,7 +85,6 @@ export const courseCategories = [
     title: "Packages (Business Pro Tip)",
     color: "bonus",
     items: [
-      { name: "Beginner Package (Basic + MS Office + Internet)", price: 7499, duration: "10 weeks", level: "Beginner" },
       { name: "Developer Package (HTML + CSS + JS + React)", price: 21999, duration: "18 weeks", level: "Intermediate" },
       { name: "Pro Package (DSA + Full Stack + Projects)", price: 36999, duration: "28 weeks", level: "Expert" }
     ]
