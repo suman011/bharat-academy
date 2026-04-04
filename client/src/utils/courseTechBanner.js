@@ -4,6 +4,7 @@
 
 const GLYPHS = {
   AI: "ai",
+  ML: "ml",
   ROBOT: "robot",
   FACTORY: "factory",
   CODE: "code",
@@ -18,8 +19,8 @@ const GLYPHS = {
 /** [regex, top, bottom, glyphKey] — order matters (first match wins). */
 const OVERRIDES = [
   [/ai\s+fundamentals/i, "AI", "FUNDAMENTALS", GLYPHS.AI],
-  [/machine\s+learning/i, "MACHINE", "LEARNING", GLYPHS.AI],
-  [/ai\s*\+\s*machine\s+learning|ai.*machine.*projects/i, "AI", "ML PROJECTS", GLYPHS.AI],
+  [/machine\s+learning/i, "MACHINE", "LEARNING", GLYPHS.ML],
+  [/ai\s*\+\s*machine\s+learning|ai.*machine.*projects/i, "AI", "ML PROJECTS", GLYPHS.ML],
   [/data\s+science\s+master/i, "DATA", "SCIENCE", GLYPHS.DATA],
   [/python\s+for\s+data/i, "PYTHON", "DATA SCIENCE", GLYPHS.PYTHON],
   [/python\s+programming/i, "PYTHON", "PROGRAMMING", GLYPHS.PYTHON],
@@ -67,7 +68,9 @@ const OVERRIDES = [
 ];
 
 function detectGlyph(lower) {
-  if (/\bai\b|artificial|neural|ml\b|deep\s+learn/.test(lower)) return GLYPHS.AI;
+  if (/machine\s+learning/.test(lower)) return GLYPHS.ML;
+  if (/\bml\b/.test(lower)) return GLYPHS.ML;
+  if (/\bai\b|artificial|neural|deep\s+learn/.test(lower)) return GLYPHS.AI;
   if (/robot|cobot|fanuc|abb|kuka|amr|agv|welding\s+robot/.test(lower)) return GLYPHS.ROBOT;
   if (/plc|scada|mes|factory|manufacturing|instrumentation|automation|hydraulic|pneumatic|conveyor|packaging|batch|dcs|opc/.test(lower))
     return GLYPHS.FACTORY;

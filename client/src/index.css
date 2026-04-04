@@ -2802,7 +2802,19 @@ a {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 100% 90% at 50% 50%, transparent 28%, rgba(2, 12, 24, 0.55) 100%);
+  background: radial-gradient(ellipse 100% 90% at 50% 45%, transparent 32%, rgba(2, 12, 24, 0.62) 100%);
+  pointer-events: none;
+}
+
+.course-tech-banner__grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.07;
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.5) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.5) 1px, transparent 1px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(ellipse 85% 75% at 50% 50%, black 20%, transparent 72%);
   pointer-events: none;
 }
 
@@ -2810,40 +2822,45 @@ a {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 12% 35%, rgba(248, 113, 113, 0.22) 0%, transparent 28%),
-    radial-gradient(circle at 78% 18%, rgba(56, 189, 248, 0.2) 0%, transparent 24%),
-    radial-gradient(circle at 62% 72%, rgba(249, 115, 22, 0.14) 0%, transparent 26%),
-    radial-gradient(circle at 30% 80%, rgba(99, 102, 241, 0.12) 0%, transparent 22%);
-  filter: blur(2px);
-  opacity: 0.9;
+    radial-gradient(circle at 10% 40%, rgba(56, 189, 248, 0.12) 0%, transparent 26%),
+    radial-gradient(circle at 88% 22%, rgba(99, 102, 241, 0.1) 0%, transparent 22%),
+    radial-gradient(circle at 72% 78%, rgba(249, 115, 22, 0.08) 0%, transparent 24%);
+  filter: blur(3px);
+  opacity: 0.75;
   pointer-events: none;
 }
 
-.course-tech-banner__watermark {
+.course-tech-banner__ambient {
   position: absolute;
-  left: 50%;
-  top: 48%;
-  transform: translate(-50%, -50%);
-  width: min(92%, 320px);
-  aspect-ratio: 1;
-  max-height: 118%;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
-  font-weight: 800;
-  font-size: clamp(3.5rem, 28vw, 7.5rem);
-  line-height: 1;
-  letter-spacing: -0.07em;
-  color: rgba(249, 115, 22, 0.16);
-  text-transform: uppercase;
+  inset: 0;
   pointer-events: none;
+  z-index: 1;
+}
+
+.course-tech-banner__ambient-orange {
+  position: absolute;
+  width: 55%;
+  height: 90%;
+  right: -8%;
+  top: 50%;
+  transform: translateY(-50%);
+  border-radius: 50%;
   background: radial-gradient(
-    circle,
+    circle at 40% 50%,
     rgba(249, 115, 22, 0.14) 0%,
-    rgba(234, 88, 12, 0.06) 42%,
-    transparent 68%
+    rgba(234, 88, 12, 0.05) 45%,
+    transparent 70%
   );
+}
+
+.course-tech-banner__ambient-cyan {
+  position: absolute;
+  width: 40%;
+  height: 70%;
+  left: -12%;
+  bottom: -10%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.1) 0%, transparent 65%);
 }
 
 .course-tech-banner__inner {
@@ -2852,29 +2869,42 @@ a {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
+  gap: 8px;
   height: 100%;
   min-height: 100%;
-  padding: 10% 7% 10% 9%;
+  padding: 9% 6% 9% 8%;
   box-sizing: border-box;
 }
 
 .course-tech-banner__text {
-  flex: 1 1 52%;
+  flex: 1 1 50%;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.12em;
+  gap: 0.2em;
   align-items: flex-start;
   text-align: left;
+  padding-left: 12px;
+  position: relative;
+}
+
+.course-tech-banner__text::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.08em;
+  bottom: 0.08em;
+  width: 3px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, rgba(251, 146, 60, 0.95), rgba(56, 189, 248, 0.4));
 }
 
 .course-tech-banner__line1,
 .course-tech-banner__line2 {
   font-family: "Plus Jakarta Sans", system-ui, sans-serif;
   font-weight: 800;
-  line-height: 1.02;
-  letter-spacing: -0.02em;
+  line-height: 1.05;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   display: block;
   max-width: 100%;
@@ -2883,20 +2913,21 @@ a {
 }
 
 .course-tech-banner__line1 {
-  font-size: clamp(0.95rem, 4.2vw, 1.55rem);
+  font-size: clamp(1.05rem, 4.8vw, 1.75rem);
   color: #f8fafc;
-  text-shadow: 0 0 28px rgba(56, 189, 248, 0.25);
+  text-shadow: 0 1px 2px rgba(2, 12, 24, 0.85);
 }
 
 .course-tech-banner__line2 {
-  font-size: clamp(0.72rem, 3.2vw, 1.2rem);
-  color: #fb923c;
-  text-shadow: 0 0 20px rgba(249, 115, 22, 0.35);
+  font-size: clamp(0.82rem, 3.6vw, 1.35rem);
+  font-weight: 700;
+  color: #fdba74;
+  text-shadow: 0 1px 2px rgba(2, 12, 24, 0.75);
 }
 
 .course-tech-banner__art {
-  flex: 0 0 42%;
-  max-width: 42%;
+  flex: 0 0 44%;
+  max-width: 44%;
   min-width: 0;
   display: flex;
   align-items: center;
@@ -2904,50 +2935,80 @@ a {
   align-self: stretch;
 }
 
+.course-tech-banner__art-panel {
+  width: 100%;
+  max-width: 132px;
+  aspect-ratio: 7 / 8;
+  max-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8% 6%;
+  border-radius: 14px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.06) 0%, rgba(15, 23, 42, 0.35) 100%);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 12px 28px rgba(2, 12, 24, 0.35);
+}
+
 .course-tech-banner__svg {
   width: 100%;
   height: auto;
   max-height: 100%;
   display: block;
-  filter: drop-shadow(0 0 14px rgba(56, 189, 248, 0.22));
+  filter: drop-shadow(0 2px 12px rgba(56, 189, 248, 0.12));
 }
 
 .course-tech-banner--compact .course-tech-banner__inner {
-  padding: 8% 6% 8% 8%;
-  gap: 4px;
+  padding: 7% 5% 7% 7%;
+  gap: 5px;
+}
+
+.course-tech-banner--compact .course-tech-banner__text {
+  padding-left: 9px;
+}
+
+.course-tech-banner--compact .course-tech-banner__text::before {
+  width: 2px;
+  border-radius: 1px;
 }
 
 .course-tech-banner--compact .course-tech-banner__line1 {
-  font-size: clamp(0.62rem, 2.6vw, 0.88rem);
+  font-size: clamp(0.72rem, 2.9vw, 0.98rem);
+  letter-spacing: 0.03em;
 }
 
 .course-tech-banner--compact .course-tech-banner__line2 {
-  font-size: clamp(0.52rem, 2.1vw, 0.72rem);
+  font-size: clamp(0.58rem, 2.35vw, 0.8rem);
 }
 
 .course-tech-banner--compact .course-tech-banner__art {
-  flex-basis: 40%;
-  max-width: 40%;
+  flex-basis: 42%;
+  max-width: 42%;
 }
 
-.course-tech-banner--compact .course-tech-banner__watermark {
-  font-size: clamp(2.2rem, 20vw, 4rem);
+.course-tech-banner--compact .course-tech-banner__art-panel {
+  max-width: 88px;
+  border-radius: 10px;
+  padding: 6% 5%;
 }
 
 .course-tech-banner--detail .course-tech-banner__inner {
-  padding: 11% 8% 11% 10%;
+  padding: 10% 7% 10% 9%;
 }
 
 .course-tech-banner--detail .course-tech-banner__line1 {
-  font-size: clamp(1.35rem, 5vw, 2.35rem);
+  font-size: clamp(1.45rem, 5.2vw, 2.45rem);
 }
 
 .course-tech-banner--detail .course-tech-banner__line2 {
-  font-size: clamp(1rem, 3.8vw, 1.75rem);
+  font-size: clamp(1.08rem, 4vw, 1.85rem);
 }
 
-.course-tech-banner--detail .course-tech-banner__watermark {
-  font-size: clamp(4.5rem, 32vw, 9rem);
+.course-tech-banner--detail .course-tech-banner__art-panel {
+  max-width: 180px;
+  border-radius: 16px;
 }
 
 .course-tech-banner--micro {

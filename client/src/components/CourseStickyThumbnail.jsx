@@ -29,7 +29,7 @@ export default function CourseStickyThumbnail({ courseName, variant = "card", cl
     );
   }
 
-  const { top, bottom, glyph, mark } = getTechBannerMeta(courseName, variant);
+  const { top, bottom, glyph } = getTechBannerMeta(courseName, variant);
 
   return (
     <div
@@ -39,15 +39,21 @@ export default function CourseStickyThumbnail({ courseName, variant = "card", cl
     >
       <div className="course-tech-banner__scene" aria-hidden>
         <div className="course-tech-banner__bg" />
+        <div className="course-tech-banner__grid" />
         <div className="course-tech-banner__bokeh" />
-        <div className="course-tech-banner__watermark">{mark}</div>
+        <div className="course-tech-banner__ambient" aria-hidden>
+          <div className="course-tech-banner__ambient-orange" />
+          <div className="course-tech-banner__ambient-cyan" />
+        </div>
         <div className="course-tech-banner__inner">
           <div className="course-tech-banner__text">
             <span className="course-tech-banner__line1">{top}</span>
             <span className="course-tech-banner__line2">{bottom}</span>
           </div>
           <div className="course-tech-banner__art">
-            <CourseBannerGraphic glyph={glyph} />
+            <div className="course-tech-banner__art-panel">
+              <CourseBannerGraphic glyph={glyph} />
+            </div>
           </div>
         </div>
       </div>

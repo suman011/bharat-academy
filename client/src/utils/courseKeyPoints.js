@@ -8,7 +8,11 @@ export function getCourseKeyPoints(course) {
   if (name.includes("excel")) points.push("Real-world Excel tasks");
   if (name.includes("tally")) points.push("Accounting + GST basics");
   if (name.includes("plc") || name.includes("scada")) points.push("Industrial automation basics");
-  if (name.includes("ai") || name.includes("machine learning")) points.push("AI fundamentals + projects");
+  if (name.includes("machine learning")) {
+    points.push(name.includes("project") ? "ML workflows + projects" : "Supervised & unsupervised ML");
+  } else if (name.includes("ai") || name.includes("artificial intelligence")) {
+    points.push("AI concepts + hands-on labs");
+  }
 
   if (course?.duration) points.push(String(course.duration));
   if (course?.level) points.push(String(course.level));
