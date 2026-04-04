@@ -64,7 +64,7 @@ export default function ItCoursesTierGrid({
     ) : (
       <>
         <FaCheckCircle aria-hidden className="it-tier-card__icon" />
-        <span>{item.name}</span>
+        <span className="it-tier-link__label">{item.name}</span>
       </>
     );
 

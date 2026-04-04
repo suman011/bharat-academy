@@ -2424,7 +2424,7 @@ a {
   text-decoration: none;
   color: inherit;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: flex-start;
   gap: 8px 10px;
   min-width: 0;
@@ -2590,7 +2590,7 @@ a {
 
 .it-tier-card__list--grid .it-tier-card__link:not(:has(.it-tier-card__mini)) {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   padding: 7px 8px;
   border-radius: 10px;
@@ -2609,7 +2609,7 @@ a {
 
 .it-tier-card__link {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   padding: 7px 8px;
   border-radius: 10px;
@@ -2716,6 +2716,14 @@ a {
   margin-top: 3px;
   color: #2563eb;
   font-size: 0.92rem;
+}
+
+/* Long titles wrap beside the checkmark (never stack icon above text). */
+.it-tier-link__label {
+  min-width: 0;
+  flex: 1 1 auto;
+  line-height: 1.45;
+  font-weight: 500;
 }
 
 .it-tier-card__thumb {
@@ -3445,6 +3453,7 @@ a {
 .course-list svg {
   color: #6366f1;
   flex-shrink: 0;
+  flex-grow: 0;
   margin-top: 3px;
   filter: drop-shadow(0 0 6px rgba(99, 102, 241, 0.2));
 }
@@ -3456,6 +3465,7 @@ a {
 .course-item-link {
   display: flex;
   width: 100%;
+  min-width: 0;
   align-items: flex-start;
   text-decoration: none;
   color: inherit;
@@ -3469,9 +3479,11 @@ a {
 
 .course-info {
   display: flex;
+  flex-wrap: nowrap;
   gap: 12px;
   align-items: flex-start;
   width: 100%;
+  min-width: 0;
 }
 
 .course-thumb {
@@ -3485,7 +3497,8 @@ a {
 }
 
 .course-details {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 6px;
