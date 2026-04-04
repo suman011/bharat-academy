@@ -94,8 +94,8 @@ export default function Home() {
                 <span className="book-demo-pill-btn__text">Book a demo</span>
               </a>
             </div>
+            <div className="feature-chip"><FaBrain /> AI & Machine Learning</div>
             <div className="feature-chip"><FaLaptopCode /> Full Stack & Programming</div>
-            <div className="feature-chip"><FaBrain /> AI & Future Technology</div>
             <div className="feature-chip"><FaShieldAlt /> Security & API Skills</div>
             <div className="feature-chip"><FaUserGraduate /> Interview & Career Prep</div>
             <div className="hero-card">

@@ -606,6 +606,31 @@ export const industry40Categories = [
     color: "i4advanced",
     items: [
       course({
+        name: "AI & Machine Learning for Manufacturing",
+        price: 21999,
+        weeks: 18,
+        level: "Advanced",
+        summary:
+          "Apply supervised/unsupervised models to quality, throughput, and energy datasets with governance fit for OT environments.",
+        skills: [
+          "Feature engineering from MES/ERP",
+          "Classification & regression for quality",
+          "Time-series baselines",
+          "Model monitoring & explainability intro",
+          "Data governance & PII boundaries",
+        ],
+        tools: ["Python ML stack", "Jupyter", "MLflow or similar", "Plant historian exports"],
+        careers: "Manufacturing ML Engineer, Data Science (Industrial), Digital Twin Analyst",
+        modules: [
+          "Problem framing & dataset ethics",
+          "EDA on production datasets",
+          "Model families for tabular & time-series",
+          "Deployment patterns to edge/cloud",
+          "Capstone: scrap prediction pilot",
+          fin("ML for manufacturing"),
+        ],
+      }),
+      course({
         name: "Advanced PLC Programming (PID, Networking)",
         price: 17999,
         weeks: 14,
@@ -730,31 +755,6 @@ export const industry40Categories = [
           "Edge acceleration & cycle budgets",
           "MLOps-lite for factory models",
           fin("vision AI"),
-        ],
-      }),
-      course({
-        name: "AI & Machine Learning for Manufacturing",
-        price: 21999,
-        weeks: 18,
-        level: "Advanced",
-        summary:
-          "Apply supervised/unsupervised models to quality, throughput, and energy datasets with governance fit for OT environments.",
-        skills: [
-          "Feature engineering from MES/ERP",
-          "Classification & regression for quality",
-          "Time-series baselines",
-          "Model monitoring & explainability intro",
-          "Data governance & PII boundaries",
-        ],
-        tools: ["Python ML stack", "Jupyter", "MLflow or similar", "Plant historian exports"],
-        careers: "Manufacturing ML Engineer, Data Science (Industrial), Digital Twin Analyst",
-        modules: [
-          "Problem framing & dataset ethics",
-          "EDA on production datasets",
-          "Model families for tabular & time-series",
-          "Deployment patterns to edge/cloud",
-          "Capstone: scrap prediction pilot",
-          fin("ML for manufacturing"),
         ],
       }),
       course({

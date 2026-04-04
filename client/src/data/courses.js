@@ -1,9 +1,21 @@
 import { industry40Categories } from "./industry40Catalog";
 
-/** Core IT path: Basic → Intermediate → Advanced (first three groups in the catalog). */
-export const IT_CORE_CATEGORY_COUNT = 3;
+/** Core IT path: AI/ML first, then Basic → Intermediate → Advanced (first four groups in the catalog). */
+export const IT_CORE_CATEGORY_COUNT = 4;
 
 export const courseCategories = [
+  {
+    title: "AI & Machine Learning (Featured Track)",
+    color: "advanced",
+    items: [
+      { name: "AI Fundamentals", price: 19999, duration: "16 weeks", level: "Advanced" },
+      { name: "Machine Learning Basics", price: 19999, duration: "16 weeks", level: "Advanced" },
+      { name: "Python for Data Science", price: 16999, duration: "14 weeks", level: "Advanced" },
+      { name: "Data Analytics (Excel + Power BI)", price: 14999, duration: "12 weeks", level: "Advanced" },
+      { name: "AI + Machine Learning with Projects", price: 42999, duration: "24 weeks", level: "Expert" },
+      { name: "Data Science Master Program", price: 44999, duration: "24 weeks", level: "Expert" },
+    ],
+  },
   {
     title: "Basic Courses (Foundation Level)",
     color: "basic",
@@ -42,10 +54,6 @@ export const courseCategories = [
       { name: "API Development (Node.js / Express)", price: 12999, duration: "12 weeks", level: "Advanced" },
       { name: "AWS Basics (S3, EC2, Lambda)", price: 15999, duration: "12 weeks", level: "Advanced" },
       { name: "CI/CD (GitHub Actions, DevOps Basics)", price: 13999, duration: "10 weeks", level: "Advanced" },
-      { name: "Data Analytics (Excel + Power BI)", price: 14999, duration: "12 weeks", level: "Advanced" },
-      { name: "Python for Data Science", price: 16999, duration: "14 weeks", level: "Advanced" },
-      { name: "Machine Learning Basics", price: 19999, duration: "16 weeks", level: "Advanced" },
-      { name: "AI Fundamentals", price: 19999, duration: "16 weeks", level: "Advanced" }
     ]
   },
   ...industry40Categories,
@@ -54,8 +62,6 @@ export const courseCategories = [
     color: "industry",
     items: [
       { name: "Full Stack Developer Program (3-6 months)", price: 39999, duration: "24 weeks", level: "Expert" },
-      { name: "Data Science Master Program", price: 44999, duration: "24 weeks", level: "Expert" },
-      { name: "AI + Machine Learning with Projects", price: 42999, duration: "24 weeks", level: "Expert" },
       { name: "Cyber Security Fundamentals", price: 15999, duration: "16 weeks", level: "Advanced" },
       { name: "Ethical Hacking Basics", price: 17999, duration: "16 weeks", level: "Advanced" }
     ]

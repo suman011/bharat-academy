@@ -10,7 +10,7 @@ const slugify = (name) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
 
-const TIER_LABELS = ["Basic", "Intermediate", "Advanced"];
+const TIER_LABELS = ["AI & ML", "Basic", "Intermediate", "Advanced"];
 
 function tierSubtitle(fullTitle) {
   const m = fullTitle.match(/\(([^)]+)\)\s*$/);
