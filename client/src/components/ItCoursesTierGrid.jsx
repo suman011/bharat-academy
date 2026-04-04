@@ -1,8 +1,8 @@
 import React from "react";
 import { FaCheckCircle } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import CourseStickyThumbnail from "./CourseStickyThumbnail";
 import { getCourseKeyPoints } from "../utils/courseKeyPoints";
+import { getCourseImage } from "../utils/courseImages";
 
 const slugify = (name) =>
   name
@@ -39,7 +39,14 @@ export default function ItCoursesTierGrid({
     showCourseImages ? (
       <div className="it-tier-card__mini">
         <div className="it-tier-card__mini-image">
-          <CourseStickyThumbnail courseName={item.name} variant="compact" />
+          <img
+            src={getCourseImage(item.name, "compact")}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            width={640}
+            height={400}
+          />
         </div>
         <div className="it-tier-card__mini-content">
           <div className="it-tier-card__mini-title">{item.name}</div>

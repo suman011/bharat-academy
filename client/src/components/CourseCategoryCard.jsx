@@ -1,7 +1,7 @@
 import React from "react";
 import { FaCheckCircle } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import CourseStickyThumbnail from "./CourseStickyThumbnail";
+import { getCourseImage } from "../utils/courseImages";
 
 const slugify = (name) =>
   name
@@ -29,7 +29,15 @@ export default function CourseCategoryCard({
             <Link to={`/courses/${slugify(item.name)}`} className="course-item-link">
               <div className="course-info">
                 {showCourseThumbs ? (
-                  <CourseStickyThumbnail courseName={item.name} variant="micro" className="course-thumb" />
+                  <img
+                    src={getCourseImage(item.name, "thumb")}
+                    alt=""
+                    className="course-thumb"
+                    loading="lazy"
+                    decoding="async"
+                    width={256}
+                    height={256}
+                  />
                 ) : null}
                 <FaCheckCircle aria-hidden />
                 <div className="course-details">

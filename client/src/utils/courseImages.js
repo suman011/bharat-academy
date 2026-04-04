@@ -296,11 +296,35 @@ const KEYWORD_FALLBACK = [
   { test: (n) => n.includes("generative") || n.includes("chatgpt"), url: `https://images.unsplash.com/photo-1620712943543-bcc4688e7485?${q}` },
 ];
 
-export function getCourseImage(courseName) {
+/** Unsplash imgix-style params — sharp 16∶9-style covers for catalog (Udemy/Coursera-like). */
+const IMAGE_VARIANT_PARAMS = {
+  /** Main grid / course cards */
+  card: "w=960&h=540&fit=crop&auto=format&q=82",
+  /** Tier row mini cards */
+  compact: "w=640&h=400&fit=crop&auto=format&q=80",
+  /** Small list avatars */
+  thumb: "w=256&h=256&fit=crop&auto=format&q=78",
+  /** Course detail hero */
+  detail: "w=1280&h=720&fit=crop&auto=format&q=82",
+};
+
+/**
+ * @param {string} courseName
+ * @param {"card"|"compact"|"thumb"|"detail"} [variant="card"]
+ */
+export function getCourseImage(courseName, variant = "card") {
   const key = (courseName || "").toLowerCase().trim();
-  if (BY_COURSE_NAME[key]) return BY_COURSE_NAME[key];
-  for (const { test, url } of KEYWORD_FALLBACK) {
-    if (test(key)) return url;
+  let url = BY_COURSE_NAME[key] || null;
+  if (!url) {
+    for (const { test, url: u } of KEYWORD_FALLBACK) {
+      if (test(key)) {
+        url = u;
+        break;
+      }
+    }
   }
-  return DEFAULT;
+  if (!url) url = DEFAULT;
+  const base = url.split("?")[0];
+  const params = IMAGE_VARIANT_PARAMS[variant] || IMAGE_VARIANT_PARAMS.card;
+  return `${base}?${params}`;
 }

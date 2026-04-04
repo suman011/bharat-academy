@@ -23,8 +23,8 @@ import {
   FaWhatsapp,
 } from "react-icons/fa";
 import { courseCategories } from "../data/courses";
-import CourseStickyThumbnail from "../components/CourseStickyThumbnail";
 import { apiUrl } from "../utils/apiBase";
+import { getCourseImage } from "../utils/courseImages";
 import { getCurrentUser, onAuthChanged } from "../utils/authStore";
 import { useCart } from "../context/CartContext";
 import { createPortal } from "react-dom";
@@ -1123,8 +1123,16 @@ export default function CourseDetail() {
 
         <div className="course-detail-content">
           <div className="course-image-section">
-            <div className="course-detail-image course-detail-image--sticky">
-              <CourseStickyThumbnail courseName={course.name} variant="detail" />
+            <div className="course-detail-image course-detail-image--cover">
+              <img
+                src={getCourseImage(course.name, "detail")}
+                alt={`${course.name} — course cover`}
+                className="course-detail-cover-img"
+                loading="eager"
+                decoding="async"
+                width={1280}
+                height={720}
+              />
             </div>
           </div>
 

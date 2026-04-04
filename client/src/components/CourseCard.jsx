@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaCheckCircle, FaHeart, FaRegHeart, FaTag } from "react-icons/fa";
-import CourseStickyThumbnail from "./CourseStickyThumbnail";
 import { apiUrl } from "../utils/apiBase";
+import { getCourseImage } from "../utils/courseImages";
 import { getCourseKeyPoints } from "../utils/courseKeyPoints";
 
 export default function CourseCard({ course, revealIndex = 0, inWishlist = false, ratingSummary }) {
@@ -16,7 +16,15 @@ export default function CourseCard({ course, revealIndex = 0, inWishlist = false
         style={{ "--reveal-delay": `${Math.min(revealIndex, 40) * 0.04}s` }}
       >
         <div className="course-card-image">
-          <CourseStickyThumbnail courseName={course.name} variant="card" />
+          <img
+            src={getCourseImage(course.name, "card")}
+            alt={`${course.name} — course cover`}
+            className="course-card-cover-img"
+            loading="lazy"
+            decoding="async"
+            width={960}
+            height={540}
+          />
           <div className="course-card-overlay" />
           <button
             type="button"
