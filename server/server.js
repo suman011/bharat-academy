@@ -204,6 +204,10 @@ const mailFrom = (() => {
 })();
 const supportEmail = process.env.SUPPORT_EMAIL || mailFrom || smtpUser || "support@bharatskillacademy.com";
 
+/** HTTPS API — works on Render free tier where SMTP ports 25/465/587 are blocked. https://resend.com */
+const resendApiKey = String(process.env.RESEND_API_KEY || "").trim();
+const resendFromDefault = "Bharat Skill Development Academy <onboarding@resend.dev>";
+
 let transporter = null;
 if (smtpUser && smtpPass && smtpHost) {
   const isGmail = /gmail\.com/i.test(String(smtpHost));
@@ -227,17 +231,80 @@ if (smtpUser && smtpPass && smtpHost) {
         );
       }
     });
-} else {
+} else if (!resendApiKey) {
   console.warn(
-    "[SMTP] Not configured (set SMTP_HOST, SMTP_USER, SMTP_PASS on this host). Lead saves and enrollments still work, but no emails: password reset, order confirmations, demo/callback alerts."
+    "[mail] No RESEND_API_KEY and no SMTP — outbound email disabled. On Render Free, SMTP ports are blocked: add RESEND_API_KEY (see server/.env.example) or use a paid instance for SMTP."
   );
 }
 
-async function sendResetEmail({ to, resetUrl }) {
+if (resendApiKey) {
+  console.log(
+    "[mail] Resend API enabled (HTTPS). Set RESEND_FROM to your verified domain sender after DNS setup; until then onboarding@resend.dev may only reach your Resend-account email."
+  );
+}
+
+function mailConfigured() {
+  return Boolean(resendApiKey || transporter);
+}
+
+/**
+ * Send one email via Resend (preferred when RESEND_API_KEY is set) or Nodemailer SMTP.
+ */
+async function deliverEmail({ to, subject, html, text }) {
+  const recipients = (Array.isArray(to) ? to : String(to || "").split(/[,;]/))
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (!recipients.length) return { sent: false, reason: "no recipient" };
+
+  if (resendApiKey) {
+    try {
+      const from = String(process.env.RESEND_FROM || "").trim() || resendFromDefault;
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${resendApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from,
+          to: recipients,
+          subject: String(subject || "").slice(0, 998),
+          html: String(html || ""),
+          ...(text ? { text: String(text) } : {}),
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const msg = typeof data?.message === "string" ? data.message : JSON.stringify(data);
+        console.error("[RESEND] Send failed:", res.status, msg);
+        return { sent: false, reason: msg || String(res.status) };
+      }
+      return { sent: true };
+    } catch (e) {
+      console.error("[RESEND]", e?.message || e);
+      return { sent: false, reason: String(e?.message || e) };
+    }
+  }
+
   if (!transporter) return { sent: false, reason: "SMTP not configured" };
   try {
-    const subject = "Reset your password";
-    const html = `
+    await transporter.sendMail({
+      from: mailFrom || smtpUser,
+      to: recipients.join(", "),
+      subject,
+      html,
+      ...(text ? { text } : {}),
+    });
+    return { sent: true };
+  } catch (e) {
+    console.error("[SMTP] sendMail failed:", e?.message || e);
+    return { sent: false, reason: String(e?.message || e) };
+  }
+}
+
+async function sendResetEmail({ to, resetUrl }) {
+  const subject = "Reset your password";
+  const html = `
       <div style="font-family: Arial, sans-serif; line-height: 1.5;">
         <h2 style="margin: 0 0 8px;">Password reset</h2>
         <p style="margin: 0 0 12px;">Click this link to reset your password (valid for 1 hour):</p>
@@ -247,12 +314,12 @@ async function sendResetEmail({ to, resetUrl }) {
         </p>
       </div>
     `;
-    await transporter.sendMail({ from: mailFrom, to, subject, html });
-    return { sent: true };
-  } catch (err) {
-    console.error(`[RESET] Email send failed: ${err?.message || err}`);
-    return { sent: false, reason: "Email send failed" };
+  const result = await deliverEmail({ to, subject, html });
+  if (!result.sent) {
+    console.error(`[RESET] Email send failed: ${result.reason || "unknown"}`);
+    return { sent: false, reason: result.reason || "Email send failed" };
   }
+  return { sent: true };
 }
 
 function formatInr(n) {
@@ -276,9 +343,9 @@ async function sendOrderEmail({
   originalPrice,
   discountAmount,
 }) {
-  if (!transporter) return { sent: false, reason: "SMTP not configured" };
+  if (!mailConfigured()) return { sent: false, reason: "Email not configured" };
+  const subject = `Course Enrollment Confirmation – ${courseTitle}`;
   try {
-    const subject = `Course Enrollment Confirmation – ${courseTitle}`;
     const itemsHtml = (items || [])
       .map(
         (it) => `
@@ -356,7 +423,11 @@ async function sendOrderEmail({
       </div>
     `;
 
-    await transporter.sendMail({ from: mailFrom, to, subject, html });
+    const result = await deliverEmail({ to, subject, html });
+    if (!result.sent) {
+      console.error(`[ORDER] Email send failed: ${result.reason || "unknown"}`);
+      return { sent: false, reason: result.reason || "Email send failed" };
+    }
     return { sent: true };
   } catch (err) {
     console.error(`[ORDER] Email send failed: ${err?.message || err}`);
@@ -471,14 +542,13 @@ function buildEnrollmentEmailHtml({
 
 async function sendEnrollmentEmail(payload) {
   const { to, subject, html } = payload;
-  if (!transporter) return { sent: false, reason: "SMTP not configured" };
-  try {
-    await transporter.sendMail({ from: mailFrom, to, subject, html });
-    return { sent: true };
-  } catch (err) {
-    console.error(`[ORDER] Email send failed: ${err?.message || err}`);
-    return { sent: false, reason: "Email send failed" };
+  if (!mailConfigured()) return { sent: false, reason: "Email not configured" };
+  const result = await deliverEmail({ to, subject, html });
+  if (!result.sent) {
+    console.error(`[ORDER] Email send failed: ${result.reason || "unknown"}`);
+    return { sent: false, reason: result.reason || "Email send failed" };
   }
+  return { sent: true };
 }
 
 function makeOrderId() {
@@ -530,6 +600,8 @@ app.get("/auth/status", (req, res) => {
   res.json({
     ok: true,
     smtpConfigured: Boolean(transporter),
+    resendConfigured: Boolean(resendApiKey),
+    mailConfigured: mailConfigured(),
     clientOrigins: CLIENT_ORIGINS,
   });
 });
@@ -1276,7 +1348,7 @@ app.post("/admin/announcements/:id/send-email", (req, res) => {
   (async () => {
     const user = await requireAdmin(req, res);
     if (!user) return;
-    if (!transporter) return res.status(400).json({ ok: false, error: "SMTP not configured." });
+    if (!mailConfigured()) return res.status(400).json({ ok: false, error: "Email not configured (set RESEND_API_KEY or SMTP)." });
 
     const id = String(req.params?.id || "").trim();
     const a = await prisma.announcement.findUnique({
@@ -1308,8 +1380,9 @@ app.post("/admin/announcements/:id/send-email", (req, res) => {
             </div>
           </div>
         `;
-        await transporter.sendMail({ from: mailFrom, to: u.email, subject, html });
-        sent += 1;
+        const r = await deliverEmail({ to: u.email, subject, html });
+        if (r.sent) sent += 1;
+        else failed += 1;
       } catch {
         failed += 1;
       }
@@ -1409,9 +1482,9 @@ app.post("/leads/callback", (req, res) => {
     // Best-effort: email support (field-by-field layout matches the forms)
     let emailSent = false;
     try {
-      if (!transporter) {
+      if (!mailConfigured()) {
         console.warn(
-          `[LEADS] Lead saved id=${lead.id} — email not sent (SMTP not configured on server). Add SMTP_HOST, SMTP_USER, SMTP_PASS in your host env (same as local .env).`
+          `[LEADS] Lead saved id=${lead.id} — no email (set RESEND_API_KEY on Render Free, or SMTP on paid).`
         );
       } else {
         const supportTo = String(process.env.SUPPORT_EMAIL || mailFrom || smtpUser || "support@example.com")
@@ -1432,9 +1505,10 @@ app.post("/leads/callback", (req, res) => {
         html += `<p style="margin:16px 0 0;font-size:14px;color:#64748b;"><strong>Account on site:</strong> ${escapeHtml(
           maybeUser?.email || "Guest (not logged in)"
         )}</p>`;
-        await transporter.sendMail({ from: mailFrom || smtpUser, to: supportTo, subject, html });
-        emailSent = true;
-        console.log(`[LEADS] Notification email sent for lead id=${lead.id} to=${supportTo}`);
+        const r = await deliverEmail({ to: supportTo, subject, html });
+        emailSent = Boolean(r.sent);
+        if (r.sent) console.log(`[LEADS] Notification email sent for lead id=${lead.id} to=${supportTo}`);
+        else console.error(`[LEADS] Lead saved id=${lead.id} email failed:`, r.reason || "unknown");
       }
     } catch (err) {
       console.error(`[LEADS] Lead saved id=${lead.id} but email failed:`, err?.message || err);
@@ -1655,8 +1729,8 @@ app.post("/issues/report", (req, res) => {
 
     // Best-effort: email support
     try {
-      if (transporter) {
-        const supportEmail = String(process.env.SUPPORT_EMAIL || mailFrom || smtpUser || "support@example.com");
+      if (mailConfigured()) {
+        const supportTo = String(process.env.SUPPORT_EMAIL || mailFrom || smtpUser || "support@example.com");
         const subject = `Course issue report – ${courseName} (${courseKey})`;
         const html = `
           <div style="font-family: Arial, sans-serif; line-height: 1.6; color:#0f172a;">
@@ -1669,7 +1743,7 @@ app.post("/issues/report", (req, res) => {
             <p style="white-space:pre-wrap; margin:0;">${message}</p>
           </div>
         `;
-        await transporter.sendMail({ from: mailFrom, to: supportEmail, subject, html });
+        await deliverEmail({ to: supportTo, subject, html });
       }
     } catch {
       // ignore email failure
@@ -1720,8 +1794,8 @@ app.post("/admin/issues/:id/reply", (req, res) => {
     // Email user (best-effort)
     try {
       const user = await prisma.user.findUnique({ where: { id: issue.userId } });
-      if (user && transporter) {
-        const supportEmail = String(process.env.SUPPORT_EMAIL || mailFrom || smtpUser || "support@example.com");
+      if (user && mailConfigured()) {
+        const supportAddr = String(process.env.SUPPORT_EMAIL || mailFrom || smtpUser || "support@example.com");
         const subject = `Support reply – ${issue.courseName}`;
         const html = `
           <div style="font-family: Arial, sans-serif; line-height:1.6; color:#0f172a;">
@@ -1732,11 +1806,11 @@ app.post("/admin/issues/:id/reply", (req, res) => {
             <hr/>
             <p style="white-space:pre-wrap; margin:0;">${reply}</p>
             <p style="margin:16px 0 0; color:#475569; font-size:13px;">
-              If you need more help, reply to this email or contact <a href="mailto:${supportEmail}">${supportEmail}</a>.
+              If you need more help, reply to this email or contact <a href="mailto:${supportAddr}">${supportAddr}</a>.
             </p>
           </div>
         `;
-        await transporter.sendMail({ from: mailFrom, to: user.email, subject, html });
+        await deliverEmail({ to: user.email, subject, html });
       }
     } catch {
       // ignore email failures
