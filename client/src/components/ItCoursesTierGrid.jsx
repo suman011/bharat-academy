@@ -35,6 +35,20 @@ export default function ItCoursesTierGrid({
 
   const showEyebrow = eyebrow != null && String(eyebrow).trim() !== "";
 
+  const normalizedCategories = React.useMemo(
+    () =>
+      categories.map((category) => {
+        const uniq = new Map();
+        for (const item of category?.items || []) {
+          const key = slugify(item?.name || "");
+          if (!key || uniq.has(key)) continue;
+          uniq.set(key, item);
+        }
+        return { ...category, items: Array.from(uniq.values()) };
+      }),
+    [categories]
+  );
+
   const renderCourseCard = (item) =>
     showCourseImages ? (
       <div className="it-tier-card__mini">
@@ -78,7 +92,7 @@ export default function ItCoursesTierGrid({
 
       {layout === "rows" ? (
         <div className="it-rows">
-          {categories.map((category, idx) => (
+          {normalizedCategories.map((category, idx) => (
             <section
               key={category.title}
               className="it-row-section theme-reveal-item"
@@ -120,7 +134,7 @@ export default function ItCoursesTierGrid({
         </div>
       ) : (
         <div className="it-tiers-grid">
-          {categories.map((category, idx) => (
+          {normalizedCategories.map((category, idx) => (
             <div
               key={category.title}
               className={`it-tier-card ${category.color} theme-reveal-item`}

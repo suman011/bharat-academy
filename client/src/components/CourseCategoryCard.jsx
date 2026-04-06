@@ -14,6 +14,16 @@ export default function CourseCategoryCard({
   revealIndex = 0,
   showCourseThumbs = false,
 }) {
+  const items = React.useMemo(() => {
+    const uniq = new Map();
+    for (const item of category?.items || []) {
+      const key = slugify(item?.name || "");
+      if (!key || uniq.has(key)) continue;
+      uniq.set(key, item);
+    }
+    return Array.from(uniq.values());
+  }, [category]);
+
   return (
     <div
       className={`category-card ${category.color} theme-reveal-item`}
@@ -21,11 +31,11 @@ export default function CourseCategoryCard({
     >
       <div className="category-header">
         <h3>{category.title}</h3>
-        <span>{category.items.length} Courses</span>
+        <span>{items.length} Courses</span>
       </div>
       <ul className="course-list">
-        {category.items.map((item, index) => (
-          <li key={index} className="course-item">
+        {items.map((item) => (
+          <li key={item.name} className="course-item">
             <Link to={`/courses/${slugify(item.name)}`} className="course-item-link">
               <div className="course-info">
                 {showCourseThumbs ? (
