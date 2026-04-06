@@ -63,7 +63,7 @@ export default function Home() {
       </Helmet>
       <section className="hero-section">
         <div className="hero-banner-note" role="note" aria-label="Industry collaboration note">
-          The Only Institute with Strong Industry Collaboration for On-Job Training &amp; Placement Support
+          The Only Institute with Strong Industry Collaboration for On-Job Training &amp; Career Assistance
         </div>
         <div className="container hero-grid">
           <div className="hero-content theme-stagger-children">
