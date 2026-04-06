@@ -320,15 +320,47 @@ a {
   margin: 0 auto;
 }
 
-.site-header {
+.top-announcement {
   position: sticky;
   top: 0;
+  z-index: 60;
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.94), rgba(124, 58, 237, 0.9));
+  color: rgba(255, 255, 255, 0.96);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+}
+
+.top-announcement__inner {
+  padding: 8px 0;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-align: center;
+  font-size: 0.9rem;
+  line-height: 1.3;
+}
+
+@media (max-width: 600px) {
+  .top-announcement__inner {
+    font-size: 0.82rem;
+    padding: 7px 0;
+  }
+}
+
+.site-header {
+  position: sticky;
+  top: 38px;
   z-index: 50;
   backdrop-filter: saturate(180%) blur(16px);
   background: rgba(255, 255, 255, 0.82);
   border-bottom: 1px solid rgba(15, 23, 42, 0.06);
   box-shadow: var(--shadow-sm);
   animation: headerReveal 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+@media (max-width: 600px) {
+  .site-header {
+    top: 36px;
+  }
 }
 
 .custom-nav {
@@ -1385,6 +1417,67 @@ a {
 }
 
 .section-block .container {
+  position: relative;
+  z-index: 1;
+}
+
+.home-seo-block {
+  position: relative;
+  overflow: hidden;
+}
+
+.home-seo-block::before,
+.home-seo-block::after {
+  content: "";
+  position: absolute;
+  inset: -22%;
+  z-index: 0;
+  pointer-events: none;
+  transform-origin: 50% 50%;
+  filter: saturate(0.95) contrast(1.05);
+}
+
+/* Layer 1: slow rotation */
+.home-seo-block::before {
+  background:
+    radial-gradient(circle at 20% 10%, rgba(79, 70, 229, 0.22), transparent 55%),
+    radial-gradient(circle at 85% 75%, rgba(8, 145, 178, 0.18), transparent 60%),
+    linear-gradient(180deg, rgba(2, 6, 23, 0.72), rgba(15, 23, 42, 0.38)),
+    url("https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=2000&q=60")
+      center/cover no-repeat;
+  opacity: 0.18;
+  animation: homeSeoSpin 28s linear infinite;
+}
+
+/* Layer 2: cross-fade to a second image while rotating opposite direction */
+.home-seo-block::after {
+  background:
+    radial-gradient(circle at 15% 85%, rgba(219, 39, 119, 0.16), transparent 55%),
+    radial-gradient(circle at 70% 20%, rgba(124, 58, 237, 0.18), transparent 60%),
+    linear-gradient(180deg, rgba(2, 6, 23, 0.72), rgba(15, 23, 42, 0.38)),
+    url("https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=2000&q=60")
+      center/cover no-repeat;
+  opacity: 0.0;
+  animation: homeSeoSwap 16s ease-in-out infinite, homeSeoSpinReverse 34s linear infinite;
+}
+
+@keyframes homeSeoSpin {
+  from { transform: rotate(0deg) scale(1.03); }
+  to { transform: rotate(360deg) scale(1.03); }
+}
+
+@keyframes homeSeoSpinReverse {
+  from { transform: rotate(0deg) scale(1.06); }
+  to { transform: rotate(-360deg) scale(1.06); }
+}
+
+@keyframes homeSeoSwap {
+  0%, 15% { opacity: 0; }
+  35%, 65% { opacity: 0.16; }
+  85%, 100% { opacity: 0; }
+}
+
+.home-seo-block .home-seo-block__inner {
   position: relative;
   z-index: 1;
 }
