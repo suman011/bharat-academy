@@ -65,7 +65,7 @@ export default function Home() {
         <div className="container hero-grid">
           <div className="hero-content theme-stagger-children">
             <div className="eyebrow">Bharat Skill Development Academy</div>
-            <h1>Best Computer Training Institute in India</h1>
+            <h1>Best Technical Training Institute in India</h1>
             <p>
               Bharat Skill Development Academy offers industry-ready courses including Full Stack MERN Development,
               AI &amp; Machine Learning, Cyber Security, and Automation and Robotics — PLC, SCADA, IoT, and smart
@@ -121,8 +121,8 @@ export default function Home() {
       <section className="section-block home-seo-block" aria-labelledby="home-seo-courses-heading">
         <div className="container home-seo-block__inner">
           <p className="home-seo-block__local">
-            Best computer training institute in <strong>Pune</strong>, India — Full Stack development, AI, Cyber
-            Security, and Automation and Robotics programs for students and working professionals.
+            Best Technical Training Institute in India — Full Stack development, AI, Cyber Security, and Automation and
+            Robotics programs for students and working professionals.
           </p>
           <h2 id="home-seo-courses-heading" className="home-seo-block__title">
             Our courses
