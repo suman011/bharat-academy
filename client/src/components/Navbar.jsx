@@ -101,11 +101,6 @@ export default function Navbar() {
 
   return (
     <>
-      <div className="top-announcement" role="note" aria-label="Announcement">
-        <div className="container top-announcement__inner">
-          The Only Institute with Strong Industry Collaboration for On-Job Training &amp; Placement Support
-        </div>
-      </div>
       <header className="site-header">
         <div className="container custom-nav">
         <Link className="brand brand--RasterLogo" to="/" onClick={closeMenu}>
@@ -205,10 +200,12 @@ export default function Navbar() {
               </NavLink>
             </>
           )}
-          {user ? (
-            <Link to="/contact" className="nav-cta" onClick={closeMenu}>Enroll Now</Link>
-          ) : null}
         </nav>
+        </div>
+        <div className="top-announcement" role="note" aria-label="Announcement">
+          <div className="container top-announcement__inner">
+            The Only Institute with Strong Industry Collaboration for On-Job Training &amp; Placement Support
+          </div>
         </div>
       </header>
     </>

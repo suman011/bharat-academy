@@ -321,9 +321,7 @@ a {
 }
 
 .top-announcement {
-  position: sticky;
-  top: 0;
-  z-index: 60;
+  position: relative;
   background: linear-gradient(135deg, rgba(79, 70, 229, 0.94), rgba(124, 58, 237, 0.9));
   color: rgba(255, 255, 255, 0.96);
   border-bottom: 1px solid rgba(255, 255, 255, 0.14);
@@ -348,19 +346,13 @@ a {
 
 .site-header {
   position: sticky;
-  top: 38px;
+  top: 0;
   z-index: 50;
   backdrop-filter: saturate(180%) blur(16px);
   background: rgba(255, 255, 255, 0.82);
   border-bottom: 1px solid rgba(15, 23, 42, 0.06);
   box-shadow: var(--shadow-sm);
   animation: headerReveal 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
-}
-
-@media (max-width: 600px) {
-  .site-header {
-    top: 36px;
-  }
 }
 
 .custom-nav {
