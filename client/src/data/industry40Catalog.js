@@ -216,31 +216,6 @@ export const industry40Categories = [
         ],
       }),
       course({
-        name: "Introduction to Robotics & Automation",
-        price: 4799,
-        weeks: 5,
-        level: "Beginner",
-        summary:
-          "Explore robot types, coordinate frames, teach pendant concepts, safety zones, and typical pick-and-place workflows.",
-        skills: [
-          "Articulated, SCARA & cartesian overview",
-          "End effectors, tooling & payloads",
-          "Safety: fences, light curtains, collaborative intro",
-          "Programming metaphor: points, paths, IO",
-          "Integration with PLCs (high level)",
-        ],
-        tools: ["Robot simulator narratives", "Teach pendant UI walkthroughs", "Cell layout CAD snippets", "Safety standard primers"],
-        careers: "Robot Cell Operator, Junior Robot Technician, Integration Trainee",
-        modules: [
-          "Robot anatomy, drives & reducers",
-          "Workcells, fixtures & reach studies",
-          "Programming workflow demo (vendor-agnostic)",
-          "Interlocks, speed & space limiting",
-          "Mini case: pick-place cycle timing",
-          fin("robotics introduction"),
-        ],
-      }),
-      course({
         name: "Basics of IoT (Internet of Things)",
         price: 4299,
         weeks: 5,

@@ -276,11 +276,6 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://bharatskillacademy.com/courses/introduction-to-robotics-automation</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
     <loc>https://bharatskillacademy.com/courses/java-programming</loc>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
