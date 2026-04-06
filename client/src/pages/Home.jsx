@@ -54,7 +54,7 @@ export default function Home() {
   return (
     <>
       <Helmet>
-        <title>Best Computer Training Institute in India | Bharat Skill Development Academy</title>
+        <title>Best Technical Training Institute in India | Bharat Skill Development Academy</title>
         <meta
           name="description"
           content="Top institute for Full Stack MERN, AI & Machine Learning, Cyber Security, and Automation and Robotics in Pune, India. Practical training, projects, and career support."
