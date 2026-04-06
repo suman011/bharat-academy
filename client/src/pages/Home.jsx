@@ -121,7 +121,10 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="section-block home-seo-block" aria-labelledby="home-seo-mission-heading">
+      <section
+        className="section-block home-seo-block"
+        aria-labelledby="home-seo-mission-heading home-seo-different-heading"
+      >
         <div className="container home-seo-block__inner">
           <div className="home-seo-block__mission">
             <h2 id="home-seo-mission-heading" className="home-seo-block__mission-title">
@@ -132,14 +135,31 @@ export default function Home() {
               confident, job-ready professionals.
             </p>
           </div>
-          <h2 id="home-seo-courses-heading" className="home-seo-block__title">
-            Our courses
+          <h2 id="home-seo-different-heading" className="home-seo-block__title">
+            What Makes Us Different?
           </h2>
-          <ul className="home-seo-block__list">
-            <li>Full Stack MERN Development</li>
-            <li>AI &amp; Machine Learning</li>
-            <li>Cyber Security training</li>
-            <li>Automation and Robotics — PLC, SCADA, IoT, robotics</li>
+          <ul className="home-seo-block__list home-seo-block__list--pointers">
+            <li>
+              <strong>Strong Industry Collaboration</strong> – Learn aligned with real industry practices
+            </li>
+            <li>
+              <strong>On-Job Training Approach</strong> – Experience real work environment during training
+            </li>
+            <li>
+              <strong>Live Project Experience</strong> – Work on real-world projects for practical skills
+            </li>
+            <li>
+              <strong>Industry-Relevant Curriculum</strong> – Courses based on current market demand
+            </li>
+            <li>
+              <strong>Expert Mentorship</strong> – Learn from experienced industry professionals
+            </li>
+            <li>
+              <strong>Personalized Support</strong> – Get individual attention and doubt-solving help
+            </li>
+            <li>
+              <strong>End-to-End Career Support</strong> – From learning to placement guidance
+            </li>
           </ul>
           <h2 className="home-seo-block__title">Why Choose Us?</h2>
           <p className="home-seo-block__why">
