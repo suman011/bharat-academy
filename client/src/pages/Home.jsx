@@ -80,7 +80,8 @@ export default function Home() {
               <Link to="/contact" className="secondary-btn">Contact Us</Link>
             </div>
             <div className="hero-note">
-              <strong>Bharat Skill Development Academy</strong> - computer training, engineering depth, and industry-ready skills.
+              <strong>Bharat Skill Development Academy</strong> – preparing learners for success with modern skills,
+              hands-on practice, and career-focused training
             </div>
           </div>
 
@@ -277,9 +278,12 @@ export default function Home() {
             </ul>
           </div>
           <div className="why-card accent">
-            <h3>Best positioning line</h3>
+            <h3>
+              <span aria-hidden="true">👉</span> Skills That Get You Hired
+            </h3>
             <p>
-              &quot;Trusted training in tech, engineering, and career skills - the Bharat Skill Development Academy way.&quot;
+              Learn in-demand technologies with hands-on experience, live projects, and career support designed for real
+              job outcomes.
             </p>
             <Link to="/contact" className="primary-btn small-btn">Start Admission Enquiry</Link>
           </div>

@@ -1526,9 +1526,10 @@ a {
 
 .home-seo-block__inner {
   max-width: min(1180px, calc(100vw - clamp(32px, 8vw, 96px)));
-  margin: 0;
-  margin-left: clamp(16px, 4vw, 48px);
-  margin-right: auto;
+  margin: 0 auto;
+  padding-left: clamp(16px, 4vw, 48px);
+  padding-right: clamp(16px, 4vw, 48px);
+  box-sizing: border-box;
 }
 
 .home-seo-block__title {
@@ -1601,39 +1602,33 @@ a {
   content: "▸";
   position: absolute;
   left: 0;
-  top: 0.05em;
+  top: 0.35em;
   color: var(--primary);
   font-weight: 800;
   font-size: 0.95em;
-  line-height: 1.65;
+  line-height: 1;
 }
 
 .home-seo-block__diff-columns {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: clamp(1.25rem, 4vw, 2.75rem);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1.5rem, 4vw, 3rem);
   align-items: start;
 }
 
 .home-seo-block__diff-columns .home-seo-block__list {
   margin: 0;
+  min-width: 0;
 }
 
 .home-seo-block__diff-columns .home-seo-block__list--pointers li {
-  white-space: nowrap;
-  overflow-x: auto;
-  overflow-y: hidden;
-  max-width: 100%;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  font-size: clamp(0.82rem, 0.95vw + 0.45rem, 1rem);
-  line-height: 1.5;
-  padding-bottom: 2px;
-}
-
-.home-seo-block__diff-columns .home-seo-block__list--pointers li::-webkit-scrollbar {
-  display: none;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
+  font-size: 1rem;
+  line-height: 1.6;
+  padding-bottom: 0;
 }
 
 @media (max-width: 720px) {

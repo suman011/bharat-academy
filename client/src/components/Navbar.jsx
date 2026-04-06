@@ -118,7 +118,7 @@ export default function Navbar() {
               <span className="brand-name-accent">Bharat</span>{" "}
               <span className="brand-name-rest">Skill Development Academy</span>
             </div>
-            <p className="brand-subtitle">Computer training and industry skills</p>
+            <p className="brand-subtitle">Empowering careers with industry-ready skills</p>
           </div>
         </Link>
 
