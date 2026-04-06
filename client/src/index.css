@@ -1531,23 +1531,29 @@ a {
   margin-right: auto;
 }
 
-.home-seo-block__local {
-  margin: 0 0 1.25rem;
-  font-size: 1rem;
-  line-height: 1.65;
-  color: var(--muted);
-}
-
-.home-seo-block__mission-title {
-  margin: 0 0 0.5rem;
+.home-seo-block__title {
+  margin: 1.75rem 0 0.75rem;
   font-size: clamp(1.25rem, 2.5vw, 1.5rem);
   font-weight: 700;
   color: var(--text);
+  letter-spacing: -0.02em;
   line-height: 1.25;
 }
 
-.home-seo-block__local--mission {
+.home-seo-block__title--lead {
+  margin-top: 0;
+}
+
+.home-seo-block__body {
   margin: 0 0 1.75rem;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.home-seo-block__body--mission {
+  margin-bottom: 1.75rem;
   white-space: nowrap;
   overflow-x: auto;
   overflow-y: hidden;
@@ -1557,26 +1563,17 @@ a {
   -ms-overflow-style: none;
 }
 
-.home-seo-block__local--mission::-webkit-scrollbar {
+.home-seo-block__body--mission::-webkit-scrollbar {
   display: none;
-}
-
-.home-seo-block__title {
-  margin: 1.75rem 0 0.75rem;
-  font-size: clamp(1.25rem, 2.5vw, 1.5rem);
-  font-weight: 700;
-  color: var(--text);
-}
-
-.home-seo-block__title:first-of-type {
-  margin-top: 0;
 }
 
 .home-seo-block__list {
   margin: 0 0 0.5rem;
   padding-left: 1.25rem;
-  line-height: 1.7;
-  color: var(--text);
+  line-height: 1.65;
+  color: var(--muted);
+  font-size: 1rem;
+  font-weight: 500;
 }
 
 .home-seo-block__list li {
@@ -1592,6 +1589,12 @@ a {
   position: relative;
   padding-left: 1.35rem;
   margin-bottom: 0.5rem;
+  color: var(--muted);
+}
+
+.home-seo-block__list--pointers li strong {
+  color: var(--text);
+  font-weight: 700;
 }
 
 .home-seo-block__list--pointers li::before {
@@ -1624,8 +1627,8 @@ a {
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  font-size: clamp(0.7rem, 0.85vw + 0.55rem, 0.95rem);
-  line-height: 1.45;
+  font-size: clamp(0.82rem, 0.95vw + 0.45rem, 1rem);
+  line-height: 1.5;
   padding-bottom: 2px;
 }
 
@@ -1637,13 +1640,6 @@ a {
   .home-seo-block__diff-columns {
     grid-template-columns: 1fr;
   }
-}
-
-.home-seo-block__why {
-  margin: 0;
-  font-size: 1rem;
-  line-height: 1.65;
-  color: var(--muted);
 }
 
 .section-page {

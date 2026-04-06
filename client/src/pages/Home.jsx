@@ -123,18 +123,25 @@ export default function Home() {
 
       <section
         className="section-block home-seo-block"
-        aria-labelledby="home-seo-mission-heading home-seo-different-heading"
+        aria-labelledby="home-seo-mission-heading home-seo-why-heading home-seo-different-heading"
       >
         <div className="container home-seo-block__inner">
           <div className="home-seo-block__mission">
-            <h2 id="home-seo-mission-heading" className="home-seo-block__mission-title">
+            <h2 id="home-seo-mission-heading" className="home-seo-block__title home-seo-block__title--lead">
               Our Mission
             </h2>
-            <p className="home-seo-block__local home-seo-block__local--mission">
+            <p className="home-seo-block__body home-seo-block__body--mission">
               To bridge the gap between education and employment by providing training that transforms learners into
               confident, job-ready professionals.
             </p>
           </div>
+          <h2 id="home-seo-why-heading" className="home-seo-block__title">
+            Why Choose Us?
+          </h2>
+          <p className="home-seo-block__body">
+            We provide practical, industry-focused training designed to make you job-ready from day one. Our approach
+            goes beyond traditional learning by combining real-world experience, expert guidance, and career support.
+          </p>
           <h2 id="home-seo-different-heading" className="home-seo-block__title">
             What Makes Us Different?
           </h2>
@@ -165,11 +172,6 @@ export default function Home() {
               </li>
             </ul>
           </div>
-          <h2 className="home-seo-block__title">Why Choose Us?</h2>
-          <p className="home-seo-block__why">
-            We provide practical, industry-focused training designed to make you job-ready from day one. Our approach
-            goes beyond traditional learning by combining real-world experience, expert guidance, and career support.
-          </p>
         </div>
       </section>
 
