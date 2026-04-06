@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { FaLaptopCode, FaBrain, FaUserGraduate, FaShieldAlt } from "react-icons/fa";
@@ -22,6 +22,29 @@ const slugify = (name) =>
     .replace(/^-|-$/g, "");
 
 export default function Home() {
+  const seoBgImages = useMemo(
+    () => [
+      "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=2000&q=60",
+      "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=2000&q=60",
+      "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=2000&q=60",
+    ],
+    []
+  );
+  const [seoBgIndex, setSeoBgIndex] = useState(0);
+
+  useEffect(() => {
+    const reduced =
+      typeof window !== "undefined" &&
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) return;
+
+    const id = window.setInterval(() => {
+      setSeoBgIndex((i) => (i + 1) % seoBgImages.length);
+    }, 4500);
+    return () => window.clearInterval(id);
+  }, [seoBgImages.length]);
+
   const [demoForm, setDemoForm] = useState({
     courseKey: "",
     firstName: "",
@@ -122,6 +145,18 @@ export default function Home() {
       </section>
 
       <section className="section-block home-seo-block" aria-labelledby="home-seo-courses-heading">
+        <div className="home-seo-block__bg" aria-hidden="true">
+          {seoBgImages.map((src, idx) => (
+            <img
+              key={src}
+              src={src}
+              alt=""
+              className={idx === seoBgIndex ? "is-active" : ""}
+              loading="lazy"
+              decoding="async"
+            />
+          ))}
+        </div>
         <div className="container home-seo-block__inner">
           <p className="home-seo-block__local">
             Best Technical Training Institute in India — Full Stack development, AI, Cyber Security, and Automation and
