@@ -168,7 +168,7 @@ export default function Home() {
             <span className="keyword-desc">Resume feedback</span>
           </div>
           <div className="keyword-box">
-            <span className="keyword-title">Learning Path</span>
+            <span className="keyword-title">Learning Path Guide</span>
             <span className="keyword-desc">Structured roadmap</span>
           </div>
           <div className="keyword-box">
