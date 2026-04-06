@@ -121,12 +121,17 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="section-block home-seo-block" aria-labelledby="home-seo-courses-heading">
+      <section className="section-block home-seo-block" aria-labelledby="home-seo-mission-heading">
         <div className="container home-seo-block__inner">
-          <p className="home-seo-block__local">
-            Best Technical Training Institute in India — Full Stack development, AI, Cyber Security, and Automation and
-            Robotics programs for students and working professionals.
-          </p>
+          <div className="home-seo-block__mission">
+            <h2 id="home-seo-mission-heading" className="home-seo-block__mission-title">
+              Our Mission
+            </h2>
+            <p className="home-seo-block__local home-seo-block__local--mission">
+              To bridge the gap between education and employment by providing training that transforms learners into
+              confident, job-ready professionals.
+            </p>
+          </div>
           <h2 id="home-seo-courses-heading" className="home-seo-block__title">
             Our courses
           </h2>

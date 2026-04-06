@@ -1536,6 +1536,18 @@ a {
   color: var(--muted);
 }
 
+.home-seo-block__mission-title {
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.25;
+}
+
+.home-seo-block__local--mission {
+  margin: 0 0 1.75rem;
+}
+
 .home-seo-block__title {
   margin: 1.75rem 0 0.75rem;
   font-size: clamp(1.25rem, 2.5vw, 1.5rem);
