@@ -70,10 +70,10 @@ export default function Home() {
             <div className="eyebrow">Bharat Skill Development Academy</div>
             <h1>Best Technical Training Institute in India</h1>
             <p>
-              Bharat Skill Development Academy offers industry-ready courses including Full Stack MERN Development,
-              AI &amp; Machine Learning, Cyber Security, and Automation and Robotics — PLC, SCADA, IoT, and smart
-              manufacturing. Learn from basics to advanced with structured paths in computer fundamentals, programming,
-              interview preparation, and hands-on projects.
+              Bharat Skill Development Academy offers industry-ready programs in AI, Machine Learning, Data Science, Full
+              Stack Development, Cyber Security, Computer Vision, and Automation &amp; Robotics. Learn through hands-on
+              projects, real-world applications, and structured learning paths designed to take you from fundamentals to
+              advanced expertise.
             </p>
             <div className="hero-actions">
               <Link to="/courses" className="primary-btn">Explore Courses</Link>
