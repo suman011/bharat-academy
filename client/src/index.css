@@ -945,13 +945,15 @@ a {
 
 .hero-banner-note {
   position: absolute;
-  left: 50%;
+  left: auto;
+  right: clamp(16px, 4vw, 48px);
   top: 18px;
-  transform: translateX(-50%);
-  width: min(1080px, calc(100% - 32px));
-  padding: 10px 14px;
-  border-radius: 999px;
-  text-align: center;
+  transform: none;
+  width: auto;
+  max-width: min(560px, calc(100% - 32px));
+  padding: 10px 0 10px 14px;
+  border-radius: 0;
+  text-align: right;
   font-weight: 750;
   letter-spacing: -0.01em;
   color: rgba(255, 255, 255, 0.92);
@@ -966,8 +968,9 @@ a {
 @media (max-width: 600px) {
   .hero-banner-note {
     top: 12px;
-    padding: 9px 12px;
-    border-radius: 18px;
+    right: clamp(12px, 3vw, 24px);
+    padding: 8px 0 8px 12px;
+    max-width: min(100%, calc(100% - 24px));
     font-size: 0.82rem;
     line-height: 1.25;
   }
