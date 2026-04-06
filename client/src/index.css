@@ -1526,7 +1526,9 @@ a {
 
 .home-seo-block__inner {
   max-width: min(720px, 100%);
-  margin: 0 auto;
+  margin: 0;
+  margin-left: clamp(16px, 4vw, 48px);
+  margin-right: auto;
 }
 
 .home-seo-block__local {
