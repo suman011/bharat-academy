@@ -202,11 +202,6 @@ export default function Navbar() {
           )}
         </nav>
         </div>
-        <div className="top-announcement" role="note" aria-label="Announcement">
-          <div className="container top-announcement__inner">
-            The Only Institute with Strong Industry Collaboration for On-Job Training &amp; Placement Support
-          </div>
-        </div>
       </header>
     </>
   );
