@@ -284,6 +284,10 @@ body::before {
     animation: none !important;
   }
 
+  .hero-banner-note {
+    animation: none !important;
+  }
+
   html {
     scroll-behavior: auto;
   }
@@ -943,6 +947,20 @@ a {
   overflow: hidden;
 }
 
+@keyframes heroBannerPulse {
+  0%,
+  100% {
+    opacity: 0.88;
+    text-shadow: 0 2px 14px rgba(2, 6, 23, 0.85);
+  }
+  50% {
+    opacity: 1;
+    text-shadow:
+      0 2px 18px rgba(2, 6, 23, 0.72),
+      0 0 22px rgba(255, 255, 255, 0.1);
+  }
+}
+
 .hero-banner-note {
   position: absolute;
   left: auto;
@@ -963,6 +981,8 @@ a {
   box-shadow: none;
   text-shadow: 0 2px 14px rgba(2, 6, 23, 0.85);
   z-index: 2;
+  animation: heroBannerPulse 3.2s ease-in-out infinite;
+  will-change: opacity;
   white-space: nowrap;
   font-size: clamp(0.68rem, 1.05vw + 0.55rem, 0.95rem);
   line-height: 1.2;
