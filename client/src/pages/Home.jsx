@@ -141,10 +141,10 @@ export default function Home() {
             <li>Cyber Security training</li>
             <li>Automation and Robotics — PLC, SCADA, IoT, robotics</li>
           </ul>
-          <h2 className="home-seo-block__title">Why choose us?</h2>
+          <h2 className="home-seo-block__title">Why Choose Us?</h2>
           <p className="home-seo-block__why">
-            We provide practical training, real-world projects, and career support to help you become job-ready — from
-            classroom concepts to interview readiness.
+            We provide practical, industry-focused training designed to make you job-ready from day one. Our approach
+            goes beyond traditional learning by combining real-world experience, expert guidance, and career support.
           </p>
         </div>
       </section>
