@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback, useRef } from "react";
+import { Helmet } from "react-helmet-async";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   FaArrowLeft,
@@ -937,6 +938,10 @@ export default function CourseDetail() {
   if (!course) {
     return (
       <section className="section-page course-detail-page">
+        <Helmet>
+          <title>Course not found | Bharat Skill Development Academy</title>
+          <meta name="robots" content="noindex" />
+        </Helmet>
         <div className="container">
           <h2>Course not found</h2>
           <p>The course you are looking for does not exist.</p>
@@ -948,8 +953,16 @@ export default function CourseDetail() {
     );
   }
 
+  const detailDesc = `${course.name} — ${course.level} level, ${course.duration}. ${course.category}. Enrol at Bharat Skill Development Academy.`;
+  const detailUrl = `https://bharatskillacademy.com/courses/${encodeURIComponent(course.slug)}`;
+
   return (
     <section className="section-page course-detail-page">
+      <Helmet>
+        <title>{`${course.name} | Bharat Skill Development Academy`}</title>
+        <meta name="description" content={detailDesc.slice(0, 160)} />
+        <link rel="canonical" href={detailUrl} />
+      </Helmet>
       <div className="container">
         <div className="course-detail-header">
           <h1>{course.name}</h1>

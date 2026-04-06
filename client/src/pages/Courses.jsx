@@ -13,6 +13,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import MenuItem from "@mui/material/MenuItem";
 import Popover from "@mui/material/Popover";
 import TextField from "@mui/material/TextField";
+import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "react-router-dom";
 import { apiUrl } from "../utils/apiBase";
 import { industry40Categories } from "../data/industry40Catalog";
@@ -288,6 +289,14 @@ export default function Courses() {
 
   return (
     <section className="section-page">
+      <Helmet>
+        <title>All Courses | Bharat Skill Development Academy</title>
+        <meta
+          name="description"
+          content="Browse IT, AI & Machine Learning, Cyber Security, and Automation and Robotics courses — levels from beginner to expert at Bharat Skill Development Academy."
+        />
+        <link rel="canonical" href="https://bharatskillacademy.com/courses" />
+      </Helmet>
       <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3 }, py: { xs: 2, md: 3 } }}>
         <Box className="page-head catalog-page-head theme-section-head">
           <span className="catalog-page-head__eyebrow">All Courses</span>

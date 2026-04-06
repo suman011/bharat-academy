@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { FaEnvelope, FaGlobe, FaPhoneAlt, FaWhatsapp } from "react-icons/fa";
 import {
   PHONE_COUNTRIES,
@@ -97,6 +98,14 @@ export default function Contact() {
 
   return (
     <section className="section-page contact-page">
+      <Helmet>
+        <title>Contact & Admission Enquiry | Bharat Skill Development Academy</title>
+        <meta
+          name="description"
+          content="Contact Bharat Skill Development Academy for course enquiry, admission, and demos — phone, WhatsApp, or form. Pune, India."
+        />
+        <link rel="canonical" href="https://bharatskillacademy.com/contact" />
+      </Helmet>
       <div className="container">
         <header className="page-head theme-section-head contact-page__intro">
           <span>We're here to help</span>

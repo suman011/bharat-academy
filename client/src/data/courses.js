@@ -1,4 +1,4 @@
-import { industry40Categories } from "./industry40Catalog";
+import { industry40Categories } from "./industry40Catalog.js";
 
 /** Core IT path: AI/ML first, then Basic → Intermediate → Advanced (first four groups in the catalog). */
 export const IT_CORE_CATEGORY_COUNT = 4;

@@ -1389,6 +1389,47 @@ a {
   z-index: 1;
 }
 
+.home-seo-block__inner {
+  max-width: min(720px, 100%);
+  margin: 0 auto;
+}
+
+.home-seo-block__local {
+  margin: 0 0 1.25rem;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--muted);
+}
+
+.home-seo-block__title {
+  margin: 1.75rem 0 0.75rem;
+  font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.home-seo-block__title:first-of-type {
+  margin-top: 0;
+}
+
+.home-seo-block__list {
+  margin: 0 0 0.5rem;
+  padding-left: 1.25rem;
+  line-height: 1.7;
+  color: var(--text);
+}
+
+.home-seo-block__list li {
+  margin-bottom: 0.35rem;
+}
+
+.home-seo-block__why {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--muted);
+}
+
 .section-page {
   padding: 64px 0 80px;
   background: linear-gradient(180deg, var(--surface-soft) 0%, var(--bg) 45%, var(--bg) 100%);

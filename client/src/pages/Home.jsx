@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { FaLaptopCode, FaBrain, FaUserGraduate, FaShieldAlt } from "react-icons/fa";
 import {
@@ -52,14 +53,24 @@ export default function Home() {
 
   return (
     <>
+      <Helmet>
+        <title>Best Computer Training Institute in India | Bharat Skill Development Academy</title>
+        <meta
+          name="description"
+          content="Top institute for Full Stack MERN, AI & Machine Learning, Cyber Security, and Automation and Robotics in Pune, India. Practical training, projects, and career support."
+        />
+        <link rel="canonical" href="https://bharatskillacademy.com/" />
+      </Helmet>
       <section className="hero-section">
         <div className="container hero-grid">
           <div className="hero-content theme-stagger-children">
             <div className="eyebrow">Bharat Skill Development Academy</div>
-            <h1>Build your career with modern tech, engineering, and industry-ready skills</h1>
+            <h1>Best Computer Training Institute in India</h1>
             <p>
-              Learn from basics to advanced level with structured courses in computer fundamentals,
-              programming, MERN stack, AI, cyber security, interview preparation, and Automation and Robotics.
+              Bharat Skill Development Academy offers industry-ready courses including Full Stack MERN Development,
+              AI &amp; Machine Learning, Cyber Security, and Automation and Robotics — PLC, SCADA, IoT, and smart
+              manufacturing. Learn from basics to advanced with structured paths in computer fundamentals, programming,
+              interview preparation, and hands-on projects.
             </p>
             <div className="hero-actions">
               <Link to="/courses" className="primary-btn">Explore Courses</Link>
@@ -104,6 +115,29 @@ export default function Home() {
               <small>Smart Factory Basics + Robotics + Vision AI</small>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="section-block home-seo-block" aria-labelledby="home-seo-courses-heading">
+        <div className="container home-seo-block__inner">
+          <p className="home-seo-block__local">
+            Best computer training institute in <strong>Pune</strong>, India — Full Stack development, AI, Cyber
+            Security, and Automation and Robotics programs for students and working professionals.
+          </p>
+          <h2 id="home-seo-courses-heading" className="home-seo-block__title">
+            Our courses
+          </h2>
+          <ul className="home-seo-block__list">
+            <li>Full Stack MERN Development</li>
+            <li>AI &amp; Machine Learning</li>
+            <li>Cyber Security training</li>
+            <li>Automation and Robotics — PLC, SCADA, IoT, robotics</li>
+          </ul>
+          <h2 className="home-seo-block__title">Why choose us?</h2>
+          <p className="home-seo-block__why">
+            We provide practical training, real-world projects, and career support to help you become job-ready — from
+            classroom concepts to interview readiness.
+          </p>
         </div>
       </section>
 

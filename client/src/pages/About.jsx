@@ -1,8 +1,17 @@
 import React from "react";
+import { Helmet } from "react-helmet-async";
 
 export default function About() {
   return (
     <section className="section-page about-page">
+      <Helmet>
+        <title>About Us | Bharat Skill Development Academy</title>
+        <meta
+          name="description"
+          content="About Bharat Skill Development Academy — computer training, programming, AI, cyber security, and Automation and Robotics skills for India."
+        />
+        <link rel="canonical" href="https://bharatskillacademy.com/about" />
+      </Helmet>
       <div className="container narrow about-page__wrap">
         <div className="about-page__grid">
           <header className="page-head about-page__head">
