@@ -138,29 +138,33 @@ export default function Home() {
           <h2 id="home-seo-different-heading" className="home-seo-block__title">
             What Makes Us Different?
           </h2>
-          <ul className="home-seo-block__list home-seo-block__list--pointers">
-            <li>
-              <strong>Strong Industry Collaboration</strong> – Learn aligned with real industry practices
-            </li>
-            <li>
-              <strong>On-Job Training Approach</strong> – Experience real work environment during training
-            </li>
-            <li>
-              <strong>Live Project Experience</strong> – Work on real-world projects for practical skills
-            </li>
-            <li>
-              <strong>Industry-Relevant Curriculum</strong> – Courses based on current market demand
-            </li>
-            <li>
-              <strong>Expert Mentorship</strong> – Learn from experienced industry professionals
-            </li>
-            <li>
-              <strong>Personalized Support</strong> – Get individual attention and doubt-solving help
-            </li>
-            <li>
-              <strong>End-to-End Career Support</strong> – From learning to placement guidance
-            </li>
-          </ul>
+          <div className="home-seo-block__diff-columns">
+            <ul className="home-seo-block__list home-seo-block__list--pointers">
+              <li>
+                <strong>Strong Industry Collaboration</strong> – Learn aligned with real industry practices
+              </li>
+              <li>
+                <strong>On-Job Training Approach</strong> – Experience real work environment during training
+              </li>
+              <li>
+                <strong>Live Project Experience</strong> – Work on real-world projects for practical skills
+              </li>
+              <li>
+                <strong>Industry-Relevant Curriculum</strong> – Courses based on current market demand
+              </li>
+            </ul>
+            <ul className="home-seo-block__list home-seo-block__list--pointers">
+              <li>
+                <strong>Expert Mentorship</strong> – Learn from experienced industry professionals
+              </li>
+              <li>
+                <strong>Personalized Support</strong> – Get individual attention and doubt-solving help
+              </li>
+              <li>
+                <strong>End-to-End Career Support</strong> – From learning to placement guidance
+              </li>
+            </ul>
+          </div>
           <h2 className="home-seo-block__title">Why Choose Us?</h2>
           <p className="home-seo-block__why">
             We provide practical, industry-focused training designed to make you job-ready from day one. Our approach

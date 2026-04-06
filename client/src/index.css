@@ -1605,6 +1605,23 @@ a {
   line-height: 1.65;
 }
 
+.home-seo-block__diff-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(1.25rem, 4vw, 2.75rem);
+  align-items: start;
+}
+
+.home-seo-block__diff-columns .home-seo-block__list {
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .home-seo-block__diff-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
 .home-seo-block__why {
   margin: 0;
   font-size: 1rem;
