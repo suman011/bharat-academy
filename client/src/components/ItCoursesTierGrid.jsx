@@ -2,7 +2,7 @@ import React from "react";
 import { FaCheckCircle } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { getCourseKeyPoints } from "../utils/courseKeyPoints";
-import { getCourseImage } from "../utils/courseImages";
+import { getCourseImage, getCourseImageFallback } from "../utils/courseImages";
 
 const slugify = (name) =>
   name
@@ -60,6 +60,9 @@ export default function ItCoursesTierGrid({
             decoding="async"
             width={640}
             height={400}
+            onError={(e) => {
+              e.currentTarget.src = getCourseImageFallback(item.name, "compact");
+            }}
           />
         </div>
         <div className="it-tier-card__mini-content">

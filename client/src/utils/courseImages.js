@@ -332,23 +332,203 @@ const IMAGE_VARIANT_PARAMS = {
   detail: "w=1280&h=720&fit=crop&auto=format&q=82",
 };
 
+const SOURCE_DIMS = {
+  card: { w: 960, h: 540 },
+  compact: { w: 640, h: 400 },
+  thumb: { w: 256, h: 256 },
+  detail: { w: 1280, h: 720 },
+};
+
+function hash32(input) {
+  // small, stable, non-crypto hash for unsplash sig + gradients
+  let h = 2166136261;
+  for (let i = 0; i < input.length; i += 1) {
+    h ^= input.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h >>> 0) || 1;
+}
+
+// Avoid duplicates on a page: assign each cover once if possible.
+const _coverAssignedByCourse = new Map(); // courseName(lower) -> cover path
+const _coverUsed = new Set(); // cover path
+
+function pickFromPool(courseName, pool) {
+  const key = String(courseName || "").toLowerCase();
+  if (_coverAssignedByCourse.has(key)) return _coverAssignedByCourse.get(key);
+
+  const seed = hash32(key);
+  const start = seed % pool.length;
+  let chosen = pool[start];
+
+  // Try to find an unused cover to reduce duplicates.
+  for (let i = 0; i < pool.length; i += 1) {
+    const candidate = pool[(start + i) % pool.length];
+    if (!_coverUsed.has(candidate)) {
+      chosen = candidate;
+      break;
+    }
+  }
+
+  _coverAssignedByCourse.set(key, chosen);
+  _coverUsed.add(chosen);
+  return chosen;
+}
+
+function pickLocalCover(courseName) {
+  const n = String(courseName || "").toLowerCase();
+
+  // --- AI / Data ---
+  if (n.includes("machine learning") || n.includes("ml"))
+    return pickFromPool(courseName, ["/course-covers/cover-ml.jpg", "/course-covers/cover-ml2.jpg", "/course-covers/cover-ml3.jpg"]);
+  if (n.includes("ai"))
+    return pickFromPool(courseName, ["/course-covers/cover-ai.jpg", "/course-covers/cover-ai2.jpg", "/course-covers/cover-ai3.jpg"]);
+  if (n.includes("data science"))
+    return pickFromPool(courseName, [
+      "/course-covers/cover-ml.jpg",
+      "/course-covers/cover-ml2.jpg",
+      "/course-covers/cover-ml3.jpg",
+      "/course-covers/cover-analytics.jpg",
+      "/course-covers/cover-analytics2.jpg",
+      "/course-covers/cover-analytics3.jpg",
+    ]);
+  if (n.includes("data analyst") || n.includes("data analytics") || n.includes("power bi"))
+    return pickFromPool(courseName, [
+      "/course-covers/cover-analytics.jpg",
+      "/course-covers/cover-analytics2.jpg",
+      "/course-covers/cover-analytics3.jpg",
+      "/course-covers/cover-excel.jpg",
+    ]);
+
+  // --- Programming / Web ---
+  if (n.includes("python"))
+    return pickFromPool(courseName, ["/course-covers/cover-python.jpg", "/course-covers/cover-python2.jpg", "/course-covers/cover-python3.jpg"]);
+  if (n.includes("data structures") || n.includes("(dsa)") || n.includes("dsa")) return "/course-covers/cover-dsa.jpg";
+  if (n.includes("react"))
+    return pickFromPool(courseName, ["/course-covers/cover-react.jpg", "/course-covers/cover-react2.jpg"]);
+  if (n.includes("full stack"))
+    return pickFromPool(courseName, [
+      "/course-covers/cover-web.jpg",
+      "/course-covers/cover-web2.jpg",
+      "/course-covers/cover-web3.jpg",
+      "/course-covers/cover-web4.jpg",
+      "/course-covers/cover-web5.jpg",
+    ]);
+  if (n.includes("next.js") || n.includes("nextjs") || n.includes("html") || n.includes("css") || n.includes("bootstrap"))
+    return pickFromPool(courseName, [
+      "/course-covers/cover-web.jpg",
+      "/course-covers/cover-web2.jpg",
+      "/course-covers/cover-web3.jpg",
+      "/course-covers/cover-web4.jpg",
+      "/course-covers/cover-web5.jpg",
+    ]);
+  if (n.includes("api") || n.includes("node") || n.includes("express"))
+    return pickFromPool(courseName, ["/course-covers/cover-node.jpg", "/course-covers/cover-node2.jpg"]);
+  if (n.includes("git") || n.includes("github"))
+    return pickFromPool(courseName, ["/course-covers/cover-devops.jpg", "/course-covers/cover-devops2.jpg"]);
+
+  // --- Systems / Infra ---
+  if (n.includes("operating system")) return "/course-covers/cover-os.jpg";
+  if (n.includes("computer networks") || (n.includes("network") && n.includes("computer")))
+    return "/course-covers/cover-networks.jpg";
+  if (n.includes("database") || n.includes("sql") || n.includes("mongodb"))
+    return pickFromPool(courseName, ["/course-covers/cover-db.jpg", "/course-covers/cover-db2.jpg"]);
+  if (n.includes("aws") || n.includes("cloud") || n.includes("s3") || n.includes("ec2") || n.includes("lambda"))
+    return pickFromPool(courseName, ["/course-covers/cover-cloud.jpg", "/course-covers/cover-cloud2.jpg"]);
+  if (n.includes("ci/cd") || n.includes("devops") || n.includes("github actions"))
+    return pickFromPool(courseName, ["/course-covers/cover-devops.jpg", "/course-covers/cover-devops2.jpg"]);
+
+  // --- Security ---
+  if (n.includes("cyber") || n.includes("security") || n.includes("hacking"))
+    return pickFromPool(courseName, [
+      "/course-covers/cover-cyber.jpg",
+      "/course-covers/cover-cyber2.jpg",
+      "/course-covers/cover-cyber3.jpg",
+      "/course-covers/cover-cyber4.jpg",
+      "/course-covers/cover-cyber5.jpg",
+    ]);
+
+  // --- Office / Basics ---
+  if (n.includes("excel"))
+    return pickFromPool(courseName, [
+      "/course-covers/cover-excel.jpg",
+      "/course-covers/cover-analytics.jpg",
+      "/course-covers/cover-analytics2.jpg",
+      "/course-covers/cover-analytics3.jpg",
+    ]);
+  if (n.includes("ms office") || n.includes("powerpoint") || n.includes("word"))
+    return pickFromPool(courseName, ["/course-covers/cover-office.jpg", "/course-covers/cover-office2.jpg"]);
+  if (n.includes("computer fundamentals") || n.includes("basic computer"))
+    return pickFromPool(courseName, ["/course-covers/cover-web.jpg", "/course-covers/cover-web2.jpg", "/course-covers/cover-web4.jpg"]);
+  if (n.includes("resume") || n.includes("interview")) return "/course-covers/cover-resume.jpg";
+  if (n.includes("spoken english") || n.includes("communication")) return "/course-covers/cover-communication.jpg";
+  if (n.includes("ui/ux") || n.includes("figma") || n.includes("canva") || n.includes("graphic design"))
+    return pickFromPool(courseName, ["/course-covers/cover-design.jpg", "/course-covers/cover-web3.jpg", "/course-covers/cover-web4.jpg"]);
+  if (n.includes("kids") || n.includes("scratch") || n.includes("drawing") || n.includes("handwriting"))
+    return "/course-covers/cover-kids.jpg";
+
+  // --- Automation & Robotics ---
+  if (n.includes("plc")) return "/course-covers/cover-plc.jpg";
+  if (n.includes("machine vision") || n.includes("vision ai") || n.includes("computer vision"))
+    return pickFromPool(courseName, ["/course-covers/cover-vision.jpg", "/course-covers/cover-industry2.jpg", "/course-covers/cover-industry3.jpg"]);
+  if (n.includes("iot") || n.includes("iiot") || n.includes("mqtt") || n.includes("opc"))
+    return pickFromPool(courseName, ["/course-covers/cover-iot.jpg", "/course-covers/cover-industry.jpg", "/course-covers/cover-industry2.jpg"]);
+  if (n.includes("safety") || n.includes("standards")) return "/course-covers/cover-safety.jpg";
+  if (n.includes("electrical") || n.includes("electronics")) return "/course-covers/cover-electronics.jpg";
+  if (n.includes("scada") || n.includes("hmi") || n.includes("automation"))
+    return pickFromPool(courseName, ["/course-covers/cover-industry.jpg", "/course-covers/cover-industry2.jpg", "/course-covers/cover-industry3.jpg"]);
+  if (n.includes("robot") || n.includes("cobot") || n.includes("agv") || n.includes("amr"))
+    return pickFromPool(courseName, ["/course-covers/cover-robotics.jpg", "/course-covers/cover-robotics2.jpg", "/course-covers/cover-robotics3.jpg"]);
+  if (n.includes("testing")) return "/course-covers/cover-testing.jpg";
+
+  return null;
+}
+
 /**
+ * Local SVG fallback (used when a remote image fails to load).
+ * @param {string} courseName
+ * @param {"card"|"compact"|"thumb"|"detail"} [variant="card"]
+ */
+export function getCourseImageFallback(courseName, variant = "card") {
+  const key = String(courseName || "").trim() || "Course";
+  const seed = hash32(key);
+  const { w, h } = SOURCE_DIMS[variant] || SOURCE_DIMS.card;
+  const a = (seed % 360);
+  const b = ((seed * 7) % 360);
+  const label = key.length > 38 ? `${key.slice(0, 38)}…` : key;
+  const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="hsl(${a} 80% 60%)"/>
+      <stop offset="1" stop-color="hsl(${b} 80% 45%)"/>
+    </linearGradient>
+    <radialGradient id="r" cx="30%" cy="30%" r="80%">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.22"/>
+      <stop offset="0.55" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="${w}" height="${h}" fill="url(#g)"/>
+  <rect width="${w}" height="${h}" fill="url(#r)"/>
+  <g opacity="0.9">
+    <rect x="${Math.round(w * 0.06)}" y="${Math.round(h * 0.70)}" width="${Math.round(w * 0.88)}" height="${Math.round(h * 0.22)}" rx="16" fill="rgba(255,255,255,0.16)"/>
+    <text x="${Math.round(w * 0.09)}" y="${Math.round(h * 0.82)}" fill="rgba(255,255,255,0.92)" font-family="Plus Jakarta Sans, system-ui, -apple-system, Segoe UI, sans-serif" font-size="${Math.max(18, Math.round(w * 0.035))}" font-weight="800">${label.replace(/&/g, "&amp;")}</text>
+  </g>
+</svg>`;
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+}
+
+/**
+ * Returns a unique, topic-relevant cover image.
+ * NOTE: External image CDNs (like Unsplash) can be blocked on some networks/environments.
+ * To ensure the UI always renders without broken thumbnails, we use a local SVG cover as the primary source.
+ *
  * @param {string} courseName
  * @param {"card"|"compact"|"thumb"|"detail"} [variant="card"]
  */
 export function getCourseImage(courseName, variant = "card") {
-  const key = (courseName || "").toLowerCase().trim();
-  let url = BY_COURSE_NAME_MERGED[key] || null;
-  if (!url) {
-    for (const { test, url: u } of KEYWORD_FALLBACK) {
-      if (test(key)) {
-        url = u;
-        break;
-      }
-    }
-  }
-  if (!url) url = DEFAULT;
-  const base = url.split("?")[0];
-  const params = IMAGE_VARIANT_PARAMS[variant] || IMAGE_VARIANT_PARAMS.card;
-  return `${base}?${params}`;
+  // Prefer local bundled images to avoid external CDN blocks.
+  // If a local cover isn't matched, use an SVG fallback.
+  const local = pickLocalCover(courseName);
+  return local || getCourseImageFallback(courseName, variant);
 }

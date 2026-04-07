@@ -25,7 +25,7 @@ import {
 } from "react-icons/fa";
 import { courseCategories } from "../data/courses";
 import { apiUrl } from "../utils/apiBase";
-import { getCourseImage } from "../utils/courseImages";
+import { getCourseImage, getCourseImageFallback } from "../utils/courseImages";
 import { getCurrentUser, onAuthChanged } from "../utils/authStore";
 import { useCart } from "../context/CartContext";
 import { createPortal } from "react-dom";
@@ -1145,6 +1145,9 @@ export default function CourseDetail() {
                 decoding="async"
                 width={1280}
                 height={720}
+                onError={(e) => {
+                  e.currentTarget.src = getCourseImageFallback(course.name, "detail");
+                }}
               />
             </div>
           </div>

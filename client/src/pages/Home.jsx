@@ -270,16 +270,16 @@ export default function Home() {
           <div className="why-card">
             <h3>Why students choose this academy</h3>
             <ul>
-              <li>Beginner to advanced learning path</li>
-              <li>Industry-oriented technology curriculum</li>
-              <li>Practical learning with projects</li>
-              <li>Job preparation and interview guidance</li>
-              <li>Future skills in AI and Automation and Robotics</li>
+              <li>Structured roadmap from fundamentals to advanced mastery</li>
+              <li>Industry-aligned curriculum built for real job roles</li>
+              <li>Hands-on projects, labs, and portfolio-ready work</li>
+              <li>Career support: resume, interviews, and placement guidance</li>
+              <li>Modern skills across AI, Automation &amp; Robotics</li>
             </ul>
           </div>
           <div className="why-card accent">
             <h3>
-              <span aria-hidden="true">👉</span> Skills That Get You Hired
+              Skills That Get You Hired
             </h3>
             <p>
               Learn in-demand technologies with hands-on experience, live projects, and career support designed for real

@@ -1,7 +1,7 @@
 import React from "react";
 import { FaCheckCircle } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import { getCourseImage } from "../utils/courseImages";
+import { getCourseImage, getCourseImageFallback } from "../utils/courseImages";
 
 const slugify = (name) =>
   name
@@ -47,6 +47,9 @@ export default function CourseCategoryCard({
                     decoding="async"
                     width={256}
                     height={256}
+                    onError={(e) => {
+                      e.currentTarget.src = getCourseImageFallback(item.name, "thumb");
+                    }}
                   />
                 ) : null}
                 <FaCheckCircle aria-hidden />

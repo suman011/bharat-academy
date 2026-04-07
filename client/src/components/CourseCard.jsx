@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaCheckCircle, FaHeart, FaRegHeart, FaTag } from "react-icons/fa";
 import { apiUrl } from "../utils/apiBase";
-import { getCourseImage } from "../utils/courseImages";
+import { getCourseImage, getCourseImageFallback } from "../utils/courseImages";
 import { getCourseKeyPoints } from "../utils/courseKeyPoints";
 
 export default function CourseCard({ course, revealIndex = 0, inWishlist = false, ratingSummary }) {
@@ -24,6 +24,9 @@ export default function CourseCard({ course, revealIndex = 0, inWishlist = false
             decoding="async"
             width={960}
             height={540}
+            onError={(e) => {
+              e.currentTarget.src = getCourseImageFallback(course.name, "card");
+            }}
           />
           <div className="course-card-overlay" />
           <button
