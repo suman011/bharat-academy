@@ -378,6 +378,15 @@ function pickFromPool(courseName, pool) {
 function pickLocalCover(courseName) {
   const n = String(courseName || "").toLowerCase();
 
+  // --- Programming languages (order matters: JavaScript before Java; C++ before C) ---
+  if (n.includes("javascript") || n.includes("es6") || n.includes("typescript"))
+    return pickFromPool(courseName, ["/course-covers/cover-js.jpg", "/course-covers/cover-js2.jpg"]);
+  if (n.includes("c++") || n.includes("c ++")) return "/course-covers/cover-cpp.jpg";
+  if (n.includes("c programming") || /^c\s+programming\b/.test(n)) return "/course-covers/cover-c.jpg";
+  if (n.includes("java") && !n.includes("javascript")) {
+    return pickFromPool(courseName, ["/course-covers/cover-java.jpg", "/course-covers/cover-node.jpg"]);
+  }
+
   // --- AI / Data ---
   if (n.includes("machine learning") || n.includes("ml"))
     return pickFromPool(courseName, ["/course-covers/cover-ml.jpg", "/course-covers/cover-ml2.jpg", "/course-covers/cover-ml3.jpg"]);
@@ -422,10 +431,24 @@ function pickLocalCover(courseName) {
       "/course-covers/cover-web4.jpg",
       "/course-covers/cover-web5.jpg",
     ]);
+  if (n.includes("web design"))
+    return pickFromPool(courseName, [
+      "/course-covers/cover-web.jpg",
+      "/course-covers/cover-web2.jpg",
+      "/course-covers/cover-design.jpg",
+      "/course-covers/cover-web4.jpg",
+    ]);
+  if (n.includes("coding for beginners") || (n.includes("beginner") && n.includes("coding")))
+    return pickFromPool(courseName, [
+      "/course-covers/cover-js.jpg",
+      "/course-covers/cover-js2.jpg",
+      "/course-covers/cover-web3.jpg",
+      "/course-covers/cover-python.jpg",
+    ]);
   if (n.includes("api") || n.includes("node") || n.includes("express"))
     return pickFromPool(courseName, ["/course-covers/cover-node.jpg", "/course-covers/cover-node2.jpg"]);
   if (n.includes("git") || n.includes("github"))
-    return pickFromPool(courseName, ["/course-covers/cover-devops.jpg", "/course-covers/cover-devops2.jpg"]);
+    return pickFromPool(courseName, ["/course-covers/cover-devops.jpg", "/course-covers/cover-devops2.jpg", "/course-covers/cover-git2.jpg"]);
 
   // --- Systems / Infra ---
   if (n.includes("operating system")) return "/course-covers/cover-os.jpg";
@@ -467,12 +490,42 @@ function pickLocalCover(courseName) {
   if (n.includes("kids") || n.includes("scratch") || n.includes("drawing") || n.includes("handwriting"))
     return "/course-covers/cover-kids.jpg";
 
-  // --- Automation & Robotics ---
+  // --- Automation & Robotics (specific topics before generic "automation") ---
+  if (n.includes("smart manufacturing")) return "/course-covers/cover-smart-mfg.jpg";
+  if (n.includes("lean manufacturing") || n.includes("six sigma") || n.includes("5s") || n.includes("kaizen"))
+    return "/course-covers/cover-lean.jpg";
+  if (
+    n.includes("production planning") ||
+    n.includes("smart factory") ||
+    n.includes("value stream") ||
+    (n.includes("planning") && n.includes("factory"))
+  ) {
+    return pickFromPool(courseName, ["/course-covers/cover-production.jpg", "/course-covers/cover-smart-mfg.jpg", "/course-covers/cover-industry.jpg"]);
+  }
+  if (n.includes("advanced sensors") || (n.includes("signal processing") && n.includes("sensor"))) {
+    return pickFromPool(courseName, ["/course-covers/cover-instrumentation.jpg", "/course-covers/cover-sensors.jpg", "/course-covers/cover-electronics.jpg"]);
+  }
+  if (n.includes("sensor") || n.includes("actuator")) {
+    return pickFromPool(courseName, ["/course-covers/cover-sensors.jpg", "/course-covers/cover-electronics.jpg", "/course-covers/cover-instrumentation.jpg"]);
+  }
+  if (n.includes("instrumentation")) return "/course-covers/cover-instrumentation.jpg";
+  if (n.includes("mechatronics")) return "/course-covers/cover-mechatronics.jpg";
+  if (n.includes("data acquisition") || n.includes("monitoring systems") || n.includes("daq") || n.includes("telemetry")) {
+    return pickFromPool(courseName, ["/course-covers/cover-daq.jpg", "/course-covers/cover-analytics.jpg", "/course-covers/cover-analytics2.jpg"]);
+  }
+
   if (n.includes("plc")) return "/course-covers/cover-plc.jpg";
   if (n.includes("machine vision") || n.includes("vision ai") || n.includes("computer vision"))
     return pickFromPool(courseName, ["/course-covers/cover-vision.jpg", "/course-covers/cover-industry2.jpg", "/course-covers/cover-industry3.jpg"]);
   if (n.includes("iot") || n.includes("iiot") || n.includes("mqtt") || n.includes("opc"))
     return pickFromPool(courseName, ["/course-covers/cover-iot.jpg", "/course-covers/cover-industry.jpg", "/course-covers/cover-industry2.jpg"]);
+  if (n.includes("edge computing") || (/\bedge\b/.test(n) && n.includes("manufacturing")))
+    return pickFromPool(courseName, [
+      "/course-covers/cover-iot.jpg",
+      "/course-covers/cover-industry2.jpg",
+      "/course-covers/cover-cloud.jpg",
+      "/course-covers/cover-industry3.jpg",
+    ]);
   if (n.includes("safety") || n.includes("standards")) return "/course-covers/cover-safety.jpg";
   if (n.includes("electrical") || n.includes("electronics")) return "/course-covers/cover-electronics.jpg";
   if (n.includes("scada") || n.includes("hmi") || n.includes("automation"))

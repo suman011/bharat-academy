@@ -1,8 +1,9 @@
 /**
  * API helper.
  *
- * - **Local dev:** `http://localhost:5002` when not in production.
- * - **Production build:** same-origin paths (e.g. `/auth/signup`) if `VITE_API_BASE` is unset.
+ * - **Vite dev (`npm run dev` in client / repo root):** same-origin `/api/...` so the dev-server proxy
+ *   forwards to the backend (see `vite.config.js`). Avoids cross-origin cookie/CORS issues.
+ * - **Production build on Express:** same-origin paths (e.g. `/auth/signup`) if `VITE_API_BASE` is unset.
  * - **Split hosting** (SPA on your domain, API on Render): set `VITE_API_BASE=https://….onrender.com`
  *   at **build** time (no trailing slash).
  */
@@ -32,6 +33,10 @@ export function apiUrl(path) {
   // Real users on https://yourdomain.com must never hit localhost (broken deploy / old bundle logic).
   if (live) {
     return p;
+  }
+
+  if (import.meta.env.DEV) {
+    return `/api${p}`;
   }
 
   if (import.meta.env.PROD) {
