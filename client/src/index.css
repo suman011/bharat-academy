@@ -951,17 +951,20 @@ a {
   overflow: hidden;
 }
 
-@keyframes heroBannerPulse {
-  0%,
-  100% {
-    opacity: 0.88;
-    text-shadow: 0 2px 14px rgba(2, 6, 23, 0.85);
-  }
-  50% {
+/* Hero tagline: continuous hard blink (on ↔ off, no long pause) */
+@keyframes heroBannerAttention {
+  0% {
     opacity: 1;
+    filter: brightness(1.08);
     text-shadow:
-      0 2px 18px rgba(2, 6, 23, 0.72),
-      0 0 22px rgba(255, 255, 255, 0.1);
+      0 2px 14px rgba(2, 6, 23, 0.9),
+      0 0 22px rgba(255, 255, 255, 0.42),
+      0 0 38px rgba(129, 140, 248, 0.28);
+  }
+  100% {
+    opacity: 0.28;
+    filter: brightness(1);
+    text-shadow: 0 2px 12px rgba(2, 6, 23, 0.95);
   }
 }
 
@@ -970,7 +973,7 @@ a {
   left: auto;
   right: clamp(16px, 4vw, 48px);
   top: 18px;
-  transform: none;
+  transform-origin: right center;
   width: max-content;
   max-width: calc(100vw - clamp(32px, 8vw, 96px));
   padding: 10px 0 10px 14px;
@@ -978,14 +981,16 @@ a {
   text-align: right;
   font-weight: 750;
   letter-spacing: -0.01em;
-  color: rgba(255, 255, 255, 0.92);
+  color: rgba(255, 255, 255, 0.95);
   background: transparent;
   border: 0;
   backdrop-filter: none;
   box-shadow: none;
-  text-shadow: 0 2px 14px rgba(2, 6, 23, 0.85);
+  text-shadow:
+    0 2px 14px rgba(2, 6, 23, 0.9),
+    0 0 18px rgba(255, 255, 255, 0.2);
   z-index: 2;
-  animation: heroBannerPulse 3.2s ease-in-out infinite;
+  animation: heroBannerAttention 0.95s steps(2, jump-none) infinite;
   will-change: opacity;
   white-space: nowrap;
   font-size: clamp(0.68rem, 1.05vw + 0.55rem, 0.95rem);
