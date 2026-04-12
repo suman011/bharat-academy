@@ -1,0 +1,15 @@
+{
+  "appId": "com.bharatskillacademy.app",
+  "appName": "Bharat Skill Academy",
+  "webDir": "dist",
+  "android": {
+    "allowMixedContent": false,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false
+  },
+  "server": {
+    "androidScheme": "https",
+    "url": "https://bharatskillacademy.com",
+    "cleartext": false
+  }
+}

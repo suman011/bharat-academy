@@ -108,8 +108,9 @@ export default function Navbar() {
             <img
               className="brand-logo-img"
               src={BRAND_LOGO_SRC}
-              height={48}
-              alt=""
+              height={52}
+              width={52}
+              alt="Bharat Skill Development Academy"
               decoding="async"
             />
           </span>

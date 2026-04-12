@@ -191,7 +191,7 @@ const KEYWORD_FALLBACK = [
   {
     test: (n) =>
       (n.includes("automation") ||
-        n.includes("control systems") ||
+      n.includes("control systems") ||
         n.includes("controller") ||
         (n.includes("control") && n.includes("system"))) &&
       !n.includes("robot") &&

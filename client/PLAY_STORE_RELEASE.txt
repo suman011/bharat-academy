@@ -1,0 +1,61 @@
+Bharat Skill Academy — Google Play release checklist
+======================================================
+
+Privacy policy (required)
+-------------------------
+Use this public URL in Play Console → App content → Privacy policy:
+  https://bharatskillacademy.com/privacy
+
+Deploy your website with the latest build before submitting the app, so that URL works.
+
+
+One-time: Google Play developer account
+---------------------------------------
+https://play.google.com/console — register ($25 one-time), accept policies.
+
+
+Build the Android App Bundle (AAB)
+-----------------------------------
+1) Install Android Studio (SDK + JDK 17).
+2) In PowerShell:
+   cd client
+   npm install
+   npm run cap:sync
+   npm run cap:open
+3) Android Studio: Build → Generate Signed App Bundle or APK
+   → Android App Bundle (recommended for Play).
+4) Create or choose a keystore. Back up the keystore file and passwords securely.
+   Enable Google Play App Signing when offered.
+
+
+Version numbers
+---------------
+Before each new Play upload, bump in android/app/build.gradle:
+  versionCode    → integer, must increase every upload (e.g. 2, 3, 4…)
+  versionName    → user-visible label (e.g. "1.0.1")
+
+Then: npm run cap:sync (or at least npx cap sync android) and rebuild the bundle.
+
+
+Play Console — store listing
+-----------------------------
+- App name: Bharat Skill Academy (or full legal name if you prefer)
+- Short description: ~80 chars
+- Full description: what users get (courses, login, enrolments)
+- Screenshots: phone (required), 7-inch tablet optional
+- Feature graphic: 1024 x 500 px
+- App icon: 512 x 512 px (high-res icon)
+
+
+Data safety & declarations
+--------------------------
+Complete the Data safety form honestly (account data, payments, etc.).
+Link the same privacy policy URL.
+
+If the app mainly loads https://bharatskillacademy.com in a WebView, say that users sign in
+on your site and data is handled as described in the privacy policy.
+
+
+After approval
+--------------
+Track reviews, crashes (Play Console → Android vitals), and update versionCode for fixes.

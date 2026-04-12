@@ -22,6 +22,7 @@ import Orders from "./pages/Orders";
 import AdminPanel from "./pages/AdminPanel";
 import Wishlist from "./pages/Wishlist";
 import Notifications from "./pages/Notifications";
+import Privacy from "./pages/Privacy";
 import "./index.css";
 
 export default function App() {
@@ -38,6 +39,7 @@ export default function App() {
             <Route path="/courses/:courseSlug" element={<CourseDetail />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/privacy" element={<Privacy />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/enrollments" element={<Enrollments />} />

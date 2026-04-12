@@ -11,6 +11,12 @@ dist/
 build/
 client/dist/
 
+# Capacitor Android (regenerate with: cd client && npm run cap:sync)
+client/android/app/build/
+client/android/.gradle/
+client/android/local.properties
+client/android/app/src/main/assets/public/
+
 # Logs & OS
 *.log
 .DS_Store

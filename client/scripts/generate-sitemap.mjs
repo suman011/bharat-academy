@@ -18,6 +18,7 @@ const staticUrls = [
   { loc: `${BASE}/courses`, changefreq: "weekly", priority: "0.9" },
   { loc: `${BASE}/about`, changefreq: "monthly", priority: "0.7" },
   { loc: `${BASE}/contact`, changefreq: "monthly", priority: "0.7" },
+  { loc: `${BASE}/privacy`, changefreq: "yearly", priority: "0.5" },
 ];
 
 const slugSet = new Set();
