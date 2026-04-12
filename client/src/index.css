@@ -1480,7 +1480,7 @@ a {
   z-index: 1;
 }
 
-/* Home SEO block: soft lavender → cyan mesh (matches keywords-section palette) */
+/* Home SEO block: soft frame; each carousel slide has its own photo + gradient */
 .section-block.home-seo-block {
   background:
     linear-gradient(
@@ -1511,9 +1511,9 @@ a {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 70% 60% at 8% 42%, rgba(79, 70, 229, 0.11), transparent 58%),
-    radial-gradient(ellipse 60% 55% at 92% 28%, rgba(8, 145, 178, 0.1), transparent 52%),
-    radial-gradient(ellipse 55% 45% at 50% 88%, rgba(124, 58, 237, 0.07), transparent 55%);
+    radial-gradient(ellipse 70% 60% at 8% 42%, rgba(79, 70, 229, 0.16), transparent 58%),
+    radial-gradient(ellipse 60% 55% at 92% 28%, rgba(8, 145, 178, 0.14), transparent 52%),
+    radial-gradient(ellipse 55% 45% at 50% 88%, rgba(124, 58, 237, 0.1), transparent 55%);
   animation: homeSeoAmbient 22s ease-in-out infinite alternate;
 }
 
@@ -1523,7 +1523,7 @@ a {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.45;
+  opacity: 0.58;
   background-image:
     radial-gradient(rgba(79, 70, 229, 0.07) 1px, transparent 1px),
     radial-gradient(rgba(8, 145, 178, 0.05) 1px, transparent 1px);
@@ -1552,6 +1552,98 @@ a {
   padding-left: clamp(16px, 4vw, 48px);
   padding-right: clamp(16px, 4vw, 48px);
   box-sizing: border-box;
+}
+
+/* --- Home mission / why / different carousel --- */
+.home-seo-carousel {
+  position: relative;
+  padding: 0.25rem 0 0.5rem;
+}
+
+.home-seo-carousel__viewport {
+  overflow: hidden;
+  width: 100%;
+}
+
+.home-seo-carousel__track {
+  display: flex;
+  width: 100%;
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.home-seo-carousel__slide {
+  flex: 0 0 100%;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  position: relative;
+  border-radius: 22px;
+  overflow: hidden;
+  padding: clamp(1.35rem, 4vw, 2.35rem);
+  min-height: min(280px, 48vh);
+  background: linear-gradient(
+    125deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(238, 242, 255, 0.92) 38%,
+    rgba(240, 249, 255, 0.9) 68%,
+    rgba(224, 242, 254, 0.94) 100%
+  );
+  box-shadow:
+    0 10px 36px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.home-seo-carousel__slide .home-seo-block__title--lead {
+  margin-top: 0;
+}
+
+.home-seo-carousel__slide .home-seo-block__body--mission {
+  white-space: normal;
+  overflow-x: visible;
+}
+
+.home-seo-carousel__controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.home-seo-carousel__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  background: rgba(79, 70, 229, 0.28);
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.home-seo-carousel__dot:hover {
+  background: rgba(79, 70, 229, 0.45);
+}
+
+.home-seo-carousel__dot.is-active {
+  background: var(--primary);
+  transform: scale(1.28);
+}
+
+.home-seo-carousel__dot:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-seo-carousel__track {
+    transition: none;
+  }
+
+  .home-seo-carousel__dot {
+    transition: none;
+  }
 }
 
 .home-seo-block__title {

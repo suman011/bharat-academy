@@ -13,6 +13,7 @@ import { industry40Categories, INDUSTRY40_CATEGORY_COUNT } from "../data/industr
 import { courseCategories, IT_CORE_CATEGORY_COUNT } from "../data/courses";
 import CourseCategoryCard from "../components/CourseCategoryCard";
 import ItCoursesTierGrid from "../components/ItCoursesTierGrid";
+import HomeMissionCarousel from "../components/HomeMissionCarousel";
 import { apiUrl } from "../utils/apiBase";
 
 const slugify = (name) =>
@@ -122,57 +123,9 @@ export default function Home() {
         </div>
       </section>
 
-      <section
-        className="section-block home-seo-block"
-        aria-labelledby="home-seo-mission-heading home-seo-why-heading home-seo-different-heading"
-      >
+      <section className="section-block home-seo-block">
         <div className="container home-seo-block__inner">
-          <div className="home-seo-block__mission">
-            <h2 id="home-seo-mission-heading" className="home-seo-block__title home-seo-block__title--lead">
-              Our Mission
-            </h2>
-            <p className="home-seo-block__body home-seo-block__body--mission">
-              To bridge the gap between education and employment by providing training that transforms learners into
-              confident, job-ready professionals.
-            </p>
-          </div>
-          <h2 id="home-seo-why-heading" className="home-seo-block__title">
-            Why Choose Us?
-          </h2>
-          <p className="home-seo-block__body">
-            We provide practical, industry-focused training designed to make you job-ready from day one. Our approach
-            goes beyond traditional learning by combining real-world experience, expert guidance, and career support.
-          </p>
-          <h2 id="home-seo-different-heading" className="home-seo-block__title">
-            What Makes Us Different?
-          </h2>
-          <div className="home-seo-block__diff-columns">
-            <ul className="home-seo-block__list home-seo-block__list--pointers">
-              <li>
-                <strong>Strong Industry Collaboration</strong> – Learn aligned with real industry practices
-              </li>
-              <li>
-                <strong>On-Job Training Approach</strong> – Experience real work environment during training
-              </li>
-              <li>
-                <strong>Live Project Experience</strong> – Work on real-world projects for practical skills
-              </li>
-              <li>
-                <strong>Industry-Relevant Curriculum</strong> – Courses based on current market demand
-              </li>
-            </ul>
-            <ul className="home-seo-block__list home-seo-block__list--pointers">
-              <li>
-                <strong>Expert Mentorship</strong> – Learn from experienced industry professionals
-              </li>
-              <li>
-                <strong>Personalized Support</strong> – Get individual attention and doubt-solving help
-              </li>
-              <li>
-                <strong>End-to-End Career Support</strong> – From learning to placement guidance
-              </li>
-            </ul>
-          </div>
+          <HomeMissionCarousel />
         </div>
       </section>
 
