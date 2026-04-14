@@ -11,6 +11,7 @@ const DEFAULT_INSTAGRAM_URL = "https://www.instagram.com/bharat_skill_academy/";
 const DEFAULT_FACEBOOK_URL =
   "https://www.facebook.com/profile.php?id=61572054090601";
 const DEFAULT_LINKEDIN_URL = "https://www.linkedin.com/company/bharat-skill-academy/";
+const DEFAULT_YOUTUBE_URL = "https://www.youtube.com/@BharatSkillAcademy-p9f";
 
 export function getFooterSocialLinks() {
   return [
@@ -29,7 +30,7 @@ export function getFooterSocialLinks() {
     {
       id: "youtube",
       label: "YouTube",
-      href: env("VITE_SOCIAL_YOUTUBE") || FALLBACK_HREF,
+      href: env("VITE_SOCIAL_YOUTUBE") || DEFAULT_YOUTUBE_URL,
       Icon: FaYoutube,
     },
     {
