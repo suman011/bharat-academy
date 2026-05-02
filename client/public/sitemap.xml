@@ -66,6 +66,11 @@
     <priority>0.75</priority>
   </url>
   <url>
+    <loc>https://bharatskillacademy.com/courses/ai-foundations-for-beginners</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
     <loc>https://bharatskillacademy.com/courses/ai-fundamentals</loc>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -167,6 +172,11 @@
   </url>
   <url>
     <loc>https://bharatskillacademy.com/courses/data-analytics-excel-power-bi</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://bharatskillacademy.com/courses/data-science-basics-eda-visualization</loc>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
@@ -276,6 +286,11 @@
     <priority>0.75</priority>
   </url>
   <url>
+    <loc>https://bharatskillacademy.com/courses/introduction-to-machine-learning</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
     <loc>https://bharatskillacademy.com/courses/introduction-to-machine-vision-systems</loc>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -296,12 +311,17 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://bharatskillacademy.com/courses/machine-learning-basics</loc>
+    <loc>https://bharatskillacademy.com/courses/machine-learning-intermediate</loc>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
     <loc>https://bharatskillacademy.com/courses/machine-vision-vision-ai-opencv-ai-models</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://bharatskillacademy.com/courses/mathematics-for-ai-machine-learning</loc>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
@@ -347,6 +367,11 @@
   </url>
   <url>
     <loc>https://bharatskillacademy.com/courses/production-planning-smart-factory-concepts</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://bharatskillacademy.com/courses/python-for-ai-beginner-level</loc>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>

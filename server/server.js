@@ -934,6 +934,617 @@ async function userHasCourse({ userId, courseKey }) {
   return false;
 }
 
+// ---------------- Protected course video streaming ----------------
+// Store large video files outside the SPA public folder, e.g.:
+//   server/private-videos/AI Fundamentals/WEEK 1/....
+const PRIVATE_VIDEOS_ROOT = path.join(__dirname, "private-videos");
+const COURSE_VIDEO_DIRS = {
+  // courseKey -> directory under PRIVATE_VIDEOS_ROOT
+  "ai-foundations-for-beginners": "AI Fundamentals",
+  "python-for-ai-beginner-level": "Python for AI – Beginner Level",
+};
+
+function resolveCourseVideoRoot(courseKey) {
+  const ck = String(courseKey || "").trim().toLowerCase();
+  const mapped = COURSE_VIDEO_DIRS[ck];
+  const candidates = [mapped, ck].filter(Boolean);
+
+  // Pick the first existing directory; otherwise fall back to the first candidate.
+  for (const dir of candidates) {
+    const absRoot = path.resolve(PRIVATE_VIDEOS_ROOT, dir);
+    if (fs.existsSync(absRoot)) {
+      return { ck, dir, absRoot };
+    }
+  }
+
+  const dir = candidates[0] || ck; // default convention: folder name == courseKey
+  return {
+    ck,
+    dir,
+    absRoot: path.resolve(PRIVATE_VIDEOS_ROOT, dir),
+  };
+}
+
+function guessVideoContentType(filePath) {
+  const ext = String(path.extname(filePath) || "").toLowerCase();
+  if (ext === ".mp4") return "video/mp4";
+  if (ext === ".webm") return "video/webm";
+  if (ext === ".mov") return "video/quicktime";
+  return "application/octet-stream";
+}
+
+function isVideoExt(name) {
+  const ext = String(path.extname(name || "")).toLowerCase();
+  return ext === ".mp4" || ext === ".webm" || ext === ".mov";
+}
+
+function titleFromFilename(name) {
+  const base = String(name || "").replace(/\.(mp4|webm|mov)$/i, "");
+  return base
+    .replace(/_+/g, " ")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
+function leadingOrderNumber(name) {
+  const s = String(name || "").trim();
+  const m = s.match(/^(\d{1,4})[\s._-]+/);
+  return m ? Number(m[1]) : null;
+}
+
+function loadVideoIndexForCourse(courseKey) {
+  const { absRoot } = resolveCourseVideoRoot(courseKey);
+  if (!fs.existsSync(absRoot)) return { weeks: [], total: 0 };
+
+  const dirents = fs.readdirSync(absRoot, { withFileTypes: true });
+  const weekDirs = dirents.filter((d) => d.isDirectory()).map((d) => d.name);
+
+  const weeks = [];
+  let total = 0;
+
+  for (const weekName of weekDirs) {
+    const weekPath = path.join(absRoot, weekName);
+    let files = [];
+    try {
+      files = fs.readdirSync(weekPath, { withFileTypes: true })
+        .filter((d) => d.isFile() && isVideoExt(d.name))
+        .map((d) => d.name);
+    } catch {
+      files = [];
+    }
+    if (!files.length) continue;
+
+    const entries = files
+      .map((name) => {
+        let mtimeMs = 0;
+        try {
+          mtimeMs = fs.statSync(path.join(weekPath, name)).mtimeMs || 0;
+        } catch {
+          mtimeMs = 0;
+        }
+        return { name, mtimeMs, order: leadingOrderNumber(name) };
+      })
+      .sort((a, b) => {
+        const ao = a.order;
+        const bo = b.order;
+        if (ao != null && bo != null && ao !== bo) return ao - bo;
+        if (ao != null && bo == null) return -1;
+        if (ao == null && bo != null) return 1;
+        if (a.mtimeMs !== b.mtimeMs) return a.mtimeMs - b.mtimeMs;
+        return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" });
+      });
+
+    total += entries.length;
+    weeks.push({
+      label: weekName,
+      items: entries.map((e) => ({
+        path: `${weekName}/${e.name}`.replace(/\\/g, "/"),
+        title: titleFromFilename(e.name),
+      })),
+    });
+  }
+
+  weeks.sort((a, b) => {
+    const ma = String(a.label).match(/(\d+)/);
+    const mb = String(b.label).match(/(\d+)/);
+    if (ma && mb) return Number(ma[1]) - Number(mb[1]);
+    return String(a.label).localeCompare(String(b.label), undefined, { numeric: true, sensitivity: "base" });
+  });
+
+  return { weeks, total };
+}
+
+// Returns week-wise index for a paid user (used by frontend to reflect videos automatically).
+app.get("/videos/:courseKey/index", (req, res) => {
+  (async () => {
+    const user = await requireAuth(req, res);
+    if (!user) return;
+
+    const courseKey = String(req.params?.courseKey || "").trim().toLowerCase();
+    if (!courseKey) return res.status(400).json({ ok: false, error: "Missing courseKey." });
+
+    const paid = await userHasCourse({ userId: user.id, courseKey });
+    if (!paid) return res.status(403).json({ ok: false, error: "Payment required." });
+
+    const { absRoot } = resolveCourseVideoRoot(courseKey);
+    if (!fs.existsSync(absRoot)) {
+      return res.status(404).json({ ok: false, error: "Video folder not found." });
+    }
+
+    const { weeks } = loadVideoIndexForCourse(courseKey);
+    return res.json({ ok: true, weeks });
+  })().catch((err) => res.status(500).json({ ok: false, error: err?.message || "Failed." }));
+});
+
+app.get("/video/:courseKey", (req, res) => {
+  (async () => {
+    const user = await requireAuth(req, res);
+    if (!user) return;
+
+    const courseKey = String(req.params?.courseKey || "").trim().toLowerCase();
+    const rel = String(req.query?.path || "").trim();
+
+    if (!courseKey) return res.status(400).json({ ok: false, error: "Missing courseKey." });
+    if (!rel) return res.status(400).json({ ok: false, error: "Missing path." });
+
+    const paid = await userHasCourse({ userId: user.id, courseKey });
+    // Use 403 so browsers/devtools show a standard forbidden response for media.
+    if (!paid) return res.status(403).send("Payment required.");
+
+    const { absRoot: absRootResolved } = resolveCourseVideoRoot(courseKey);
+
+    // Prevent path traversal.
+    const sanitized = rel.replace(/^([/\\])+/, "");
+    if (sanitized.includes("..")) return res.status(400).json({ ok: false, error: "Invalid path." });
+
+    const absRoot = absRootResolved;
+    const absFile = path.resolve(absRoot, sanitized);
+    if (!absFile.startsWith(absRoot)) return res.status(400).json({ ok: false, error: "Invalid path." });
+
+    let stat;
+    try {
+      stat = fs.statSync(absFile);
+    } catch {
+      return res.status(404).send("Video not found.");
+    }
+    if (!stat.isFile()) return res.status(404).send("Video not found.");
+
+    const total = stat.size;
+    const range = req.headers.range;
+    const contentType = guessVideoContentType(absFile);
+
+    res.setHeader("Accept-Ranges", "bytes");
+    res.setHeader("Content-Type", contentType);
+    // Allow browser to read range headers in cross-origin setups (also fine same-origin).
+    res.setHeader("Access-Control-Expose-Headers", "Content-Range, Accept-Ranges, Content-Length");
+
+    if (range) {
+      const m = String(range).match(/bytes=(\d*)-(\d*)/);
+      if (!m) return res.status(416).end();
+      const start = m[1] ? Number(m[1]) : 0;
+      const end = m[2] ? Number(m[2]) : Math.min(total - 1, start + 1024 * 1024 * 4); // 4MB chunk default
+      if (!Number.isFinite(start) || !Number.isFinite(end) || start > end || start >= total) {
+        return res.status(416).end();
+      }
+
+      res.status(206);
+      res.setHeader("Content-Range", `bytes ${start}-${end}/${total}`);
+      res.setHeader("Content-Length", String(end - start + 1));
+      return fs.createReadStream(absFile, { start, end }).pipe(res);
+    }
+
+    res.setHeader("Content-Length", String(total));
+    return fs.createReadStream(absFile).pipe(res);
+  })().catch((err) => res.status(500).json({ ok: false, error: err?.message || "Failed." }));
+});
+
+// ---------------- Final Test + Certificate ----------------
+const PDFDocument = require("pdfkit");
+
+const FINAL_TEST_BANK = {
+  "ai-foundations-for-beginners": {
+    quizTitle: "AI Fundamentals Final Assessment",
+    passPercentage: 70,
+    maxAttempts: 3,
+    durationSec: 10 * 60,
+    questions: [
+      {
+        id: 1,
+        question: "What is Artificial Intelligence?",
+        options: [
+          "Machines performing tasks with human intelligence",
+          "Only computer programming",
+          "Only data storage",
+          "Internet technology",
+        ],
+        answer: 0,
+      },
+      {
+        id: 2,
+        question: "Which of the following is an example of AI?",
+        options: ["Calculator", "Netflix recommendation", "Keyboard typing", "USB drive"],
+        answer: 1,
+      },
+      { id: 3, question: "AI learns from?", options: ["Code only", "Data", "Internet speed", "Hardware"], answer: 1 },
+      {
+        id: 4,
+        question: "Machine Learning is a subset of?",
+        options: ["Data Science", "Artificial Intelligence", "Programming", "Networking"],
+        answer: 1,
+      },
+      {
+        id: 5,
+        question: "Which type of AI is currently used?",
+        options: ["General AI", "Narrow AI", "Super AI", "Human AI"],
+        answer: 1,
+      },
+      {
+        id: 6,
+        question: "Structured data is?",
+        options: ["Organized in rows and columns", "Images and videos", "Audio files", "Random text"],
+        answer: 0,
+      },
+      { id: 7, question: "Unstructured data example?", options: ["Excel sheet", "Database", "Images", "Table"], answer: 2 },
+      { id: 8, question: "What is dataset?", options: ["Single value", "Collection of data", "Only images", "Only numbers"], answer: 1 },
+      {
+        id: 9,
+        question: "Which step comes first in data lifecycle?",
+        options: ["Processing", "Output", "Collection", "Prediction"],
+        answer: 2,
+      },
+      { id: 10, question: "Machine Learning helps in?", options: ["Learning from data", "Typing faster", "Storage", "Internet speed"], answer: 0 },
+      { id: 11, question: "Supervised learning uses?", options: ["No data", "Labeled data", "Random data", "Images only"], answer: 1 },
+      { id: 12, question: "Unsupervised learning is?", options: ["With labels", "Without labels", "Only coding", "Only prediction"], answer: 1 },
+      {
+        id: 13,
+        question: "Spam detection is example of?",
+        options: ["Unsupervised learning", "Supervised learning", "No learning", "Manual process"],
+        answer: 1,
+      },
+      { id: 14, question: "Recommendation systems are used in?", options: ["Netflix", "Calculator", "Keyboard", "Mouse"], answer: 0 },
+      { id: 15, question: "Algorithm is?", options: ["Final result", "Learning method", "Data", "Output"], answer: 1 },
+      { id: 16, question: "Model is?", options: ["Learning method", "Final trained output", "Data", "Input"], answer: 1 },
+      {
+        id: 17,
+        question: "AI thinking approach includes?",
+        options: ["Problem → Data → Pattern → Prediction", "Only coding", "Only data", "Only output"],
+        answer: 0,
+      },
+      { id: 18, question: "Better data leads to?", options: ["Worse results", "Better results", "No change", "Slow system"], answer: 1 },
+      { id: 19, question: "Which tool is used for no-code AI?", options: ["Teachable Machine", "Notepad", "Calculator", "Excel"], answer: 0 },
+      { id: 20, question: "Python is used for?", options: ["AI and ML", "Cooking", "Driving", "Painting"], answer: 0 },
+    ],
+  },
+  "python-for-ai-beginner-level": {
+    quizTitle: "Python for AI - Final Test",
+    passPercentage: 70,
+    maxAttempts: 3,
+    durationSec: 10 * 60,
+    questions: [
+      {
+        id: 1,
+        question: "What is Python?",
+        options: ["A programming language", "A database", "An operating system", "A web browser"],
+        answer: 0,
+      },
+      {
+        id: 2,
+        question: "Which symbol is used for comments in Python?",
+        options: ["//", "#", "/* */", "<!-- -->"],
+        answer: 1,
+      },
+      {
+        id: 3,
+        question: "Which data type is used to store True or False values?",
+        options: ["String", "Integer", "Boolean", "List"],
+        answer: 2,
+      },
+      {
+        id: 4,
+        question: "Which Python library is commonly used for numerical computing?",
+        options: ["NumPy", "React", "Express", "MongoDB"],
+        answer: 0,
+      },
+      {
+        id: 5,
+        question: "What does AI stand for?",
+        options: ["Artificial Intelligence", "Automated Internet", "Advanced Input", "Application Interface"],
+        answer: 0,
+      },
+      {
+        id: 6,
+        question: "What is Machine Learning?",
+        options: [
+          "A way for computers to learn from data",
+          "A hardware device",
+          "A type of monitor",
+          "A file format",
+        ],
+        answer: 0,
+      },
+      {
+        id: 7,
+        question: "Which library is used for data analysis in Python?",
+        options: ["Pandas", "CSS", "HTML", "Bootstrap"],
+        answer: 0,
+      },
+      {
+        id: 8,
+        question: "Which function is used to display output in Python?",
+        options: ["print()", "show()", "display()", "output()"],
+        answer: 0,
+      },
+      {
+        id: 9,
+        question: "What is a dataset?",
+        options: ["Collection of data", "A Python keyword", "A computer virus", "A web page"],
+        answer: 0,
+      },
+      {
+        id: 10,
+        question: "Which of these is an example of AI?",
+        options: ["Chatbot", "Keyboard", "Mouse", "Printer"],
+        answer: 0,
+      },
+    ],
+  },
+};
+
+function getFinalTestDurationSec(bank) {
+  const n = Number(bank?.durationSec);
+  if (Number.isFinite(n) && n > 0) return Math.round(n);
+  return 10 * 60;
+}
+
+function evaluateQuiz(questions, userAnswers, passPercentage) {
+  let score = 0;
+  for (let i = 0; i < questions.length; i += 1) {
+    const q = questions[i];
+    if (userAnswers?.[i] === q.answer) score += 1;
+  }
+  const total = questions.length;
+  const percentage = total ? (score / total) * 100 : 0;
+  const passed = percentage >= passPercentage;
+  return { score, total, percentage, passed };
+}
+
+async function getVideoCompletionState({ userId, courseKey }) {
+  const progress = await prisma.courseProgress.findUnique({
+    where: { userId_courseKey: { userId, courseKey } },
+    select: { completedLessonKeys: true, totalLessons: true },
+  });
+  const { total: serverTotal } = loadVideoIndexForCourse(courseKey);
+  const completedAll = Array.isArray(progress?.completedLessonKeys) ? progress.completedLessonKeys.map((x) => String(x)) : [];
+  const completed = serverTotal > 0 ? completedAll.filter((k) => k.startsWith("video:")) : completedAll;
+  const completedCount = new Set(completed).size;
+
+  const totalLessons = Math.max(Number(progress?.totalLessons || 0), Number(serverTotal || 0));
+  const unlocked = totalLessons > 0 && completedCount >= totalLessons;
+  return { unlocked, completedCount, totalLessons };
+}
+
+app.get("/final-test/:courseKey", (req, res) => {
+  (async () => {
+    const user = await requireAuth(req, res);
+    if (!user) return;
+
+    const courseKey = String(req.params?.courseKey || "").trim().toLowerCase();
+    const bank = FINAL_TEST_BANK[courseKey];
+    if (!bank) return res.status(404).json({ ok: false, error: "Final test not configured." });
+
+    const paid = await userHasCourse({ userId: user.id, courseKey });
+    if (!paid) return res.status(403).json({ ok: false, error: "Payment required." });
+
+    const attemptsUsed = await prisma.finalTestAttempt.count({ where: { userId: user.id, courseKey } });
+    const cert = await prisma.courseCertificate.findUnique({
+      where: { userId_courseKey: { userId: user.id, courseKey } },
+      select: { certCode: true, issuedAt: true },
+    });
+    const completion = await getVideoCompletionState({ userId: user.id, courseKey });
+
+    const alreadyPassed = Boolean(cert);
+    const questionsSafe = bank.questions.map((q) => ({ id: q.id, question: q.question, options: q.options }));
+    return res.json({
+      ok: true,
+      quizTitle: bank.quizTitle,
+      passPercentage: bank.passPercentage,
+      maxAttempts: bank.maxAttempts,
+      durationSec: getFinalTestDurationSec(bank),
+      attemptsUsed,
+      unlocked: completion.unlocked,
+      completion,
+      alreadyPassed,
+      certificate: cert || null,
+      questions: questionsSafe,
+    });
+  })().catch((err) => res.status(500).json({ ok: false, error: err?.message || "Failed." }));
+});
+
+app.post("/final-test/:courseKey/start", (req, res) => {
+  (async () => {
+    const user = await requireAuth(req, res);
+    if (!user) return;
+
+    const courseKey = String(req.params?.courseKey || "").trim().toLowerCase();
+    const bank = FINAL_TEST_BANK[courseKey];
+    if (!bank) return res.status(404).json({ ok: false, error: "Final test not configured." });
+
+    const paid = await userHasCourse({ userId: user.id, courseKey });
+    if (!paid) return res.status(403).json({ ok: false, error: "Payment required." });
+
+    const completion = await getVideoCompletionState({ userId: user.id, courseKey });
+    if (!completion.unlocked) return res.status(403).json({ ok: false, error: "Final test locked until videos are completed." });
+
+    const existingCert = await prisma.courseCertificate.findUnique({
+      where: { userId_courseKey: { userId: user.id, courseKey } },
+      select: { certCode: true, issuedAt: true },
+    });
+    if (existingCert) return res.json({ ok: true, alreadyPassed: true, certificate: existingCert });
+
+    const attemptsUsed = await prisma.finalTestAttempt.count({ where: { userId: user.id, courseKey } });
+    if (attemptsUsed >= bank.maxAttempts) {
+      return res.status(429).json({ ok: false, error: `Max attempts reached (${bank.maxAttempts}).` });
+    }
+
+    const durationSec = getFinalTestDurationSec(bank);
+    const startedAtMs = Date.now();
+    const token = jwt.sign(
+      { kind: "final_test", sub: user.id, courseKey, startedAtMs, durationSec },
+      JWT_SECRET,
+      { expiresIn: Math.max(30, durationSec + 30) } // small grace for network
+    );
+    return res.json({
+      ok: true,
+      sessionToken: token,
+      startedAtMs,
+      durationSec,
+      expiresAtMs: startedAtMs + durationSec * 1000,
+      attemptsUsed,
+      maxAttempts: bank.maxAttempts,
+    });
+  })().catch((err) => res.status(500).json({ ok: false, error: err?.message || "Failed." }));
+});
+
+app.post("/final-test/:courseKey/submit", (req, res) => {
+  (async () => {
+    const user = await requireAuth(req, res);
+    if (!user) return;
+
+    const courseKey = String(req.params?.courseKey || "").trim().toLowerCase();
+    const bank = FINAL_TEST_BANK[courseKey];
+    if (!bank) return res.status(404).json({ ok: false, error: "Final test not configured." });
+
+    const paid = await userHasCourse({ userId: user.id, courseKey });
+    if (!paid) return res.status(403).json({ ok: false, error: "Payment required." });
+
+    const completion = await getVideoCompletionState({ userId: user.id, courseKey });
+    if (!completion.unlocked) return res.status(403).json({ ok: false, error: "Final test locked until videos are completed." });
+
+    const existingCert = await prisma.courseCertificate.findUnique({
+      where: { userId_courseKey: { userId: user.id, courseKey } },
+      select: { certCode: true, issuedAt: true },
+    });
+    if (existingCert) {
+      return res.json({ ok: true, alreadyPassed: true, certificate: existingCert });
+    }
+
+    const attemptsUsed = await prisma.finalTestAttempt.count({ where: { userId: user.id, courseKey } });
+    if (attemptsUsed >= bank.maxAttempts) {
+      return res.status(429).json({ ok: false, error: `Max attempts reached (${bank.maxAttempts}).` });
+    }
+
+    const sessionToken = String(req.body?.sessionToken || "").trim();
+    if (!sessionToken) return res.status(400).json({ ok: false, error: "Missing session token." });
+    let payload;
+    try {
+      payload = jwt.verify(sessionToken, JWT_SECRET);
+    } catch {
+      return res.status(403).json({ ok: false, error: "Session expired. Please restart the test." });
+    }
+    if (payload?.kind !== "final_test") return res.status(403).json({ ok: false, error: "Invalid session." });
+    if (String(payload?.sub || "") !== String(user.id || "")) return res.status(403).json({ ok: false, error: "Invalid session." });
+    if (String(payload?.courseKey || "") !== String(courseKey || "")) return res.status(403).json({ ok: false, error: "Invalid session." });
+
+    const durationSec = getFinalTestDurationSec(bank);
+    const startedAtMs = Number(payload?.startedAtMs || 0);
+    if (!Number.isFinite(startedAtMs) || startedAtMs <= 0) return res.status(403).json({ ok: false, error: "Invalid session." });
+    const now = Date.now();
+    if (now > startedAtMs + durationSec * 1000 + 5000) {
+      return res.status(403).json({ ok: false, error: "Time is over. Please restart the test." });
+    }
+
+    const userAnswers = Array.isArray(req.body?.userAnswers) ? req.body.userAnswers : [];
+    const result = evaluateQuiz(bank.questions, userAnswers, bank.passPercentage);
+
+    await prisma.finalTestAttempt.create({
+      data: {
+        userId: user.id,
+        courseKey,
+        scorePct: Math.round(result.percentage),
+        passed: Boolean(result.passed),
+        answers: { userAnswers },
+      },
+    });
+
+    let certificate = null;
+    if (result.passed) {
+      const certCode = `BSA-${String(courseKey).slice(0, 4).toUpperCase()}-${crypto.randomBytes(4).toString("hex").toUpperCase()}`;
+      const row = await prisma.courseCertificate.upsert({
+        where: { userId_courseKey: { userId: user.id, courseKey } },
+        update: { certCode, issuedAt: new Date() },
+        create: { userId: user.id, courseKey, certCode, issuedAt: new Date() },
+        select: { certCode: true, issuedAt: true },
+      });
+      certificate = row;
+    }
+
+    return res.json({
+      ok: true,
+      result: {
+        score: result.score,
+        total: result.total,
+        percentage: Math.round(result.percentage),
+        passed: Boolean(result.passed),
+      },
+      attemptsUsed: attemptsUsed + 1,
+      maxAttempts: bank.maxAttempts,
+      certificate,
+    });
+  })().catch((err) => res.status(500).json({ ok: false, error: err?.message || "Failed." }));
+});
+
+app.get("/certificate/:courseKey/download", (req, res) => {
+  (async () => {
+    const user = await requireAuth(req, res);
+    if (!user) return;
+
+    const courseKey = String(req.params?.courseKey || "").trim().toLowerCase();
+    const paid = await userHasCourse({ userId: user.id, courseKey });
+    if (!paid) return res.status(403).send("Payment required.");
+
+    const cert = await prisma.courseCertificate.findUnique({
+      where: { userId_courseKey: { userId: user.id, courseKey } },
+      select: { certCode: true, issuedAt: true },
+    });
+    if (!cert) return res.status(404).send("Certificate not found.");
+
+    const displayCourse = courseKey
+      .split("-")
+      .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w))
+      .join(" ");
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename=\"certificate-${courseKey}.pdf\"`);
+
+    const doc = new PDFDocument({ size: "A4", margin: 50 });
+    doc.pipe(res);
+
+    doc.rect(20, 20, 555, 802).lineWidth(2).stroke("#1e293b");
+    doc.fontSize(24).fillColor("#0f172a").text("Bharat Skill Academy", { align: "center" });
+    doc.moveDown(0.5);
+    doc.fontSize(18).fillColor("#334155").text("Certificate of Completion", { align: "center" });
+    doc.moveDown(1.5);
+
+    doc.fontSize(12).fillColor("#475569").text("This is to certify that", { align: "center" });
+    doc.moveDown(0.5);
+    doc.fontSize(22).fillColor("#0f172a").text(String(user.name || user.email || "Learner"), { align: "center" });
+    doc.moveDown(0.8);
+    doc.fontSize(12).fillColor("#475569").text("has successfully passed the final assessment for", { align: "center" });
+    doc.moveDown(0.4);
+    doc.fontSize(18).fillColor("#0f172a").text(displayCourse, { align: "center" });
+    doc.moveDown(2);
+
+    doc.fontSize(12).fillColor("#334155").text(`Certificate Code: ${cert.certCode}`, { align: "center" });
+    doc.moveDown(0.3);
+    doc.fontSize(12).fillColor("#334155").text(`Issued: ${new Date(cert.issuedAt).toLocaleDateString("en-IN")}`, { align: "center" });
+
+    doc.moveDown(4);
+    doc.fontSize(10).fillColor("#64748b").text("This certificate is system-generated.", { align: "center" });
+
+    doc.end();
+  })().catch(() => res.status(500).send("Failed."));
+});
+
 function maskMobile(mobile) {
   const s = String(mobile || "").replace(/\s+/g, "");
   if (s.length <= 4) return s;

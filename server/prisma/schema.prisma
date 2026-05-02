@@ -23,6 +23,8 @@ model User {
   wishlist  WishlistItem[]
   progress  CourseProgress[]
   reviews   CourseReview[]
+  finalTestAttempts FinalTestAttempt[]
+  certificates CourseCertificate[]
   notificationState UserNotificationState?
   callbackRequests CallbackRequest[]
 
@@ -186,5 +188,37 @@ model CourseReview {
   @@unique([userId, courseKey])
   @@index([courseKey])
   @@index([createdAt])
+}
+
+model FinalTestAttempt {
+  id         String   @id @default(uuid())
+  userId     String
+  courseKey  String
+  scorePct   Int
+  passed     Boolean  @default(false)
+  answers    Json
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([courseKey])
+  @@index([createdAt])
+}
+
+model CourseCertificate {
+  id         String   @id @default(uuid())
+  userId     String
+  courseKey  String
+  certCode   String   @unique
+  attemptId  String?
+  issuedAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseKey])
+  @@index([userId])
+  @@index([courseKey])
+  @@index([issuedAt])
 }
 

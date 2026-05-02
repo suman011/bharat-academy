@@ -17,6 +17,9 @@ client/android/.gradle/
 client/android/local.properties
 client/android/app/src/main/assets/public/
 
+# Private course videos (do not commit large media)
+server/private-videos/
+
 # Logs & OS
 *.log
 .DS_Store

@@ -44,7 +44,12 @@ const BY_COURSE_NAME = {
   "python for data science": `https://images.unsplash.com/photo-1526379095098-d400fd0bf935?${q}`,
   "ai fundamentals": `https://images.unsplash.com/photo-1677442136019-21780ecad995?${q}`,
 
-  "machine learning basics": `https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?${q}`,
+  "machine learning intermediate": `https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?${q}`,
+  "ai foundations for beginners": `https://images.unsplash.com/photo-1677442136019-21780ecad995?${q}`,
+  "python for ai – beginner level": `https://images.unsplash.com/photo-1526379095098-d400fd0bf935?${q}`,
+  "mathematics for ai & machine learning": `https://images.unsplash.com/photo-1509228468518-180dd4864904?${q}`,
+  "introduction to machine learning": `https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?${q}`,
+  "data science basics (eda + visualization)": `https://images.unsplash.com/photo-1551288049-bebda4e38f71?${q}`,
   "full stack developer program (3-6 months)": `https://images.unsplash.com/photo-1627398242454-45a1465c2479?${q}`,
   "data science master program": `https://images.unsplash.com/photo-1522071820081-009f0129c71c?${q}`,
   "ai + machine learning with projects": `https://images.unsplash.com/photo-1620712943543-bcc4688e7485?${q}`,
@@ -392,6 +397,9 @@ function pickLocalCover(courseName) {
     return pickFromPool(courseName, ["/course-covers/cover-ml.jpg", "/course-covers/cover-ml2.jpg", "/course-covers/cover-ml3.jpg"]);
   if (n.includes("ai"))
     return pickFromPool(courseName, ["/course-covers/cover-ai.jpg", "/course-covers/cover-ai2.jpg", "/course-covers/cover-ai3.jpg"]);
+  // Python before "data science": titles like "Python for Data Science" must use Python art, not the DS/ML pool.
+  if (n.includes("python"))
+    return pickFromPool(courseName, ["/course-covers/cover-python.jpg", "/course-covers/cover-python2.jpg", "/course-covers/cover-python3.jpg"]);
   if (n.includes("data science"))
     return pickFromPool(courseName, [
       "/course-covers/cover-ml.jpg",
@@ -410,8 +418,6 @@ function pickLocalCover(courseName) {
     ]);
 
   // --- Programming / Web ---
-  if (n.includes("python"))
-    return pickFromPool(courseName, ["/course-covers/cover-python.jpg", "/course-covers/cover-python2.jpg", "/course-covers/cover-python3.jpg"]);
   if (n.includes("data structures") || n.includes("(dsa)") || n.includes("dsa")) return "/course-covers/cover-dsa.jpg";
   if (n.includes("react"))
     return pickFromPool(courseName, ["/course-covers/cover-react.jpg", "/course-covers/cover-react2.jpg"]);

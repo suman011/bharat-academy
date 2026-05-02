@@ -23,6 +23,7 @@ import AdminPanel from "./pages/AdminPanel";
 import Wishlist from "./pages/Wishlist";
 import Notifications from "./pages/Notifications";
 import Privacy from "./pages/Privacy";
+import FinalTest from "./pages/FinalTest";
 import "./index.css";
 
 export default function App() {
@@ -37,6 +38,7 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/courses" element={<Courses />} />
             <Route path="/courses/:courseSlug" element={<CourseDetail />} />
+            <Route path="/courses/:courseSlug/final-test" element={<FinalTest />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/privacy" element={<Privacy />} />

@@ -24,6 +24,7 @@ import {
   FaWhatsapp,
 } from "react-icons/fa";
 import { courseCategories } from "../data/courses";
+import { getCourseVideos } from "../data/courseVideos";
 import { apiUrl } from "../utils/apiBase";
 import { getCourseImage, getCourseImageFallback } from "../utils/courseImages";
 import { getCurrentUser, onAuthChanged } from "../utils/authStore";
@@ -264,6 +265,10 @@ export default function CourseDetail() {
   const { courseSlug } = useParams();
   const [activeTab, setActiveTab] = useState("overview");
   const [expandedModules, setExpandedModules] = useState(() => new Set([0]));
+  const [expandedVideoWeeks, setExpandedVideoWeeks] = useState(() => new Set([0]));
+  const [activeVideoKey, setActiveVideoKey] = useState(null);
+  const [videoDurations, setVideoDurations] = useState(() => ({})); // videoKey -> seconds (number)
+  const [activeVideoLoadStatus, setActiveVideoLoadStatus] = useState(null); // null | { ok:boolean, status?:number, message?:string }
   const [addedOpen, setAddedOpen] = useState(false);
   const [issueOpen, setIssueOpen] = useState(false);
   const [issueMessage, setIssueMessage] = useState("");
@@ -290,6 +295,10 @@ export default function CourseDetail() {
   const { add } = useCart();
   const loginRedirect = `/login?redirect=${encodeURIComponent(location.pathname)}`;
   const tabsSectionRef = useRef(null);
+  const videoPlayerRef = useRef(null);
+  const autoCompletedLessonKeysRef = useRef(new Set());
+
+  const AUTO_COMPLETE_THRESHOLD = 0.9;
 
   useEffect(() => {
     let alive = true;
@@ -362,6 +371,362 @@ export default function CourseDetail() {
   const course =
     allCourses.find((item) => item.slug === normalizedSlug) ||
     allCourses.find((item) => normalizedSlug.startsWith(item.slug));
+
+  const courseVideos = useMemo(() => getCourseVideos(course), [course]);
+  const [serverVideoWeeks, setServerVideoWeeks] = useState(null); // null | [{label, items:[{path,title}]}]
+  const [serverVideosLoading, setServerVideosLoading] = useState(false);
+  const [serverVideosError, setServerVideosError] = useState(null);
+  const hasCourseVideos = courseVideos.length > 0;
+
+  const currentEnrollment = useMemo(() => {
+    const courseSlugKey = String(course?.slug || "").toLowerCase().trim();
+    const urlKey = String(normalizedSlug || "").toLowerCase().trim();
+    if (!courseSlugKey && !urlKey) return null;
+    return (
+      enrollments.find((e) => {
+        const k = String(e?.courseKey || "").toLowerCase().trim();
+        if (!k) return false;
+        if (courseSlugKey && k === courseSlugKey) return true;
+        // tolerate legacy/partial slugs or extra URL suffixes
+        if (courseSlugKey && (k.startsWith(courseSlugKey) || courseSlugKey.startsWith(k))) return true;
+        if (urlKey && (urlKey.startsWith(k) || k.startsWith(urlKey))) return true;
+        return false;
+      }) || null
+    );
+  }, [course?.slug, enrollments, normalizedSlug]);
+
+  // Paid access gate for video content (server exposes enrollments only for paid orders).
+  const hasVideoAccess = Boolean(currentEnrollment);
+
+  const markLessonCompleted = useCallback(
+    async (lessonKey, totalLessons) => {
+      const key = String(lessonKey || "").trim();
+      if (!key) return;
+      if (!currentEnrollment) return;
+      if (progress.has(key)) return;
+
+      setProgress((prev) => {
+        const s = new Set(prev);
+        s.add(key);
+        return s;
+      });
+
+      try {
+        await fetch(apiUrl(`/progress/${encodeURIComponent(course.slug)}`), {
+          method: "PUT",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            lessonKey: key,
+            completed: true,
+            totalLessons: Number(totalLessons || 0),
+          }),
+        });
+      } catch {
+        // ignore
+      }
+    },
+    [course?.slug, currentEnrollment, progress]
+  );
+
+  const renderCourseVideo = (v, idx) => {
+    const title = String(v?.title || `Video ${idx + 1}`);
+    const type = String(v?.type || "file").toLowerCase();
+    const src = String(v?.src || "").trim();
+
+    if (!src) return null;
+
+    if (type === "youtube") {
+      const id = src.replace(/^.*v=([^&]+).*$/i, "$1").replace(/^.*youtu\.be\/([^?]+).*$/i, "$1");
+      const embedUrl = `https://www.youtube.com/embed/${encodeURIComponent(id)}`;
+      return (
+        <div key={`${type}-${idx}`} className="cd-video-player">
+          <div className="cd-video-player__frame">
+            <iframe
+              title={title}
+              src={embedUrl}
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
+          </div>
+          <div className="cd-video-player__title">{title}</div>
+        </div>
+      );
+    }
+
+    // `src` may already be a fully encoded protected URL (e.g. /api/video/...?...%20...).
+    // Avoid double-encoding (which turns %20 into %2520 and breaks file lookup).
+    const safeSrc = src.includes("?") ? src : encodeURI(src);
+    const lessonKey = String(v?.lessonKey || "").trim();
+    return (
+      <div key={`${type}-${idx}`} className="cd-video-player">
+        <div className="cd-video-player__frame">
+          <video
+            controls
+            preload="metadata"
+            src={safeSrc}
+            onTimeUpdate={(e) => {
+              if (!lessonKey) return;
+              if (autoCompletedLessonKeysRef.current.has(lessonKey)) return;
+              if (!currentEnrollment) return;
+              if (progress.has(lessonKey)) {
+                autoCompletedLessonKeysRef.current.add(lessonKey);
+                return;
+              }
+              const el = e.currentTarget;
+              const dur = Number(el?.duration);
+              const cur = Number(el?.currentTime);
+              if (!Number.isFinite(dur) || dur <= 0) return;
+              if (!Number.isFinite(cur) || cur < 0) return;
+              const ratio = cur / dur;
+              if (ratio >= AUTO_COMPLETE_THRESHOLD) {
+                autoCompletedLessonKeysRef.current.add(lessonKey);
+                markLessonCompleted(lessonKey, totalVideoLessons);
+              }
+            }}
+            onEnded={() => {
+              if (!lessonKey) return;
+              if (autoCompletedLessonKeysRef.current.has(lessonKey)) return;
+              autoCompletedLessonKeysRef.current.add(lessonKey);
+              markLessonCompleted(lessonKey, totalVideoLessons);
+            }}
+            onError={() => {
+              setActiveVideoLoadStatus((prev) => prev || { ok: false, message: "Failed to load video." });
+            }}
+          />
+        </div>
+        <div className="cd-video-player__title">{title}</div>
+      </div>
+    );
+  };
+
+  const cleanVideoTitle = useCallback((t) => {
+    const s0 = String(t || "").trim();
+    const s1 = s0.replace(/^week\s*\d+\s*[\u2014\u2013-]\s*/i, "");
+    const normalize = (s) =>
+      String(s || "")
+        .replace(/_+/g, " ")
+        .replace(/\s{2,}/g, " ")
+        .trim();
+
+    // Try removing Day suffixes (good for titles like "... (Day 1)"),
+    // but keep "Day 1" when that is the entire title (Week 4/5 filenames).
+    const stripped = normalize(
+      s1
+        .replace(/\(\s*day\s*(\d+)\s*\)\s*$/i, "")
+        .replace(/[_\s-]*day[_\s-]*(\d+)\s*$/i, "")
+    );
+
+    if (stripped) return stripped;
+
+    // If we stripped everything, fall back to a clean Lesson label when present.
+    const m = normalize(s1).match(/\bday\s*(\d+)\b/i);
+    if (m) return `Lesson ${m[1]}`;
+
+    return normalize(s1);
+  }, []);
+
+  const formatVideoDuration = useCallback((sec) => {
+    const n = Number(sec);
+    if (!Number.isFinite(n) || n <= 0) return "";
+    const total = Math.round(n);
+    const m = Math.floor(total / 60);
+    const s = total % 60;
+    return `${m}:${String(s).padStart(2, "0")}`;
+  }, []);
+
+  const videoWeeks = useMemo(() => {
+    // Prefer server index when user has paid access.
+    if (hasVideoAccess && Array.isArray(serverVideoWeeks) && serverVideoWeeks.length && course?.slug) {
+      return serverVideoWeeks.map((w) => {
+        const label = String(w?.label || "Videos");
+        const m = label.match(/(\d+)/);
+        const weekNumber = m ? Number(m[1]) : 0;
+        const items = (Array.isArray(w?.items) ? w.items : []).map((it, idx) => {
+          const rel = String(it?.path || "").trim();
+          const title = String(it?.title || rel.split("/").pop() || `Video ${idx + 1}`);
+          const src = apiUrl(`/video/${encodeURIComponent(course.slug)}?path=${encodeURIComponent(rel)}`);
+          return { type: "file", title, src, rel, lessonKey: `video:${rel}`, _key: `${label}:${idx}:file:${rel}` };
+        });
+        return { weekNumber, label, items };
+      });
+    }
+
+    const items = Array.isArray(courseVideos) ? courseVideos : [];
+    if (!items.length) return [];
+
+    const groups = new Map(); // weekNumber -> { weekNumber, label, items: [{...v, _key}] }
+    for (let i = 0; i < items.length; i += 1) {
+      const v = items[i] || {};
+      const title = String(v.title || "");
+      const src = String(v.src || "");
+      const m =
+        title.match(/week\s*(\d+)/i) ||
+        src.match(/\/week\s*(\d+)\//i) ||
+        src.match(/\\week\s*(\d+)\\/i);
+      const weekNumber = m ? Number(m[1]) : 0;
+      const label = weekNumber ? `WEEK ${weekNumber}` : "Videos";
+      const key = `${weekNumber}:${i}:${String(v.type || "file")}:${src}`;
+
+      if (!groups.has(weekNumber)) groups.set(weekNumber, { weekNumber, label, items: [] });
+      groups.get(weekNumber).items.push({ ...v, _key: key });
+    }
+
+    return Array.from(groups.values()).sort((a, b) => a.weekNumber - b.weekNumber);
+  }, [course?.slug, courseVideos, hasVideoAccess, serverVideoWeeks]);
+
+  const hasAnyVideos = videoWeeks.length > 0;
+  const totalVideoLessons = useMemo(
+    () => (Array.isArray(videoWeeks) ? videoWeeks.reduce((n, w) => n + (Array.isArray(w?.items) ? w.items.length : 0), 0) : 0),
+    [videoWeeks]
+  );
+  const videoLessonKeys = useMemo(() => {
+    const keys = [];
+    for (const w of Array.isArray(videoWeeks) ? videoWeeks : []) {
+      for (const it of Array.isArray(w?.items) ? w.items : []) {
+        const k = String(it?.lessonKey || "").trim();
+        if (k) keys.push(k);
+      }
+    }
+    return keys;
+  }, [videoWeeks]);
+  const completedVideoCount = useMemo(() => {
+    if (!videoLessonKeys.length) return 0;
+    let n = 0;
+    for (const k of videoLessonKeys) if (progress.has(k)) n += 1;
+    return n;
+  }, [progress, videoLessonKeys]);
+
+  useEffect(() => {
+    if (!hasAnyVideos) return;
+    // Reset selection when switching course
+    setExpandedVideoWeeks(new Set([0]));
+    const first = videoWeeks?.[0]?.items?.[0]?._key || null;
+    setActiveVideoKey((prev) => prev || first);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [course?.slug, videoWeeks]);
+
+  const toggleVideoWeek = useCallback((idx) => {
+    setExpandedVideoWeeks((prev) => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx);
+      else next.add(idx);
+      return next;
+    });
+  }, []);
+
+  const activeVideo = useMemo(() => {
+    if (!activeVideoKey) return null;
+    const all = Array.isArray(videoWeeks) ? videoWeeks.flatMap((w) => w.items) : [];
+    return all.find((v) => v._key === activeVideoKey) || null;
+  }, [activeVideoKey, videoWeeks]);
+
+  useEffect(() => {
+    // Probe the protected stream endpoint so we can show a clear message (403 payment required / 404 missing).
+    if (!activeVideo?.src) {
+      setActiveVideoLoadStatus(null);
+      return;
+    }
+
+    let cancelled = false;
+    setActiveVideoLoadStatus(null);
+
+    (async () => {
+      try {
+        const res = await fetch(activeVideo.src, {
+          method: "GET",
+          credentials: "include",
+          headers: { Range: "bytes=0-1" },
+        });
+        if (cancelled) return;
+        if (res.ok || res.status === 206) {
+          setActiveVideoLoadStatus({ ok: true, status: res.status });
+          return;
+        }
+        const txt = await res.text().catch(() => "");
+        setActiveVideoLoadStatus({
+          ok: false,
+          status: res.status,
+          message: txt || (res.status === 403 ? "Payment required." : "Video not available."),
+        });
+      } catch (e) {
+        if (cancelled) return;
+        setActiveVideoLoadStatus({ ok: false, message: String(e?.message || "Failed to load video.") });
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeVideo?.src]);
+
+  useEffect(() => {
+    if (!hasAnyVideos) return;
+
+    const openWeekIdxs = Array.from(expandedVideoWeeks.values());
+    if (!openWeekIdxs.length) return;
+
+    let cancelled = false;
+    const pending = [];
+
+    const loadDuration = async (v) => {
+      const key = v?._key;
+      if (!key || videoDurations[key] != null) return;
+
+      const type = String(v?.type || "file").toLowerCase();
+      if (type === "youtube") return; // could be added later via API, skip for now
+
+      const src = String(v?.src || "").trim();
+      if (!src) return;
+
+      const safeSrc = src.includes("?") ? src : encodeURI(src);
+      await new Promise((resolve) => {
+        try {
+          const el = document.createElement("video");
+          el.preload = "metadata";
+          el.muted = true;
+          el.playsInline = true;
+          el.src = safeSrc;
+
+          const cleanup = () => {
+            el.removeAttribute("src");
+            try {
+              el.load();
+            } catch {
+              // ignore
+            }
+          };
+
+          el.onloadedmetadata = () => {
+            const d = Number(el.duration);
+            cleanup();
+            if (!cancelled && Number.isFinite(d) && d > 0) {
+              setVideoDurations((prev) => (prev[key] == null ? { ...prev, [key]: d } : prev));
+            }
+            resolve();
+          };
+          el.onerror = () => {
+            cleanup();
+            resolve();
+          };
+        } catch {
+          resolve();
+        }
+      });
+    };
+
+    for (const idx of openWeekIdxs) {
+      const week = videoWeeks[idx];
+      if (!week?.items?.length) continue;
+      for (const v of week.items) pending.push(loadDuration(v));
+    }
+
+    Promise.allSettled(pending);
+    return () => {
+      cancelled = true;
+    };
+  }, [expandedVideoWeeks, hasAnyVideos, videoDurations, videoWeeks]);
 
   useEffect(() => {
     if (!course?.slug) return;
@@ -454,22 +819,46 @@ export default function CourseDetail() {
     };
   }, [course?.slug, allCourses]);
 
-  const currentEnrollment = useMemo(() => {
-    const courseSlugKey = String(course?.slug || "").toLowerCase().trim();
-    const urlKey = String(normalizedSlug || "").toLowerCase().trim();
-    if (!courseSlugKey && !urlKey) return null;
-    return (
-      enrollments.find((e) => {
-        const k = String(e?.courseKey || "").toLowerCase().trim();
-        if (!k) return false;
-        if (courseSlugKey && k === courseSlugKey) return true;
-        // tolerate legacy/partial slugs or extra URL suffixes
-        if (courseSlugKey && (k.startsWith(courseSlugKey) || courseSlugKey.startsWith(k))) return true;
-        if (urlKey && (urlKey.startsWith(k) || k.startsWith(urlKey))) return true;
-        return false;
-      }) || null
-    );
-  }, [course?.slug, enrollments, normalizedSlug]);
+  useEffect(() => {
+    if (!course?.slug) return;
+    if (!hasVideoAccess) {
+      setServerVideoWeeks(null);
+      setServerVideosLoading(false);
+      setServerVideosError(null);
+      return;
+    }
+
+    let cancelled = false;
+    setServerVideosLoading(true);
+    setServerVideosError(null);
+
+    (async () => {
+      try {
+        const res = await fetch(apiUrl(`/videos/${encodeURIComponent(course.slug)}/index`), {
+          credentials: "include",
+        });
+        const data = await res.json().catch(() => ({}));
+        if (cancelled) return;
+        if (!res.ok || !data?.ok) {
+          setServerVideoWeeks(null);
+          setServerVideosError(String(data?.error || `Failed to load videos (HTTP ${res.status}).`));
+          setServerVideosLoading(false);
+          return;
+        }
+        setServerVideoWeeks(Array.isArray(data.weeks) ? data.weeks : []);
+        setServerVideosLoading(false);
+      } catch (e) {
+        if (cancelled) return;
+        setServerVideoWeeks(null);
+        setServerVideosError(String(e?.message || "Failed to load videos."));
+        setServerVideosLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [course?.slug, hasVideoAccess]);
 
   useEffect(() => {
     let alive = true;
@@ -584,8 +973,12 @@ export default function CourseDetail() {
     if (!currentEnrollment) return;
 
     if (nextIncompleteLesson) {
-      setActiveTab("curriculum");
-      setExpandedModules(new Set([nextIncompleteLesson.moduleIndex]));
+      if (hasAnyVideos && hasVideoAccess) {
+        setActiveTab("videos");
+      } else {
+        setActiveTab("curriculum");
+        setExpandedModules(new Set([nextIncompleteLesson.moduleIndex]));
+      }
     } else {
       setActiveTab("reviews");
     }
@@ -594,7 +987,13 @@ export default function CourseDetail() {
     requestAnimationFrame(() => {
       tabsSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
-  }, [currentEnrollment, nextIncompleteLesson]);
+  }, [currentEnrollment, nextIncompleteLesson, hasAnyVideos, hasVideoAccess]);
+
+  useEffect(() => {
+    if (!hasAnyVideos) return;
+    if (!hasVideoAccess) return;
+    if (activeTab === "curriculum") setActiveTab("videos");
+  }, [activeTab, hasAnyVideos, hasVideoAccess]);
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -710,7 +1109,203 @@ export default function CourseDetail() {
           </div>
         );
 
+      case "videos":
+        if (!hasVideoAccess) {
+          return (
+            <div className="tab-content-card">
+              <h3>Course Videos</h3>
+              <p style={{ marginTop: 6, color: "#64748b", fontWeight: 650 }}>
+                Videos are available after payment confirmation.
+              </p>
+              <div className="cd-empty-videos">
+                {user ? (
+                  <>
+                    Please purchase this course to unlock videos.{" "}
+                    <button
+                      type="button"
+                      className="primary-btn"
+                      style={{ marginLeft: 10 }}
+                      onClick={() => {
+                        add(course);
+                        navigate("/checkout");
+                      }}
+                    >
+                      Buy now
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    Please log in and purchase this course to unlock videos.{" "}
+                    <button
+                      type="button"
+                      className="primary-btn"
+                      style={{ marginLeft: 10 }}
+                      onClick={() => navigate(loginRedirect)}
+                    >
+                      Log in
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          );
+        }
+        return (
+          <div className="tab-content-card">
+            <h3>Course Videos</h3>
+            <p style={{ marginTop: 6, color: "#64748b", fontWeight: 650 }}>
+              Watch lessons and walkthroughs for this course.
+            </p>
+
+            {hasAnyVideos ? (
+              <div className="checkout-card" style={{ marginTop: 12, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+                <div style={{ color: "#334155", fontWeight: 750 }}>
+                  Progress: <strong>{completedVideoCount}/{totalVideoLessons}</strong>
+                </div>
+                <button
+                  type="button"
+                  className="primary-btn"
+                  disabled={totalVideoLessons <= 0 || completedVideoCount < totalVideoLessons}
+                  onClick={() => navigate(`/courses/${course.slug}/final-test`)}
+                >
+                  Final Test
+                </button>
+              </div>
+            ) : null}
+
+            {serverVideosLoading ? (
+              <div className="cd-empty-videos">Loading videos…</div>
+            ) : serverVideosError ? (
+              <div className="cd-empty-videos">Unable to load videos: {serverVideosError}</div>
+            ) : videoWeeks.length ? (
+              <div className="cd-videos">
+                {activeVideo ? (
+                  <div className="cd-videos__player" ref={videoPlayerRef} key={activeVideoKey || "player"}>
+                    {renderCourseVideo(activeVideo, 0)}
+                  </div>
+                ) : null}
+
+                {activeVideoLoadStatus && activeVideoLoadStatus.ok === false ? (
+                  <div className="cd-empty-videos" style={{ marginTop: 0 }}>
+                    {activeVideoLoadStatus.status ? (
+                      <strong style={{ marginRight: 8 }}>Error {activeVideoLoadStatus.status}:</strong>
+                    ) : null}
+                    {activeVideoLoadStatus.message || "Video failed to load."}
+                  </div>
+                ) : null}
+
+                <div className="cd-curriculum-accordion cd-video-accordion" role="list">
+                  {videoWeeks.map((week, weekIdx) => {
+                    const open = expandedVideoWeeks.has(weekIdx);
+                    const count = week.items.length;
+                    return (
+                      <div
+                        key={week.label}
+                        className={`cd-acc-section${open ? " is-open" : ""}`}
+                        role="listitem"
+                      >
+                        <button
+                          type="button"
+                          className="cd-acc-trigger"
+                          onClick={() => toggleVideoWeek(weekIdx)}
+                          aria-expanded={open}
+                          aria-controls={`cd-video-panel-${weekIdx}`}
+                          id={`cd-video-heading-${weekIdx}`}
+                        >
+                          <FaChevronDown className="cd-acc-chevron" aria-hidden />
+                          <span className="cd-acc-trigger-text">
+                            <span className="cd-acc-section-title">{week.label}</span>
+                          </span>
+                        </button>
+
+                        <div
+                          className="cd-acc-panel"
+                          id={`cd-video-panel-${weekIdx}`}
+                          role="region"
+                          aria-labelledby={`cd-video-heading-${weekIdx}`}
+                          aria-hidden={!open}
+                        >
+                          <ul className="cd-lesson-list">
+                            {week.items.map((v, vi) => {
+                              const title = cleanVideoTitle(v?.title || `Video ${vi + 1}`);
+                              const isActive = activeVideoKey === v._key;
+                              const dur = formatVideoDuration(videoDurations[v._key]);
+                              const lessonKey = String(v?.lessonKey || `video:${v._key}`);
+                              const done = progress.has(lessonKey);
+                              return (
+                                <li key={v._key} className={`cd-video-row${isActive ? " is-active" : ""}`}>
+                                  <button
+                                    type="button"
+                                    className="cd-video-pick"
+                                    onClick={() => {
+                                      setActiveVideoKey(v._key);
+                                      requestAnimationFrame(() => {
+                                        videoPlayerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                                      });
+                                    }}
+                                  >
+                                    {title}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className={`cd-lesson-done${done ? " is-done" : ""}`}
+                                    disabled={!currentEnrollment}
+                                    onClick={async () => {
+                                      const next = !done;
+                                      setProgress((prev) => {
+                                        const s = new Set(prev);
+                                        if (next) s.add(lessonKey);
+                                        else s.delete(lessonKey);
+                                        return s;
+                                      });
+                                      try {
+                                        await fetch(apiUrl(`/progress/${encodeURIComponent(course.slug)}`), {
+                                          method: "PUT",
+                                          credentials: "include",
+                                          headers: { "Content-Type": "application/json" },
+                                          body: JSON.stringify({
+                                            lessonKey,
+                                            completed: next,
+                                            totalLessons: totalVideoLessons || 0,
+                                          }),
+                                        });
+                                      } catch {
+                                        // ignore
+                                      }
+                                    }}
+                                  >
+                                    {done ? "Done" : "Mark"}
+                                  </button>
+                                  {dur ? <span className="cd-video-duration">{dur}</span> : null}
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              <div className="cd-empty-videos">
+                No videos uploaded for this course yet.
+              </div>
+            )}
+          </div>
+        );
+
       case "curriculum":
+        if (hasAnyVideos && hasVideoAccess) {
+          return (
+            <div className="tab-content-card">
+              <h3>Course content</h3>
+              <p style={{ marginTop: 6, color: "#64748b", fontWeight: 650 }}>
+                This course uses week-wise video lessons. Please check the Videos tab.
+              </p>
+            </div>
+          );
+        }
         return (
           <div className="tab-content-card cd-curriculum-card">
             <div className="cd-curriculum-head">
@@ -1155,7 +1750,12 @@ export default function CourseDetail() {
           <div className="tabs-section" ref={tabsSectionRef}>
             <div className="tabs">
               <button className={activeTab === "overview" ? "tab active" : "tab"} onClick={() => setActiveTab("overview")}>Overview</button>
-              <button className={activeTab === "curriculum" ? "tab active" : "tab"} onClick={() => setActiveTab("curriculum")}>Curriculum</button>
+              {(hasCourseVideos || (hasVideoAccess && (serverVideosLoading || serverVideosError || Array.isArray(serverVideoWeeks)))) ? (
+                <button className={activeTab === "videos" ? "tab active" : "tab"} onClick={() => setActiveTab("videos")}>Videos</button>
+              ) : null}
+              {(!hasAnyVideos || !hasVideoAccess) ? (
+                <button className={activeTab === "curriculum" ? "tab active" : "tab"} onClick={() => setActiveTab("curriculum")}>Curriculum</button>
+              ) : null}
               <button className={activeTab === "reviews" ? "tab active" : "tab"} onClick={() => setActiveTab("reviews")}>Reviews</button>
             </div>
             <div className="tab-content">{renderTabContent()}</div>

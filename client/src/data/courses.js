@@ -8,10 +8,20 @@ export const courseCategories = [
     title: "AI & Machine Learning (Featured Track)",
     color: "advanced",
     items: [
+      // Beginner — on-ramp for non-tech and early learners
+      { name: "AI Foundations for Beginners", price: 4999, duration: "5 weeks", level: "Beginner" },
+      { name: "Python for AI – Beginner Level", price: 1, duration: "7 weeks", level: "Beginner" },
+      { name: "Mathematics for AI & Machine Learning", price: 5999, duration: "6 weeks", level: "Beginner" },
+      { name: "Introduction to Machine Learning", price: 8999, duration: "7 weeks", level: "Beginner" },
+      { name: "Data Science Basics (EDA + Visualization)", price: 7499, duration: "6 weeks", level: "Beginner" },
+      // Intermediate — shared with broader IT path (listed here for journey; not duplicated below)
+      { name: "Python Programming (Basic + Intermediate)", price: 9999, duration: "12 weeks", level: "Intermediate" },
+      { name: "Data Analytics (Excel + Power BI)", price: 14999, duration: "12 weeks", level: "Intermediate" },
+      // Advanced
       { name: "AI Fundamentals", price: 19999, duration: "16 weeks", level: "Advanced" },
-      { name: "Machine Learning Basics", price: 19999, duration: "16 weeks", level: "Advanced" },
+      { name: "Machine Learning Intermediate", price: 19999, duration: "16 weeks", level: "Advanced" },
       { name: "Python for Data Science", price: 16999, duration: "14 weeks", level: "Advanced" },
-      { name: "Data Analytics (Excel + Power BI)", price: 14999, duration: "12 weeks", level: "Advanced" },
+      // Expert
       { name: "AI + Machine Learning with Projects", price: 42999, duration: "24 weeks", level: "Expert" },
       { name: "Data Science Master Program", price: 44999, duration: "24 weeks", level: "Expert" },
     ],
@@ -37,7 +47,6 @@ export const courseCategories = [
       { name: "C Programming", price: 7999, duration: "10 weeks", level: "Intermediate" },
       { name: "C++ Programming", price: 8999, duration: "12 weeks", level: "Intermediate" },
       { name: "Java Programming", price: 10999, duration: "14 weeks", level: "Intermediate" },
-      { name: "Python Programming (Basic + Intermediate)", price: 9999, duration: "12 weeks", level: "Intermediate" },
     ]
   },
   {
