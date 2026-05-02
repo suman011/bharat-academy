@@ -10,7 +10,7 @@ export const courseCategories = [
     items: [
       // Beginner — on-ramp for non-tech and early learners
       { name: "AI Foundations for Beginners", price: 4999, duration: "5 weeks", level: "Beginner" },
-      { name: "Python for AI – Beginner Level", price: 1, duration: "7 weeks", level: "Beginner" },
+      { name: "Python for AI – Beginner Level", price: 7999, duration: "7 weeks", level: "Beginner" },
       { name: "Mathematics for AI & Machine Learning", price: 5999, duration: "6 weeks", level: "Beginner" },
       { name: "Introduction to Machine Learning", price: 8999, duration: "7 weeks", level: "Beginner" },
       { name: "Data Science Basics (EDA + Visualization)", price: 7499, duration: "6 weeks", level: "Beginner" },
