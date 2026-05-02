@@ -78,7 +78,7 @@ export default function Home() {
             </p>
             <div className="hero-actions">
               <Link to="/courses" className="primary-btn">Explore Courses</Link>
-              <Link to="/contact" className="secondary-btn">Contact Us</Link>
+              <Link to="/contact" className="primary-btn">Contact Us</Link>
             </div>
             <div className="hero-note">
               <strong>Bharat Skill Development Academy</strong> – preparing learners for success with modern skills,
