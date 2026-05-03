@@ -118,7 +118,7 @@ export default function Home() {
             <div className="hero-card">
               <h3>Bonus Signature Course</h3>
               <p>Factory Automation and Robotics</p>
-              <small>Smart Factory Basics + Robotics + Industrial AI</small>
+              <small>Smart Factory Basics + Robotics + Physical AI</small>
             </div>
           </div>
         </div>
