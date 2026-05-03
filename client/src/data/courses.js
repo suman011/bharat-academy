@@ -18,7 +18,8 @@ export const courseCategories = [
       { name: "Python Programming (Basic + Intermediate)", price: 9999, duration: "12 weeks", level: "Intermediate" },
       { name: "Data Analytics (Excel + Power BI)", price: 14999, duration: "12 weeks", level: "Intermediate" },
       // Advanced
-      { name: "AI Fundamentals", price: 19999, duration: "16 weeks", level: "Advanced" },
+      // Hidden from catalog/category lists; keep for detail URL & future release (toggle catalogHidden).
+      { name: "AI Fundamentals", price: 19999, duration: "16 weeks", level: "Advanced", catalogHidden: true },
       { name: "Machine Learning Intermediate", price: 19999, duration: "16 weeks", level: "Advanced" },
       { name: "Python for Data Science", price: 16999, duration: "14 weeks", level: "Advanced" },
       // Expert

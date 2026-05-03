@@ -35,6 +35,10 @@ function course({
 
 const fin = (topic) => `Recap, assessment & certification readiness — ${topic}`;
 
+/**
+ * Full Automation & Robotics tier definitions (Basic + Intermediate + Advanced).
+ * Set catalogHidden: true on a tier to keep its courses in data/detail URLs but omit it from tier grids and catalog sections.
+ */
 export const industry40Categories = [
   {
     title: "Basic (Foundation Level – Automation and Robotics)",
@@ -245,6 +249,7 @@ export const industry40Categories = [
   {
     title: "Intermediate (Skill Development – Automation and Robotics)",
     color: "i4intermediate",
+    catalogHidden: true,
     items: [
       course({
         name: "PLC Programming (Siemens / Allen Bradley Basics)",
@@ -579,6 +584,7 @@ export const industry40Categories = [
   {
     title: "Advanced (Professional Level – Automation and Robotics)",
     color: "i4advanced",
+    catalogHidden: true,
     items: [
       course({
         name: "AI & Machine Learning for Manufacturing",
@@ -912,3 +918,6 @@ export const industry40Categories = [
     ],
   },
 ];
+
+/** Shown on Home / Courses “Automation and Robotics” tier grids (hidden tiers stay in `industry40Categories` for data & URLs). */
+export const industry40CategoriesVisible = industry40Categories.filter((c) => !c.catalogHidden);

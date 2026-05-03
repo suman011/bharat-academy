@@ -17,6 +17,7 @@ export default function CourseCategoryCard({
   const items = React.useMemo(() => {
     const uniq = new Map();
     for (const item of category?.items || []) {
+      if (item?.catalogHidden) continue;
       const key = slugify(item?.name || "");
       if (!key || uniq.has(key)) continue;
       uniq.set(key, item);

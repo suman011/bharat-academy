@@ -9,7 +9,7 @@ import {
   formatPhoneCountryOption,
   toPhoneCountryKey,
 } from "../data/countryCallingCodes";
-import { industry40Categories, INDUSTRY40_CATEGORY_COUNT } from "../data/industry40Catalog";
+import { industry40CategoriesVisible, INDUSTRY40_CATEGORY_COUNT } from "../data/industry40Catalog";
 import { courseCategories, IT_CORE_CATEGORY_COUNT } from "../data/courses";
 import CourseCategoryCard from "../components/CourseCategoryCard";
 import ItCoursesTierGrid from "../components/ItCoursesTierGrid";
@@ -38,6 +38,7 @@ export default function Home() {
     const map = new Map();
     for (const cat of courseCategories) {
       for (const item of cat.items || []) {
+        if (item.catalogHidden) continue;
         const key = slugify(item.name);
         if (!key || map.has(key)) continue;
         map.set(key, { key, label: item.name });
@@ -117,7 +118,7 @@ export default function Home() {
             <div className="hero-card">
               <h3>Bonus Signature Course</h3>
               <p>Factory Automation and Robotics</p>
-              <small>Smart Factory Basics + Robotics + Vision AI</small>
+              <small>Smart Factory Basics + Robotics + Industrial AI</small>
             </div>
           </div>
         </div>
@@ -183,11 +184,11 @@ export default function Home() {
       <section className="section-block section-block--it-tiers section-block--i4-tiers">
         <div className="container">
           <ItCoursesTierGrid
-            categories={industry40Categories}
+            categories={industry40CategoriesVisible}
             className="it-courses-block--home"
             eyebrow="Learning tracks"
             title="Automation and Robotics courses"
-            lede="Three clear levels — start where you fit, then grow into PLC, SCADA, IIoT, robotics, analytics, OT security, and smart factory architecture."
+            lede="Foundation track — smart factories, PLC/SCADA context, IIoT, robotics, and OT-aware workflows. Additional tier listings are paused but kept for future batches."
             showCourseImages={false}
             layout="rows"
           />

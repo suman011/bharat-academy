@@ -16,7 +16,7 @@ import TextField from "@mui/material/TextField";
 import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "react-router-dom";
 import { apiUrl } from "../utils/apiBase";
-import { industry40Categories } from "../data/industry40Catalog";
+import { industry40Categories, industry40CategoriesVisible } from "../data/industry40Catalog";
 import { courseCategories, IT_CORE_CATEGORY_COUNT } from "../data/courses";
 import CourseCard from "../components/CourseCard";
 import ItCoursesTierGrid from "../components/ItCoursesTierGrid";
@@ -46,7 +46,9 @@ export default function Courses() {
   const catalogModules = useMemo(() => {
     return courseCategories.map((category) => ({
       ...category,
-      items: category.items.map((course) => {
+      items: category.items
+        .filter((course) => !course.catalogHidden)
+        .map((course) => {
         const slug = course.name
           .toLowerCase()
           .replace(/[^a-z0-9]+/g, "-")
@@ -79,13 +81,14 @@ export default function Courses() {
     const maxP = maxPrice ? Number(maxPrice) : null;
     const maxW = maxWeeks ? Number(maxWeeks) : null;
     return catalogModules
+      .filter((module) => !module.catalogHidden)
       .filter((module) => !selectedCategory || module.title === selectedCategory)
       .filter((module) => {
         if (trackFilter === "it") {
           return !industry40Categories.some((c) => c.title === module.title);
         }
         if (trackFilter === "automation") {
-          return industry40Categories.some((c) => c.title === module.title);
+          return industry40CategoriesVisible.some((c) => c.title === module.title);
         }
         return true;
       })
@@ -273,11 +276,13 @@ export default function Courses() {
     let n = 0;
     if (trackFilter === "" || trackFilter === "it") {
       for (let i = 0; i < IT_CORE_CATEGORY_COUNT; i++) {
-        n += (courseCategories[i]?.items || []).length;
+        for (const c of courseCategories[i]?.items || []) {
+          if (!c.catalogHidden) n += 1;
+        }
       }
     }
     if (trackFilter === "" || trackFilter === "automation") {
-      for (const c of industry40Categories) {
+      for (const c of industry40CategoriesVisible) {
         n += (c.items || []).length;
       }
     }
@@ -559,11 +564,11 @@ export default function Courses() {
 
         {showItThreeColumn && (trackFilter === "" || trackFilter === "automation") ? (
           <ItCoursesTierGrid
-            categories={industry40Categories}
+            categories={industry40CategoriesVisible}
             className="it-courses-block--catalog it-courses-block--i4-after-it"
             eyebrow="Learning tracks"
             title="Automation and Robotics courses"
-            lede="Three clear levels — start where you fit, then grow into PLC, SCADA, IIoT, robotics, analytics, OT security, and smart factory architecture."
+            lede="Foundation track — smart factories, PLC/SCADA context, IIoT, robotics, and OT-aware workflows. Additional tier listings are paused but kept for future batches."
             layout="rows"
           />
         ) : null}
