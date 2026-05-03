@@ -9,21 +9,21 @@ export const courseCategories = [
     color: "advanced",
     items: [
       // Beginner — on-ramp for non-tech and early learners
-      { name: "AI Foundations for Beginners", price: 4999, duration: "5 weeks", level: "Beginner" },
-      { name: "Python for AI – Beginner Level", price: 7999, duration: "7 weeks", level: "Beginner" },
+      { name: "AI Foundations for Beginners", price: 3990, duration: "5 weeks", level: "Beginner" },
+      { name: "Python for AI – Beginner Level", price: 4990, duration: "7 weeks", level: "Beginner" },
       { name: "Mathematics for AI & Machine Learning", price: 5999, duration: "6 weeks", level: "Beginner" },
-      { name: "Introduction to Machine Learning", price: 8999, duration: "7 weeks", level: "Beginner" },
+      { name: "Introduction to Machine Learning", price: 5990, duration: "7 weeks", level: "Beginner" },
       { name: "Data Science Basics (EDA + Visualization)", price: 7499, duration: "6 weeks", level: "Beginner" },
       // Intermediate — shared with broader IT path (listed here for journey; not duplicated below)
-      { name: "Python Programming (Basic + Intermediate)", price: 9999, duration: "12 weeks", level: "Intermediate" },
-      { name: "Data Analytics (Excel + Power BI)", price: 14999, duration: "12 weeks", level: "Intermediate" },
+      { name: "Python Programming (Basic + Intermediate)", price: 8500, duration: "12 weeks", level: "Intermediate" },
+      { name: "Data Analytics (Excel + Power BI)", price: 10999, duration: "12 weeks", level: "Intermediate" },
       // Advanced
       // Hidden from catalog/category lists; keep for detail URL & future release (toggle catalogHidden).
-      { name: "AI Fundamentals", price: 19999, duration: "16 weeks", level: "Advanced", catalogHidden: true },
-      { name: "Machine Learning Intermediate", price: 19999, duration: "16 weeks", level: "Advanced" },
+      { name: "AI Fundamentals", price: 18990, duration: "16 weeks", level: "Advanced", catalogHidden: true },
+      { name: "Machine Learning Intermediate", price: 18990, duration: "16 weeks", level: "Advanced" },
       { name: "Python for Data Science", price: 16999, duration: "14 weeks", level: "Advanced" },
       // Expert
-      { name: "AI + Machine Learning with Projects", price: 42999, duration: "24 weeks", level: "Expert" },
+      { name: "AI + Machine Learning with Projects", price: 25990, duration: "24 weeks", level: "Expert" },
       { name: "Data Science Master Program", price: 44999, duration: "24 weeks", level: "Expert" },
     ],
   },
@@ -40,10 +40,10 @@ export const courseCategories = [
     title: "Intermediate Courses (Skill Development)",
     color: "intermediate",
     items: [
-      { name: "Advance Excel (Dashboard, Pivot, Macros)", price: 6999, duration: "8 weeks", level: "Intermediate" },
-      { name: "Advance PowerPoint (Presentation Design)", price: 5499, duration: "6 weeks", level: "Intermediate" },
-      { name: "HTML, CSS, Bootstrap", price: 6999, duration: "8 weeks", level: "Intermediate" },
-      { name: "JavaScript (ES6+)", price: 8999, duration: "10 weeks", level: "Intermediate" },
+      { name: "Advance Excel (Dashboard, Pivot, Macros)", price: 4990, duration: "8 weeks", level: "Intermediate" },
+      { name: "Advance PowerPoint (Presentation Design)", price: 4990, duration: "6 weeks", level: "Intermediate" },
+      { name: "HTML, CSS, Bootstrap", price: 6990, duration: "8 weeks", level: "Intermediate" },
+      { name: "JavaScript (ES6+)", price: 6990, duration: "10 weeks", level: "Intermediate" },
       { name: "Git & GitHub", price: 3499, duration: "4 weeks", level: "Intermediate" },
       { name: "C Programming", price: 7999, duration: "10 weeks", level: "Intermediate" },
       { name: "C++ Programming", price: 8999, duration: "12 weeks", level: "Intermediate" },
@@ -91,7 +91,7 @@ export const courseCategories = [
     color: "job",
     items: [
       { name: "Full Stack Development", price: 24999, duration: "24 weeks", level: "Advanced" },
-      { name: "Advanced Excel + MIS", price: 8999, duration: "10 weeks", level: "Intermediate" },
+      { name: "Advanced Excel + MIS", price: 8999, duration: "10 weeks", level: "Intermediate", catalogHidden: true },
       { name: "Data Analyst Course", price: 16999, duration: "14 weeks", level: "Advanced" },
       { name: "Software Testing (Manual + Automation)", price: 10999, duration: "12 weeks", level: "Advanced" },
       { name: "Resume Building + Interview Preparation", price: 5999, duration: "6 weeks", level: "Intermediate" }
