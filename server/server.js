@@ -939,9 +939,12 @@ async function userHasCourse({ userId, courseKey }) {
 //   server/private-videos/AI Fundamentals/WEEK 1/....
 const PRIVATE_VIDEOS_ROOT = path.join(__dirname, "private-videos");
 const COURSE_VIDEO_DIRS = {
-  // courseKey -> directory under PRIVATE_VIDEOS_ROOT
+  // courseKey -> directory under PRIVATE_VIDEOS_ROOT (match your folder names exactly)
   "ai-foundations-for-beginners": "AI Fundamentals",
   "python-for-ai-beginner-level": "Python for AI – Beginner Level",
+  // Automation & Robotics (industry40Catalog) — folder names as on disk
+  "introduction-to-automation-and-robotics": "Introduction to Automation and Robotics",
+  "industrial-safety-standards": "Industrial Safety & Standards",
 };
 
 function resolveCourseVideoRoot(courseKey) {
