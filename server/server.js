@@ -945,6 +945,7 @@ const COURSE_VIDEO_DIRS = {
   // Automation & Robotics (industry40Catalog) — folder names as on disk
   "introduction-to-automation-and-robotics": "Introduction to Automation and Robotics",
   "industrial-safety-standards": "Industrial Safety & Standards",
+  "introduction-to-machine-learning": "Introduction to Machine Learning",
 };
 
 function resolveCourseVideoRoot(courseKey) {
