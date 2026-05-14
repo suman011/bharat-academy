@@ -946,6 +946,7 @@ const COURSE_VIDEO_DIRS = {
   "introduction-to-automation-and-robotics": "Introduction to Automation and Robotics",
   "industrial-safety-standards": "Industrial Safety & Standards",
   "introduction-to-machine-learning": "Introduction to Machine Learning",
+  "mathematics-for-ai-machine-learning": "Mathematics for AI & Machine Learning",
 };
 
 function resolveCourseVideoRoot(courseKey) {
