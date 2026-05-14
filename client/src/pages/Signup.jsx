@@ -24,12 +24,21 @@ export default function Signup() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+    const nameVal = String(fd.get("name") ?? name ?? "").trim();
+    const emailVal = String(fd.get("email") ?? email ?? "").trim();
+    const mobileVal = String(fd.get("mobile") ?? mobile ?? "").replace(/\D/g, "").slice(0, 15);
+    const passwordVal = String(fd.get("password") ?? password ?? "");
+    setName(nameVal);
+    setEmail(emailVal);
+    setMobile(mobileVal);
+    setPassword(passwordVal);
     setLoading(true);
 
     try {
-      const digits = String(mobile || "").replace(/\D/g, "");
-      const mobileForApi = digits.length > 0 ? `${selectedDial}${digits}` : "";
-      await signup({ name, email, mobile: mobileForApi, password });
+      const mobileForApi = mobileVal.length > 0 ? `${selectedDial}${mobileVal}` : "";
+      await signup({ name: nameVal, email: emailVal, mobile: mobileForApi, password: passwordVal });
       navigate("/courses");
     } catch (err) {
       setError(err?.message || "Could not create account.");
@@ -84,6 +93,7 @@ export default function Signup() {
                     ))}
                   </select>
                   <input
+                    name="mobile"
                     value={mobile}
                     onChange={(e) => setMobile(e.target.value.replace(/\D/g, "").slice(0, 15))}
                     placeholder={selectedDial === "+91" ? "10-digit number" : "National number"}
@@ -97,11 +107,13 @@ export default function Signup() {
               <label className="auth-field">
                 <span className="auth-label">Password</span>
                 <input
+                  name="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   type="password"
                   required
                   placeholder="Create a password"
+                  autoComplete="new-password"
                 />
               </label>
             </div>
@@ -112,7 +124,7 @@ export default function Signup() {
               </div>
             ) : null}
 
-            <button className="primary-btn full-btn" type="submit" disabled={loading || !password.trim()}>
+            <button className="primary-btn full-btn" type="submit" disabled={loading}>
               {loading ? "Creating..." : "Create account"}
             </button>
 

@@ -26,9 +26,19 @@ export default function Login() {
             onSubmit={async (e) => {
               e.preventDefault();
               setError("");
+              const form = e.currentTarget;
+              const fd = new FormData(form);
+              const emailVal = String(fd.get("email") ?? email ?? "").trim();
+              const passwordVal = String(fd.get("password") ?? password ?? "");
+              setEmail(emailVal);
+              setPassword(passwordVal);
+              if (!emailVal || !passwordVal) {
+                setError("Please enter your email and password.");
+                return;
+              }
               setLoading(true);
               try {
-                await loginWithEmailPassword({ email, password });
+                await loginWithEmailPassword({ email: emailVal, password: passwordVal });
                 navigate(next);
               } catch (err) {
                 setError(err?.message || "Login failed.");
@@ -41,6 +51,7 @@ export default function Login() {
               <label className="auth-field">
                 <span className="auth-label">Email</span>
                 <input
+                  name="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
@@ -52,6 +63,7 @@ export default function Login() {
               <label className="auth-field">
                 <span className="auth-label">Password</span>
                 <input
+                  name="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   type="password"
@@ -68,7 +80,7 @@ export default function Login() {
               </div>
             ) : null}
 
-            <button className="primary-btn full-btn" type="submit" disabled={loading || !email.trim() || !password.trim()}>
+            <button className="primary-btn full-btn" type="submit" disabled={loading}>
               {loading ? "Signing in..." : "Sign in"}
             </button>
 

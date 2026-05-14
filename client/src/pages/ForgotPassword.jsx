@@ -18,10 +18,14 @@ export default function ForgotPassword() {
     e.preventDefault();
     setError("");
     setInfo("");
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+    const emailVal = String(fd.get("email") ?? email ?? "").trim();
+    setEmail(emailVal);
     setLoading(true);
 
     try {
-      const data = await requestPasswordReset({ email });
+      const data = await requestPasswordReset({ email: emailVal });
       if (data.mode === "demo" && data.resetUrl) {
         setInfo(`Demo reset link: ${data.resetUrl}`);
       } else {
@@ -38,10 +42,14 @@ export default function ForgotPassword() {
     e.preventDefault();
     setError("");
     setInfo("");
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+    const newPasswordVal = String(fd.get("newPassword") ?? newPassword ?? "");
+    setNewPassword(newPasswordVal);
     setLoading(true);
 
     try {
-      await resetPasswordWithToken({ token, newPassword });
+      await resetPasswordWithToken({ token, newPassword: newPasswordVal });
       navigate("/login");
     } catch (err) {
       setError(err?.message || "Could not reset password.");
@@ -68,6 +76,7 @@ export default function ForgotPassword() {
                 <label className="auth-field">
                   <span className="auth-label">Email</span>
                   <input
+                    name="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
@@ -81,12 +90,14 @@ export default function ForgotPassword() {
                 <label className="auth-field">
                   <span className="auth-label">New password</span>
                   <input
+                    name="newPassword"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     type="password"
                     placeholder="Create a new password"
                     required
                     minLength={6}
+                    autoComplete="new-password"
                   />
                 </label>
               ) : null}
@@ -99,14 +110,7 @@ export default function ForgotPassword() {
               </div>
             ) : null}
 
-            <button
-              className="primary-btn full-btn"
-              type="submit"
-              disabled={
-                loading ||
-                (token ? !newPassword.trim() : !email.trim())
-              }
-            >
+            <button className="primary-btn full-btn" type="submit" disabled={loading}>
               {loading ? (token ? "Resetting..." : "Sending...") : token ? "Reset password" : "Send reset link"}
             </button>
 

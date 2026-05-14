@@ -7248,6 +7248,13 @@ a.course-buy-now-btn--login-cta.primary-btn {
   gap: 14px;
 }
 
+.auth-form .primary-btn:disabled {
+  opacity: 0.85;
+  cursor: wait;
+  transform: none;
+  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.22);
+}
+
 .auth-form-grid {
   display: grid;
   gap: 14px;
