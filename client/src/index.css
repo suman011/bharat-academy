@@ -6922,6 +6922,38 @@ a.course-buy-now-btn--login-cta.primary-btn {
   line-height: 1.75;
 }
 
+.course-detail-page .cd-notes-intro {
+  margin-top: 14px;
+  color: #334155;
+  font-weight: 650;
+  line-height: 1.75;
+  max-width: 72ch;
+}
+
+.course-detail-page .cd-notes-p {
+  margin: 0 0 12px;
+  color: #334155;
+  line-height: 1.72;
+  font-weight: 600;
+  max-width: 72ch;
+}
+
+.course-detail-page .cd-notes-ul {
+  margin: 0 0 4px 1.1rem;
+  padding: 0;
+  color: #334155;
+  line-height: 1.65;
+  font-weight: 600;
+}
+
+.course-detail-page .cd-notes-ul li {
+  margin-bottom: 8px;
+}
+
+.course-detail-page .cd-notes-accordion .cd-acc-panel {
+  padding-top: 4px;
+}
+
 .course-detail-page .overview-grid > div {
   background: var(--surface-soft);
   border: 1px solid rgba(79, 70, 229, 0.1);

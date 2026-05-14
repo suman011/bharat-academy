@@ -25,6 +25,7 @@ import {
 } from "react-icons/fa";
 import { courseCategories } from "../data/courses";
 import { getCourseVideos } from "../data/courseVideos";
+import { getCourseStudyNotes } from "../data/courseStudyNotes";
 import { apiUrl } from "../utils/apiBase";
 import { getCourseImage, getCourseImageFallback } from "../utils/courseImages";
 import { getCurrentUser, onAuthChanged } from "../utils/authStore";
@@ -265,6 +266,7 @@ export default function CourseDetail() {
   const { courseSlug } = useParams();
   const [activeTab, setActiveTab] = useState("overview");
   const [expandedModules, setExpandedModules] = useState(() => new Set([0]));
+  const [expandedNoteSections, setExpandedNoteSections] = useState(() => new Set([0]));
   const [expandedVideoWeeks, setExpandedVideoWeeks] = useState(() => new Set([0]));
   const [activeVideoKey, setActiveVideoKey] = useState(null);
   const [videoDurations, setVideoDurations] = useState(() => ({})); // videoKey -> seconds (number)
@@ -373,6 +375,8 @@ export default function CourseDetail() {
     allCourses.find((item) => normalizedSlug.startsWith(item.slug));
 
   const courseVideos = useMemo(() => getCourseVideos(course), [course]);
+  const studyNotes = useMemo(() => (course?.slug ? getCourseStudyNotes(course.slug) : null), [course?.slug]);
+  const hasStudyNotes = Boolean(studyNotes?.sections?.length);
   const [serverVideoWeeks, setServerVideoWeeks] = useState(null); // null | [{label, items:[{path,title}]}]
   const [serverVideosLoading, setServerVideosLoading] = useState(false);
   const [serverVideosError, setServerVideosError] = useState(null);
@@ -606,6 +610,10 @@ export default function CourseDetail() {
     setActiveVideoKey((prev) => prev || first);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [course?.slug, videoWeeks]);
+
+  useEffect(() => {
+    setExpandedNoteSections(new Set([0]));
+  }, [course?.slug]);
 
   const toggleVideoWeek = useCallback((idx) => {
     setExpandedVideoWeeks((prev) => {
@@ -969,6 +977,15 @@ export default function CourseDetail() {
     });
   }, []);
 
+  const toggleNoteSection = useCallback((idx) => {
+    setExpandedNoteSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx);
+      else next.add(idx);
+      return next;
+    });
+  }, []);
+
   const handleResumeLearning = useCallback(() => {
     if (!currentEnrollment) return;
 
@@ -1083,6 +1100,11 @@ export default function CourseDetail() {
                 <li>
                   <FaFileAlt aria-hidden /> Module notes and recap briefs
                 </li>
+                {hasStudyNotes ? (
+                  <li>
+                    <FaFileAlt aria-hidden /> Structured study notes for self-paced reading (unlocks with enrollment)
+                  </li>
+                ) : null}
                 <li>
                   <FaCertificate aria-hidden /> Certificate after assessment
                 </li>
@@ -1409,6 +1431,103 @@ export default function CourseDetail() {
                 );
               })}
               </div>
+          </div>
+        );
+
+      case "notes":
+        if (!studyNotes?.sections?.length) return null;
+        if (!hasVideoAccess) {
+          return (
+            <div className="tab-content-card">
+              <h3>Study notes</h3>
+              <p style={{ marginTop: 6, color: "#64748b", fontWeight: 650 }}>
+                Structured reading notes unlock after payment confirmation, together with your video library.
+              </p>
+              <div className="cd-empty-videos">
+                {user ? (
+                  <>
+                    Please purchase this course to unlock study notes.{" "}
+                    <button
+                      type="button"
+                      className="primary-btn"
+                      style={{ marginLeft: 10 }}
+                      onClick={() => {
+                        add(course);
+                        navigate("/checkout");
+                      }}
+                    >
+                      Buy now
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    Please log in and purchase this course to unlock study notes.{" "}
+                    <button type="button" className="primary-btn" style={{ marginLeft: 10 }} onClick={() => navigate(loginRedirect)}>
+                      Log in
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          );
+        }
+        return (
+          <div className="tab-content-card cd-notes-card">
+            <h3>Study notes</h3>
+            <p style={{ marginTop: 6, color: "#64748b", fontWeight: 650 }}>
+              Read between video lessons—these sections expand on vocabulary, workflows, and self-checks for this long-form course.
+            </p>
+            {studyNotes.intro ? (
+              <p className="cd-notes-intro">{studyNotes.intro}</p>
+            ) : null}
+            <div className="cd-curriculum-accordion cd-notes-accordion" role="list">
+              {studyNotes.sections.map((sec, noteIdx) => {
+                const open = expandedNoteSections.has(noteIdx);
+                return (
+                  <div
+                    key={noteIdx}
+                    className={`cd-acc-section${open ? " is-open" : ""}`}
+                    role="listitem"
+                  >
+                    <button
+                      type="button"
+                      className="cd-acc-trigger"
+                      onClick={() => toggleNoteSection(noteIdx)}
+                      aria-expanded={open}
+                      aria-controls={`cd-notes-panel-${noteIdx}`}
+                      id={`cd-notes-heading-${noteIdx}`}
+                    >
+                      <FaChevronDown className="cd-acc-chevron" aria-hidden />
+                      <span className="cd-acc-trigger-text">
+                        <span className="cd-acc-section-title">{sec.title}</span>
+                      </span>
+                    </button>
+                    <div
+                      className="cd-acc-panel"
+                      id={`cd-notes-panel-${noteIdx}`}
+                      role="region"
+                      aria-labelledby={`cd-notes-heading-${noteIdx}`}
+                      aria-hidden={!open}
+                    >
+                      {Array.isArray(sec.paragraphs)
+                        ? sec.paragraphs.map((p, pi) => (
+                            <p key={pi} className="cd-notes-p">
+                              {p}
+                            </p>
+                          ))
+                        : null}
+                      {Array.isArray(sec.bullets) && sec.bullets.length ? (
+                        <ul className="cd-notes-ul">
+                          {sec.bullets.map((b, bi) => (
+                            <li key={bi}>{b}</li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         );
 
@@ -1752,6 +1871,11 @@ export default function CourseDetail() {
               <button className={activeTab === "overview" ? "tab active" : "tab"} onClick={() => setActiveTab("overview")}>Overview</button>
               {(hasCourseVideos || (hasVideoAccess && (serverVideosLoading || serverVideosError || Array.isArray(serverVideoWeeks)))) ? (
                 <button className={activeTab === "videos" ? "tab active" : "tab"} onClick={() => setActiveTab("videos")}>Videos</button>
+              ) : null}
+              {hasStudyNotes ? (
+                <button className={activeTab === "notes" ? "tab active" : "tab"} onClick={() => setActiveTab("notes")}>
+                  Study notes
+                </button>
               ) : null}
               {(!hasAnyVideos || !hasVideoAccess) ? (
                 <button className={activeTab === "curriculum" ? "tab active" : "tab"} onClick={() => setActiveTab("curriculum")}>Curriculum</button>
