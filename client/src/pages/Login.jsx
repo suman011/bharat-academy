@@ -2,10 +2,17 @@ import React, { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { loginWithEmailPassword } from "../utils/authStore";
 
+/** Same-origin path only — avoids open redirects from query strings. */
+function safeReturnPath(raw) {
+  const s = String(raw || "").trim();
+  if (!s.startsWith("/") || s.startsWith("//")) return "/courses";
+  return s;
+}
+
 export default function Login() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const next = searchParams.get("next") || "/courses";
+  const next = safeReturnPath(searchParams.get("next") || searchParams.get("redirect"));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
