@@ -32,6 +32,16 @@ app.use(cookieParser());
 
 const prisma = new PrismaClient();
 
+void (async () => {
+  try {
+    await prisma.$connect();
+    console.log("[db] Prisma connected.");
+  } catch (e) {
+    console.error("[db] Prisma connect failed:", e?.message || e);
+    if (process.env.NODE_ENV === "production") process.exit(1);
+  }
+})();
+
 const CLIENT_ORIGINS = String(
   process.env.CLIENT_ORIGIN ||
     "http://localhost:5173,http://localhost:3000,http://localhost:3002,http://localhost:8080,https://bharat-academy.onrender.com,https://bharatskillacademy.com,https://www.bharatskillacademy.com"
@@ -67,9 +77,20 @@ app.use(
   })
 );
 
-// Health check (useful for dry-run verification)
-app.get("/health", (req, res) => {
-  res.json({ ok: true, service: "course-academy-server" });
+// Health check — includes DB reachability (login/signup fail when this fails)
+app.get("/health", async (req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    return res.json({ ok: true, service: "course-academy-server", database: "up" });
+  } catch (e) {
+    return res.status(503).json({
+      ok: false,
+      service: "course-academy-server",
+      database: "down",
+      error: e?.message || "Database unreachable",
+      message: e?.message || "Database unreachable",
+    });
+  }
 });
 
 const PORT = Number(process.env.PORT || 5002);
@@ -80,12 +101,36 @@ const isProd = process.env.NODE_ENV === "production";
 // When the SPA is on a different host than this API (e.g. custom domain + Render API),
 // browsers require SameSite=None and Secure for auth cookies on fetch(..., { credentials: "include" }).
 const crossSiteAuth = String(process.env.AUTH_CROSS_SITE || "").trim().toLowerCase() === "true";
-const cookieOptions = {
-  httpOnly: true,
-  secure: crossSiteAuth || isProd,
-  sameSite: crossSiteAuth ? "none" : "lax",
-  path: "/",
-};
+
+/**
+ * Cookie options for auth JWT. In production, if the browser Origin host differs from this
+ * server's Host (split SPA/API deploy), use SameSite=None so credentials are sent on XHR.
+ */
+function resolveAuthCookieOptions(req) {
+  const base = { httpOnly: true, path: "/" };
+  if (!isProd) {
+    return { ...base, secure: false, sameSite: "lax" };
+  }
+  if (crossSiteAuth) {
+    return { ...base, secure: true, sameSite: "none" };
+  }
+  const originHeader = String(req.get("origin") || "").trim();
+  if (!originHeader) {
+    return { ...base, secure: true, sameSite: "lax" };
+  }
+  try {
+    const originHost = new URL(originHeader).hostname.toLowerCase();
+    const reqHost = String(req.get("host") || "")
+      .split(":")[0]
+      .toLowerCase();
+    if (originHost && reqHost && originHost === reqHost) {
+      return { ...base, secure: true, sameSite: "lax" };
+    }
+    return { ...base, secure: true, sameSite: "none" };
+  } catch {
+    return { ...base, secure: true, sameSite: "lax" };
+  }
+}
 
 function normalizeEmail(email) {
   return String(email || "").trim().toLowerCase();
@@ -162,6 +207,23 @@ function safeUser(u) {
 
 function signToken(user) {
   return jwt.sign({ sub: user.id, email: user.email }, JWT_SECRET, { expiresIn: "7d" });
+}
+
+/** Turn Prisma / infra failures into a safe message for JSON (never leak secrets). */
+function serializeAuthFailure(err, fallback) {
+  if (!err) return fallback;
+  const code = String(err.code || err?.meta?.code || "");
+  const msg = String(err.message || err || fallback);
+  if (code === "P1001" || /Can't reach database server|ECONNREFUSED|ETIMEDOUT/i.test(msg)) {
+    return "Cannot reach the database. On Render: confirm DATABASE_URL, use sslmode=require if needed, and that Postgres is running.";
+  }
+  if (code === "P2021" || /relation .* does not exist|no such table/i.test(msg)) {
+    return "Database is not migrated. On the server run: npx prisma migrate deploy (see server/package.json).";
+  }
+  if (code === "P1017" || /Server has closed the connection/i.test(msg)) {
+    return "Database closed the connection. Check DATABASE_URL pool/SSL settings.";
+  }
+  return msg.length > 400 ? `${msg.slice(0, 400)}…` : msg;
 }
 
 async function getAuthUser(req) {
@@ -615,7 +677,7 @@ app.get("/auth/me", (req, res) => {
 });
 
 app.post("/auth/logout", (req, res) => {
-  res.clearCookie(COOKIE_NAME, cookieOptions);
+  res.clearCookie(COOKIE_NAME, resolveAuthCookieOptions(req));
   return res.json({ ok: true });
 });
 
@@ -638,7 +700,7 @@ app.post("/auth/signup", async (req, res) => {
     });
 
     const token = signToken(user);
-    res.cookie(COOKIE_NAME, token, cookieOptions);
+    res.cookie(COOKIE_NAME, token, resolveAuthCookieOptions(req));
     return res.json({ ok: true, user: safeUser(user) });
   } catch (err) {
     if (err && err.code === "P2002") {
@@ -658,14 +720,31 @@ app.post("/auth/login", async (req, res) => {
     const user = await prisma.user.findUnique({ where: { email: e } });
     if (!user) return res.status(401).json({ ok: false, error: "Invalid email or password." });
 
-    const ok = await bcrypt.compare(p, user.passwordHash);
+    const hash = user.passwordHash;
+    if (!hash || typeof hash !== "string") {
+      console.error("[auth/login] User missing passwordHash:", e);
+      return res.status(500).json({ ok: false, error: "Account data is incomplete. Contact support." });
+    }
+
+    const ok = await bcrypt.compare(p, hash);
     if (!ok) return res.status(401).json({ ok: false, error: "Invalid email or password." });
 
     const token = signToken(user);
-    res.cookie(COOKIE_NAME, token, cookieOptions);
+    try {
+      res.cookie(COOKIE_NAME, token, resolveAuthCookieOptions(req));
+    } catch (cookieErr) {
+      console.error("[auth/login] res.cookie failed:", cookieErr);
+      return res.status(500).json({
+        ok: false,
+        error: serializeAuthFailure(cookieErr, "Could not set session cookie."),
+      });
+    }
     return res.json({ ok: true, user: safeUser(user) });
   } catch (err) {
-    return res.status(500).json({ ok: false, error: err?.message || "Login failed." });
+    console.error("[auth/login]", err);
+    const error = serializeAuthFailure(err, "Login failed.");
+    if (res.headersSent) return;
+    return res.status(500).json({ ok: false, error, message: error });
   }
 });
 
@@ -1850,6 +1929,139 @@ const FINAL_TEST_BANK = {
       },
     ],
   },
+  "data-science-basics-eda-visualization": {
+    quizTitle: "Data Science Basics (EDA + Visualization) – MCQs",
+    passPercentage: 70,
+    maxAttempts: 3,
+    durationSec: 15 * 60,
+    questions: [
+      {
+        id: 1,
+        question: "What is the primary purpose of Data Science?",
+        options: ["Creating games", "Extracting insights from data", "Designing websites", "Building hardware"],
+        answer: 1,
+      },
+      {
+        id: 2,
+        question: "Which library is mainly used for data analysis in Python?",
+        options: ["NumPy", "Pandas", "Flask", "TensorFlow"],
+        answer: 1,
+      },
+      {
+        id: 3,
+        question: "Which function shows the first 5 rows of a DataFrame?",
+        options: ["info()", "head()", "describe()", "tail()"],
+        answer: 1,
+      },
+      {
+        id: 4,
+        question: "What is EDA?",
+        options: ["Error Data Access", "Exploratory Data Analysis", "External Data Analysis", "Evaluation Data Algorithm"],
+        answer: 1,
+      },
+      {
+        id: 5,
+        question: "Which chart is best for showing trends over time?",
+        options: ["Pie Chart", "Histogram", "Line Chart", "Scatter Plot"],
+        answer: 2,
+      },
+      {
+        id: 6,
+        question: "Which visualization library is built on top of Matplotlib?",
+        options: ["NumPy", "Django", "Seaborn", "OpenCV"],
+        answer: 2,
+      },
+      {
+        id: 7,
+        question: "What does correlation measure?",
+        options: ["Data cleaning", "Relationship between variables", "Data storage", "Sorting"],
+        answer: 1,
+      },
+      {
+        id: 8,
+        question: "What is the range of correlation coefficient?",
+        options: ["0 to 100", "-1 to 1", "-10 to 10", "1 to 100"],
+        answer: 1,
+      },
+      {
+        id: 9,
+        question: "Which algorithm is used for numerical prediction?",
+        options: ["Logistic Regression", "K-Means", "Linear Regression", "KNN Classifier"],
+        answer: 2,
+      },
+      {
+        id: 10,
+        question: "Which algorithm is mainly used for classification?",
+        options: ["Logistic Regression", "PCA", "K-Means", "StandardScaler"],
+        answer: 0,
+      },
+      {
+        id: 11,
+        question: "What is overfitting?",
+        options: [
+          "Model performs well on all data",
+          "Model memorizes training data",
+          "Removing features",
+          "Scaling data",
+        ],
+        answer: 1,
+      },
+      {
+        id: 12,
+        question: "Which function is used to split dataset?",
+        options: ["split_data()", "divide()", "train_test_split()", "random_split()"],
+        answer: 2,
+      },
+      {
+        id: 13,
+        question: "Which metric measures overall classification correctness?",
+        options: ["Recall", "Precision", "Accuracy", "Variance"],
+        answer: 2,
+      },
+      {
+        id: 14,
+        question: "What does K in KNN represent?",
+        options: ["Kernel", "Knowledge", "Number of neighbors", "Keypoints"],
+        answer: 2,
+      },
+      {
+        id: 15,
+        question: "Which algorithm groups similar data points?",
+        options: ["Linear Regression", "K-Means", "Logistic Regression", "PCA"],
+        answer: 1,
+      },
+      {
+        id: 16,
+        question: "What is PCA mainly used for?",
+        options: ["Classification", "Clustering", "Dimensionality Reduction", "Data Cleaning"],
+        answer: 2,
+      },
+      {
+        id: 17,
+        question: "Which scaler converts values between 0 and 1?",
+        options: ["StandardScaler", "PCA", "MinMaxScaler", "LabelEncoder"],
+        answer: 2,
+      },
+      {
+        id: 18,
+        question: "Which model uses multiple decision trees?",
+        options: ["KNN", "Random Forest", "Logistic Regression", "PCA"],
+        answer: 1,
+      },
+      {
+        id: 19,
+        question: "Which type of learning uses unlabeled data?",
+        options: ["Supervised Learning", "Reinforcement Learning", "Unsupervised Learning", "Deep Learning"],
+        answer: 2,
+      },
+      {
+        id: 20,
+        question: "What is the final step in Machine Learning workflow?",
+        options: ["Data Cleaning", "Data Collection", "Model Evaluation", "Visualization"],
+        answer: 2,
+      },
+    ],
+  },
 };
 
 function getFinalTestDurationSec(bank) {
@@ -2104,7 +2316,7 @@ app.get("/certificate/:courseKey/download", (req, res) => {
     doc.fontSize(10).fillColor("#64748b").text("This certificate is system-generated.", { align: "center" });
 
     doc.end();
-  })().catch(() => res.status(500).send("Failed."));
+  })().catch(() => res.status(500).json({ ok: false, error: "Certificate failed.", message: "Certificate failed." }));
 });
 
 function maskMobile(mobile) {
@@ -3032,15 +3244,32 @@ app.get("*", (req, res, next) => {
 
 // 404 for unknown file/api routes
 app.use((req, res) => {
-  res.status(404).json({ message: "Not found" });
+  res.status(404).json({ ok: false, error: "Not found", message: "Not found" });
 });
 
-// Error handler
+// Error handler (must never assume err is an Error with a non-empty .message)
 app.use((err, req, res, next) => {
+  if (res.headersSent) {
+    try {
+      console.error("Server error (headers already sent):", err);
+    } catch {
+      // ignore
+    }
+    return;
+  }
+  let msg = "";
+  if (err != null && typeof err === "object" && err.message != null && String(err.message).trim()) {
+    msg = String(err.message).trim();
+  } else if (err != null && err !== undefined) {
+    msg = String(err).replace(/^(Error:\s*)+/i, "").trim();
+  }
+  if (!msg) msg = "Internal server error";
+  const rawStatus =
+    err != null && typeof err === "object" ? err.status ?? err.statusCode : undefined;
+  const status =
+    Number.isInteger(rawStatus) && rawStatus >= 400 && rawStatus < 600 ? rawStatus : 500;
   console.error("Server error:", err);
-  res.status(err.status || 500).json({
-    message: err.message || "Internal server error",
-  });
+  res.status(status).json({ ok: false, error: msg, message: msg });
 });
 
 app.listen(PORT, "0.0.0.0", () => {

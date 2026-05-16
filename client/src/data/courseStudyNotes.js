@@ -441,3 +441,21 @@ export function getCourseStudyNotes(slug) {
   if (!key) return null;
   return NOTES[key] || null;
 }
+
+/**
+ * Maps each video week (1-based) to a reading block from the same course notes used on the Study notes tab.
+ * When there are more video weeks than note sections, the last section is reused (with a short hint).
+ */
+export function getStudySummaryForVideoWeek(slug, weekNumber1Based) {
+  const pack = getCourseStudyNotes(slug);
+  if (!pack?.sections?.length) return null;
+  const n = Number(weekNumber1Based);
+  if (!Number.isFinite(n) || n < 1) return null;
+  const sections = pack.sections;
+  const idx = Math.min(Math.max(0, n - 1), sections.length - 1);
+  return {
+    weekNumber: n,
+    section: sections[idx],
+    beyondOutline: n > sections.length,
+  };
+}

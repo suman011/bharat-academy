@@ -25,7 +25,7 @@ import {
 } from "react-icons/fa";
 import { courseCategories } from "../data/courses";
 import { getCourseVideos } from "../data/courseVideos";
-import { getCourseStudyNotes } from "../data/courseStudyNotes";
+import { getCourseStudyNotes, getStudySummaryForVideoWeek } from "../data/courseStudyNotes";
 import { apiUrl } from "../utils/apiBase";
 import { getCourseImage, getCourseImageFallback } from "../utils/courseImages";
 import { getCurrentUser, onAuthChanged } from "../utils/authStore";
@@ -268,6 +268,7 @@ export default function CourseDetail() {
   const [expandedModules, setExpandedModules] = useState(() => new Set([0]));
   const [expandedNoteSections, setExpandedNoteSections] = useState(() => new Set([0]));
   const [expandedVideoWeeks, setExpandedVideoWeeks] = useState(() => new Set([0]));
+  const [expandedWeekNotes, setExpandedWeekNotes] = useState(() => new Set());
   const [activeVideoKey, setActiveVideoKey] = useState(null);
   const [videoDurations, setVideoDurations] = useState(() => ({})); // videoKey -> seconds (number)
   const [activeVideoLoadStatus, setActiveVideoLoadStatus] = useState(null); // null | { ok:boolean, status?:number, message?:string }
@@ -613,6 +614,7 @@ export default function CourseDetail() {
 
   useEffect(() => {
     setExpandedNoteSections(new Set([0]));
+    setExpandedWeekNotes(new Set());
   }, [course?.slug]);
 
   const toggleVideoWeek = useCallback((idx) => {
@@ -986,6 +988,15 @@ export default function CourseDetail() {
     });
   }, []);
 
+  const toggleWeekNote = useCallback((idx) => {
+    setExpandedWeekNotes((prev) => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx);
+      else next.add(idx);
+      return next;
+    });
+  }, []);
+
   const handleResumeLearning = useCallback(() => {
     if (!currentEnrollment) return;
 
@@ -1303,6 +1314,85 @@ export default function CourseDetail() {
                               );
                             })}
                           </ul>
+                          {hasStudyNotes
+                            ? (() => {
+                                const wNum =
+                                  Number(week.weekNumber) > 0 ? Number(week.weekNumber) : weekIdx + 1;
+                                const block = getStudySummaryForVideoWeek(course.slug, wNum);
+                                if (!block?.section) return null;
+                                const noteOpen = expandedWeekNotes.has(weekIdx);
+                                return (
+                                  <div className="cd-video-week-notes">
+                                    <div
+                                      className={`cd-acc-section cd-video-week-notes__accordion${
+                                        noteOpen ? " is-open" : ""
+                                      }`}
+                                    >
+                                      <button
+                                        type="button"
+                                        className="cd-acc-trigger cd-acc-trigger--sub"
+                                        onClick={() => toggleWeekNote(weekIdx)}
+                                        aria-expanded={noteOpen}
+                                        aria-controls={`cd-video-week-reading-${weekIdx}`}
+                                        id={`cd-video-week-reading-h-${weekIdx}`}
+                                      >
+                                        <FaChevronDown className="cd-acc-chevron" aria-hidden />
+                                        <span className="cd-acc-trigger-text">
+                                          <span className="cd-acc-section-title">
+                                            Week {wNum} — reading recap & key ideas
+                                          </span>
+                                        </span>
+                                      </button>
+                                      <div
+                                        className="cd-acc-panel"
+                                        id={`cd-video-week-reading-${weekIdx}`}
+                                        role="region"
+                                        aria-labelledby={`cd-video-week-reading-h-${weekIdx}`}
+                                        aria-hidden={!noteOpen}
+                                      >
+                                        {block.beyondOutline ? (
+                                          <p className="cd-notes-p cd-video-week-notes__hint">
+                                            You are past the numbered outline in the Study notes tab—the
+                                            ideas below match the closest chapter; add your own lab notes
+                                            here.
+                                          </p>
+                                        ) : null}
+                                        {wNum === 1 && studyNotes?.intro ? (
+                                          <p className="cd-notes-intro cd-notes-intro--video-week">
+                                            {studyNotes.intro}
+                                          </p>
+                                        ) : null}
+                                        <h4 className="cd-video-week-notes__sec-title">
+                                          {block.section.title}
+                                        </h4>
+                                        {Array.isArray(block.section.paragraphs)
+                                          ? block.section.paragraphs.map((p, pi) => (
+                                              <p key={pi} className="cd-notes-p">
+                                                {p}
+                                              </p>
+                                            ))
+                                          : null}
+                                        {Array.isArray(block.section.bullets) &&
+                                        block.section.bullets.length ? (
+                                          <ul className="cd-notes-ul">
+                                            {block.section.bullets.map((b, bi) => (
+                                              <li key={bi}>{b}</li>
+                                            ))}
+                                          </ul>
+                                        ) : null}
+                                        <button
+                                          type="button"
+                                          className="cd-video-week-notes__full-tab"
+                                          onClick={() => setActiveTab("notes")}
+                                        >
+                                          Open full study notes
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })()
+                            : null}
                         </div>
                       </div>
                     );
